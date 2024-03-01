@@ -1,5 +1,6 @@
 using TL;
 using ChatHub.Services.Telegram;
+using ChatHub.Models.Telegram.DTO;
 
 namespace ChatHub.Api;
 
@@ -34,18 +35,18 @@ public static class TelegramApi
     return TypedResults.Json(result);
   }
 
-  private static async Task<IResult> GetMessages(ITLService telegramService, long chatId)
+  private static async Task<IResult> GetMessages(ITLService telegramService, long chatId, int offsetId, int limit)
   {
-    var result = await telegramService.GetAllMessages(chatId);
+    var result = await telegramService.GetMessages(chatId, offsetId, limit);
     return TypedResults.Json(result);
   }
   
   private static async Task<IResult> GetDialogs(ITLService telegramService)
   {
     var result = await telegramService.GetAllDialogs();
-    if(result.Data is Messages_Dialogs dialogs)
-      return TypedResults.Json(dialogs);
-    else 
-      return TypedResults.Json(result);
+    if (result.Data is List<DialogDTO> dialogs)
+        return TypedResults.Ok(dialogs);
+    else
+        return TypedResults.Json(result);
   }
 }
