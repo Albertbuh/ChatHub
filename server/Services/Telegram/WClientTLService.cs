@@ -7,11 +7,13 @@ namespace ChatHub.Services.Telegram;
 public class WClientTLService : ITLService
 {
 	readonly WTelegram.Client _client = null!;
-	readonly ILogger<WClientTLService> _logger;
 	User _user => _client.User;
 	Messages_Dialogs? _dialogs;
 
-    bool IsLoggedIn => _client.User != null;
+	bool IsLoggedIn => _client.User != null;
+
+	readonly ILogger<WClientTLService> _logger;
+
 	public WClientTLService(ILogger<WClientTLService> logger, int api_id, string api_hash)
 	{
 		_client = new WTelegram.Client(api_id, api_hash);
@@ -19,11 +21,11 @@ public class WClientTLService : ITLService
 
 		_logger = logger;
 		var phone = Environment.GetEnvironmentVariable("TELEGRAM_API_PHONE");
-		if(!String.IsNullOrEmpty(phone))
+		if (!String.IsNullOrEmpty(phone))
 			Task.WaitAll(Task.Run(async () => await Login(phone)));
-    }
+	}
 
-    public async Task<TLResponse> Login(string loginInfo)
+	public async Task<TLResponse> Login(string loginInfo)
 	{
 		string GetResponseMessage(string info) =>
 			info switch
@@ -43,9 +45,9 @@ public class WClientTLService : ITLService
 
 				if (_user != null)
 				{
-                    result.Message = $"User {_user} (id {_user.id}) is successfully logged-in";
+					result.Message = $"User {_user} (id {_user.id}) is successfully logged-in";
 					_dialogs = await _client.Messages_GetAllDialogs();
-                }
+				}
 			}
 			else
 				result.Message = $"User {_user} (id {_user.id}) is already logged-in";
@@ -67,7 +69,6 @@ public class WClientTLService : ITLService
 		return new TLResponse($"User {_user} logout");
 	}
 
-	
 	public async Task<TLResponse> GetMessages(long peerId, int offsetId, int limit)
 	{
 		if (!IsLoggedIn)
@@ -76,19 +77,15 @@ public class WClientTLService : ITLService
 			_dialogs = await _client.Messages_GetAllDialogs();
 
 		var response = new TLResponse();
-		var list = new List<string>();
-		InputPeer? peer = GetPeerFromDialogs(_dialogs, peerId);
-    
+		var list = new List<MessageDTO>();
+		InputPeer? peer = (InputPeer?)GetPeerFromDialogs(_dialogs, peerId);
+
 		if (peer != null)
 		{
-			var messages = await _client.Messages_GetHistory(peer, offset_id:offsetId, limit:limit);
+			var messages = await _client.Messages_GetHistory(peer, offset_id: offsetId, limit: limit);
 			foreach (var msgBase in messages.Messages)
 			{
-				var from = messages.UserOrChat(msgBase.From ?? msgBase.Peer);
-				if (msgBase is Message msg)
-					list.Add($"{from}> {msg.message} {msg.media}");
-				else if (msgBase is MessageService ms)
-					list.Add($"{from} [{ms.action.GetType().Name[13..]}]");
+				list.Add(CreateMessageDTO(msgBase));
 			}
 			response.Data = list;
 		}
@@ -96,93 +93,133 @@ public class WClientTLService : ITLService
 		return response;
 	}
 
-	private InputPeer? GetPeerFromDialogs(Messages_Dialogs dialogs, long peerId)
+  private IPeerInfo? GetPeerFromMessage(Messages_MessagesBase collection, MessageBase message)
+  {
+    return collection.UserOrChat(message.From ?? message.Peer);
+  }
+
+
+  private IPeerInfo? GetPeerFromDialogs(Messages_Dialogs dialogs, long peerId)
 	{
-		if(dialogs.users.ContainsKey(peerId))
+		if (dialogs.users.ContainsKey(peerId))
 			return dialogs.users[peerId];
-		else if(dialogs.chats.ContainsKey(peerId))
+		else if (dialogs.chats.ContainsKey(peerId))
 			return dialogs.chats[peerId];
-		else 
+		else
 			return null;
 	}
-
+  
 	public async Task<TLResponse> GetAllDialogs()
 	{
-        if (!IsLoggedIn)
-            return new TLResponse(StatusCodes.Status401Unauthorized, "Undefiend user");
+		if (!IsLoggedIn)
+			return new TLResponse(StatusCodes.Status401Unauthorized, "Undefiend user");
 		if (_dialogs == null)
 			_dialogs = await _client.Messages_GetAllDialogs();
 
-        var result = new TLResponse(StatusCodes.Status200OK, "Get dialogs");
-		try
+		var result = new TLResponse(StatusCodes.Status200OK, "Get dialogs");
+		var list = new List<DialogDTO>();
+		foreach (Dialog dialog in _dialogs.dialogs)
 		{
-			var list = new List<DialogDTO>();
-			foreach (Dialog dialog in _dialogs.dialogs)
-			{
-				var messages = await _client.Messages_GetHistory(
-					GetPeerFromDialogs(_dialogs, dialog.peer.ID), 
-					offset_id: 0, 
-					limit: 1);
-				var lastMessage = messages.Messages.First();
-                var from = messages.UserOrChat(lastMessage.From);
-                DialogDTO dto = new DialogDTO();
-
-				switch (_dialogs.UserOrChat(dialog))
-				{
-					case User user when user.IsActive:
-						dto = GetUserInfo(user);
-						break;
-					case ChatBase chat when chat.IsActive:
-						dto = GetChatMainInfo(chat);
-						break;
-				}
-
-                if (lastMessage is Message msg)
-                    dto.Message = ($"{from}> {msg.message} {msg.media}");
-                else if (lastMessage is MessageService ms)
-                    dto.Message = ($"{from} [{ms.action.GetType().Name[13..]}]");
-
-                list.Add(dto);
-			}
-
-			result.Data = list;
+			list.Add(await CreateDialogDTO(dialog));
 		}
-		catch (Exception e)
+
+		result.Data = list;
+		return result;
+	}
+
+	private PeerDTO CreatePeerDTO(IPeerInfo? peer)
+	{
+		PeerDTO result = new PeerDTO();
+		switch (peer)
 		{
-			result = new TLResponse(StatusCodes.Status500InternalServerError, e.ToString());
+			case User user:
+				var username = $"{user.first_name} {user.last_name}".Trim();
+				result = new PeerDTO(user.ID, username, GetPhotoIdByPeer(peer));
+				break;
+			case ChatBase chat:
+				result = new PeerDTO(chat.ID, chat.MainUsername, GetPhotoIdByPeer(peer));
+				break;
 		}
 		return result;
 	}
 
-	private DialogDTO GetUserInfo(User user)
+	private long GetPhotoIdByPeer(IPeerInfo info)
 	{
-        long photoId = 0;
-        if (user.photo is UserProfilePhoto photo)
-            photoId = photo.photo_id;
-		string title = $"{user.first_name} {user.last_name}";
-		title = title.Trim();
-        return new DialogDTO(user.id, title, user.MainUsername, photoId);
-    }
-	private DialogDTO GetChatMainInfo(ChatBase chat)
+		long id = 0;
+		switch (info)
+		{
+			case User u:
+				if (u.photo is UserProfilePhoto userPhoto)
+					id = userPhoto.photo_id;
+				break;
+			case ChatBase chat:
+				if (chat.Photo is ChatPhoto chatPhoto)
+					id = chatPhoto.photo_id;
+				break;
+		}
+		return id;
+	}
+
+	private MessageDTO CreateMessageDTO(MessageBase message)
 	{
-        long photoId = 0;
-        if (chat.Photo is ChatPhoto photo)
-            photoId = photo.photo_id;
-		return new DialogDTO(chat.ID, chat.Title, chat.MainUsername,photoId);
-    }
+		MessageDTO result = new();
+		switch (message)
+		{
+			case Message msg:
+				result = new MessageDTO(msg.ID, $"{msg.message} {msg.media}", msg.date);
+				break;
+			case MessageService ms:
+				result = new MessageDTO(ms.ID, ms.action.GetType().Name[13..], ms.Date);
+				break;
+		}
+    var sender = _dialogs!.UserOrChat(message?.From ?? message?.Peer);
+    result.Sender = CreatePeerDTO(sender);
+		return result;
+	}
+
+	private async Task<DialogDTO> CreateDialogDTO(Dialog dialog)
+	{
+		if (_dialogs == null)
+			_dialogs = await _client.Messages_GetAllDialogs();
+
+		DialogDTO result = new();
+		var topMessage = _dialogs
+			.Messages
+			.First(m => m.Peer.ID == dialog.peer.ID && m.ID == dialog.TopMessage);
+		var messageInfo = CreateMessageDTO(topMessage);
+    
+		switch (_dialogs.UserOrChat(dialog))
+		{
+			case User user when user.IsActive:
+				var title = $"{user.first_name} {user.last_name}".Trim();
+				result = new DialogDTO(user.ID, title, user.MainUsername, GetPhotoIdByPeer(user), messageInfo);
+				break;
+
+			case ChatBase chat when chat.IsActive:
+				result = new DialogDTO(
+					chat.ID,
+					chat.Title,
+					chat.MainUsername,
+					GetPhotoIdByPeer(chat),
+					messageInfo
+				);
+				break;
+		}
+		return result;
+	}
 
 	public async Task<TLResponse> SendMessage(long peerId, string message)
 	{
-        if (!IsLoggedIn)
-            return new TLResponse(StatusCodes.Status401Unauthorized, "Undefiend user");
+		if (!IsLoggedIn)
+			return new TLResponse(StatusCodes.Status401Unauthorized, "Undefiend user");
 
-        var response = new TLResponse($"undefiend {peerId}");
+		var response = new TLResponse($"undefiend {peerId}");
 		var dialogs = await _client.Messages_GetAllDialogs();
-		InputPeer? peer = GetPeerFromDialogs(dialogs, peerId); 
-		if(peer != null)
+		InputPeer? peer = (InputPeer?)GetPeerFromDialogs(dialogs, peerId);
+		if (peer != null)
 		{
-		  response.Data = await _client.SendMessageAsync(peer, message);   
-		  response.Message = $"Send to {peer}";
+			response.Data = await _client.SendMessageAsync(peer, message);
+			response.Message = $"Send to {peer}";
 		}
 		return response;
 	}
