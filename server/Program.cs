@@ -20,7 +20,12 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddTelegramApiService();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
+app.UseExceptionHandler();
+app.UseCors("AllowReactOrigin");
 
 if (app.Environment.IsDevelopment())
 {
