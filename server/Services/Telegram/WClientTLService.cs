@@ -1,5 +1,6 @@
 using ChatHub.Models.Telegram;
 using ChatHub.Models.Telegram.DTO;
+using System.Collections.Generic;
 using TL;
 
 namespace ChatHub.Services.Telegram;
@@ -80,21 +81,30 @@ public class WClientTLService : ITLService
 			_dialogs = await _client.Messages_GetAllDialogs();
 
 		var response = new TLResponse();
-		var list = new List<MessageDTO>();
-		InputPeer? peer = (InputPeer?)GetPeerFromDialogs(_dialogs, peerId);
+		var peer = GetPeerFromDialogs(_dialogs, peerId);
 
 		if (peer != null)
 		{
-			var messages = await _client.Messages_GetHistory(peer, offset_id: offsetId, limit: limit);
-			foreach (var msgBase in messages.Messages)
-			{
-				list.Add(CreateMessageDTO(msgBase));
-			}
-			response.Data = list;
+			if (peer is InputPeer inputPeer)
+				response.Data = await GetMessagesFromPeer(inputPeer, offsetId, limit);
+			else if (peer is Channel channel)
+				response.Data = await GetMessagesFromPeer(channel, offsetId, limit);
+			else
+				_logger.LogWarning($"Unsupported peer type: {peer.GetType().Name}");
 		}
-
 		return response;
 	}
+
+	private async Task<List<MessageDTO>> GetMessagesFromPeer(InputPeer peer, int offsetId, int limit)
+	{
+		var result = new List<MessageDTO>();
+        var messages = await _client.Messages_GetHistory(peer, add_offset: offsetId, limit: limit);
+        foreach (var msgBase in messages.Messages)
+        {
+            result.Add(CreateMessageDTO(msgBase));
+        }
+		return result;
+    }
 
   private IPeerInfo? GetPeerFromMessage(Messages_MessagesBase collection, MessageBase message)
   {
@@ -137,20 +147,6 @@ public class WClientTLService : ITLService
       ChatBase cb => _mapper.Map<PeerDTO>(cb),     
       _ => throw new InvalidCastException("Cant find peer class")
     };
-	// private PeerDTO CreatePeerDTO(IPeerInfo? peer)
-	// {
-	// 	PeerDTO result = new PeerDTO();
-	// 	switch (peer)
-	// 	{
-	// 		case User user:
-	// 			result = _mapper.Map<PeerDTO>(peer);
-	// 			break;
-	// 		case ChatBase chat:
-	// 			result = new PeerDTO(chat.ID, chat.MainUsername, GetPhotoIdByPeer(peer));
-	// 			break;
-	// 	}
-	// 	return result;
-	// }
 
 	private long GetPhotoIdByPeer(IPeerInfo info)
 	{
@@ -181,8 +177,8 @@ public class WClientTLService : ITLService
 				result = new MessageDTO(ms.ID, ms.action.GetType().Name[13..], ms.Date);
 				break;
 		}
-    var sender = _dialogs!.UserOrChat(message?.From ?? message?.Peer);
-    result.Sender = CreatePeerDTO(sender);
+		var sender = _dialogs!.UserOrChat(message?.From ?? message?.Peer);
+		result.Sender = CreatePeerDTO(sender);
 		return result;
 	}
 

@@ -2,9 +2,9 @@ namespace ChatHub.Models.Telegram.DTO;
 
 public struct PeerDTO
 {
-  public readonly long Id {get;}
-  public readonly string Username {get;}
-  public readonly long PhotoId {get;}
+  public long Id { get; set; }
+  public string Username { get; set; }
+  public long PhotoId { get; set; }
 
   public PeerDTO(long id, string name, long photoId)
   {

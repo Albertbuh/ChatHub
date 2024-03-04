@@ -2,9 +2,9 @@ namespace ChatHub.Models.Telegram.DTO;
 
 public struct MessageDTO
 {
-  public readonly long Id { get; }
-  public readonly string Message { get; }
-  public readonly DateTime Date { get; }
+  public long Id { get; set;  }
+  public string Message { get; set; }
+  public DateTime Date { get; set; }
   public PeerDTO? Sender { get; set; }
 
   public MessageDTO(long id, string message, DateTime date, PeerDTO? sender)
