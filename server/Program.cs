@@ -18,6 +18,7 @@ builder
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAutoMapper(typeof(ChatHub.Mappers.Telegram.WClientMapperProfile));
 builder.Services.AddTelegramApiService();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

@@ -13,13 +13,16 @@ public class WClientTLService : ITLService
 	bool IsLoggedIn => _client.User != null;
 
 	readonly ILogger<WClientTLService> _logger;
+  readonly IMapper _mapper;
 
-	public WClientTLService(ILogger<WClientTLService> logger, int api_id, string api_hash)
+	public WClientTLService(ILogger<WClientTLService> logger, IMapper mapper, int api_id, string api_hash)
 	{
 		_client = new WTelegram.Client(api_id, api_hash);
 		WTelegram.Helpers.Log = (lvl, msg) => logger.Log((LogLevel)lvl, msg);
 
 		_logger = logger;
+    _mapper = mapper;
+    
 		var phone = Environment.GetEnvironmentVariable("TELEGRAM_API_PHONE");
 		if (!String.IsNullOrEmpty(phone))
 			Task.WaitAll(Task.Run(async () => await Login(phone)));
@@ -126,22 +129,28 @@ public class WClientTLService : ITLService
 		result.Data = list;
 		return result;
 	}
-
-	private PeerDTO CreatePeerDTO(IPeerInfo? peer)
-	{
-		PeerDTO result = new PeerDTO();
-		switch (peer)
-		{
-			case User user:
-				var username = $"{user.first_name} {user.last_name}".Trim();
-				result = new PeerDTO(user.ID, username, GetPhotoIdByPeer(peer));
-				break;
-			case ChatBase chat:
-				result = new PeerDTO(chat.ID, chat.MainUsername, GetPhotoIdByPeer(peer));
-				break;
-		}
-		return result;
-	}
+  
+  private PeerDTO CreatePeerDTO(IPeerInfo? peer)
+    => peer switch 
+    {
+      User u => _mapper.Map<PeerDTO>(u),
+      ChatBase cb => _mapper.Map<PeerDTO>(cb),     
+      _ => throw new InvalidCastException("Cant find peer class")
+    };
+	// private PeerDTO CreatePeerDTO(IPeerInfo? peer)
+	// {
+	// 	PeerDTO result = new PeerDTO();
+	// 	switch (peer)
+	// 	{
+	// 		case User user:
+	// 			result = _mapper.Map<PeerDTO>(peer);
+	// 			break;
+	// 		case ChatBase chat:
+	// 			result = new PeerDTO(chat.ID, chat.MainUsername, GetPhotoIdByPeer(peer));
+	// 			break;
+	// 	}
+	// 	return result;
+	// }
 
 	private long GetPhotoIdByPeer(IPeerInfo info)
 	{

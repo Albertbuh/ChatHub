@@ -28,7 +28,7 @@ public static class ServiceProviderExtensions
 		}
 
 		services.AddSingleton<ITLService, WClientTLService>(
-			_ => new WClientTLService(_.GetRequiredService<ILogger<WClientTLService>>(), apiId, apiHash)
+			_ => new WClientTLService(_.GetRequiredService<ILogger<WClientTLService>>(), _.GetRequiredService<IMapper>(), apiId, apiHash)
 		);
 	}
 }
