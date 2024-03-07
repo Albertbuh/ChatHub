@@ -1,6 +1,5 @@
 using ChatHub.Models.Telegram;
 using ChatHub.Models.Telegram.DTO;
-using System.Collections.Generic;
 using TL;
 
 namespace ChatHub.Services.Telegram;
@@ -14,16 +13,21 @@ public class WClientTLService : ITLService
 	bool IsLoggedIn => _client.User != null;
 
 	readonly ILogger<WClientTLService> _logger;
-  readonly IMapper _mapper;
+	readonly IMapper _mapper;
 
-	public WClientTLService(ILogger<WClientTLService> logger, IMapper mapper, int api_id, string api_hash)
+	public WClientTLService(
+		ILogger<WClientTLService> logger,
+		IMapper mapper,
+		int api_id,
+		string api_hash
+	)
 	{
 		_client = new WTelegram.Client(api_id, api_hash);
 		WTelegram.Helpers.Log = (lvl, msg) => logger.Log((LogLevel)lvl, msg);
 
 		_logger = logger;
-    _mapper = mapper;
-    
+		_mapper = mapper;
+
 		var phone = Environment.GetEnvironmentVariable("TELEGRAM_API_PHONE");
 		if (!String.IsNullOrEmpty(phone))
 			Task.WaitAll(Task.Run(async () => await Login(phone)));
@@ -111,8 +115,7 @@ public class WClientTLService : ITLService
     return collection.UserOrChat(message.From ?? message.Peer);
   }
 
-
-  private IPeerInfo? GetPeerFromDialogs(Messages_Dialogs dialogs, long peerId)
+	private IPeerInfo? GetPeerFromDialogs(Messages_Dialogs dialogs, long peerId)
 	{
 		if (dialogs.users.ContainsKey(peerId))
 			return dialogs.users[peerId];
@@ -121,7 +124,7 @@ public class WClientTLService : ITLService
 		else
 			return null;
 	}
-  
+
 	public async Task<TLResponse> GetAllDialogs()
 	{
 		if (!IsLoggedIn)
@@ -140,13 +143,13 @@ public class WClientTLService : ITLService
 		return result;
 	}
   
-  private PeerDTO CreatePeerDTO(IPeerInfo? peer)
-    => peer switch 
-    {
-      User u => _mapper.Map<PeerDTO>(u),
-      ChatBase cb => _mapper.Map<PeerDTO>(cb),     
-      _ => throw new InvalidCastException("Cant find peer class")
-    };
+	private PeerDTO CreatePeerDTO(IPeerInfo? peer) =>
+		peer switch
+		{
+			User u => _mapper.Map<PeerDTO>(u),
+			ChatBase cb => _mapper.Map<PeerDTO>(cb),
+			_ => throw new InvalidCastException("Cant find peer class")
+		};
 
 	private long GetPhotoIdByPeer(IPeerInfo info)
 	{
@@ -167,19 +170,20 @@ public class WClientTLService : ITLService
 
 	private MessageDTO CreateMessageDTO(MessageBase message)
 	{
-		MessageDTO result = new();
+		var result = new MessageDTO();
 		switch (message)
 		{
-			case Message msg:
-				result = new MessageDTO(msg.ID, $"{msg.message} {msg.media}", msg.date);
+			case Message m:
+				result = _mapper.Map<MessageDTO>(m);
 				break;
 			case MessageService ms:
-				result = new MessageDTO(ms.ID, ms.action.GetType().Name[13..], ms.Date);
+				result = _mapper.Map<MessageDTO>(ms);
 				break;
-		}
-		var sender = _dialogs!.UserOrChat(message?.From ?? message?.Peer);
-		result.Sender = CreatePeerDTO(sender);
-		return result;
+			default:
+				throw new InvalidCastException("Cant find message class");
+		};
+		result.Sender = CreatePeerDTO(_dialogs!.UserOrChat(message?.From ?? message?.Peer));
+    return result;
 	}
 
 	private async Task<DialogDTO> CreateDialogDTO(Dialog dialog)
@@ -188,28 +192,20 @@ public class WClientTLService : ITLService
 			_dialogs = await _client.Messages_GetAllDialogs();
 
 		DialogDTO result = new();
-		var topMessage = _dialogs
-			.Messages
-			.First(m => m.Peer.ID == dialog.peer.ID && m.ID == dialog.TopMessage);
-		var messageInfo = CreateMessageDTO(topMessage);
-    
 		switch (_dialogs.UserOrChat(dialog))
 		{
 			case User user when user.IsActive:
-				var title = $"{user.first_name} {user.last_name}".Trim();
-				result = new DialogDTO(user.ID, title, user.MainUsername, GetPhotoIdByPeer(user), messageInfo);
+        result = _mapper.Map<DialogDTO>(user);
 				break;
-
 			case ChatBase chat when chat.IsActive:
-				result = new DialogDTO(
-					chat.ID,
-					chat.Title,
-					chat.MainUsername,
-					GetPhotoIdByPeer(chat),
-					messageInfo
-				);
+				result = _mapper.Map<DialogDTO>(chat);
 				break;
 		}
+		var topMessage = _dialogs
+			.Messages
+			.First(m => m.Peer.ID == dialog.peer.ID && m.ID == dialog.TopMessage);
+    result.TopMessage = CreateMessageDTO(topMessage);
+    
 		return result;
 	}
 

@@ -9,12 +9,34 @@ public class WClientMapperProfile : Profile
 	{
 		CreateMapUserPeerDTO();
     CreateMapChatBasePeerDTO();
+    CreateMapMessages();
+    CreateMapDialogs();
   }
 
-  private void CreateMapDialog()
+  private void CreateMapDialogs()
   {
-    
+    CreateMap<User, DialogDTO>()
+      .ForMember(dest => dest.Id, opt => opt.MapFrom(d => d.ID))
+      .ForMember(dest => dest.Title, opt => opt.MapFrom(d => $"{d.first_name} {d.last_name}".Trim()))
+      .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(d => GetUserPhotoId(d)));
+
+    CreateMap<ChatBase, DialogDTO>()
+      .ForMember(dest => dest.Id, opt => opt.MapFrom(d => d.ID))
+      .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(d => GetChatPhotoId(d)));
   }
+
+  private void CreateMapMessages()
+  {
+    CreateMap<Message, MessageDTO>()
+      .ForMember(dest => dest.Id, opt => opt.MapFrom(m => m.ID))
+      .ForMember(dest => dest.Message, opt => opt.MapFrom(m => $"{m.message} {m.media}"));
+
+    CreateMap<MessageService, MessageDTO>()
+      .ForMember(dest => dest.Id, opt => opt.MapFrom(ms => ms.ID))
+      .ForMember(dest => dest.Message, opt => opt.MapFrom(ms => GetMessageServiceMessage(ms)));
+  }
+
+  private string GetMessageServiceMessage(MessageService ms) => ms.action.GetType().Name[13..];
 
   private void CreateMapChatBasePeerDTO()
   {
