@@ -1,3 +1,5 @@
+import ClientAppWrapper from './ClientWrapper';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -6,13 +8,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <header>
-          <h1>Мой заголовок</h1>
-        </header>
-        {children}
-        <footer>
-          <p>Мой подвал</p>
-        </footer>
+        {children || <ClientAppWrapper />}
       </body>
     </html>
   );

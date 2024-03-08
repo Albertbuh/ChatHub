@@ -4,9 +4,8 @@ using PusherServer;
 public class ChatController : Controller
 {
     [HttpPost("messages")]
-    public async Task<ActionResult> Message(MessageDTO dto)
+    public async Task<ActionResult> Message([FromBody] MessageDTO dto)
     {
-        Console.WriteLine("Received POST request to /api/messages");
 
 
         var options = new PusherOptions
@@ -22,10 +21,12 @@ public class ChatController : Controller
           options);
 
         var result = await pusher.TriggerAsync(
-          "Chat",
+          "chat",
           "message",
           new { username=dto.Username, message = dto.Message });
 
-          return Ok(new string[] {});
+        Console.WriteLine("Received POST request to /api/messages:" + dto.Username + " - " + dto.Message);
+
+        return Ok(new string[] {});
     }
 }
