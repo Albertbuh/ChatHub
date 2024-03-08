@@ -5,7 +5,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <header>
+          <h1>Мой заголовок</h1>
+        </header>
+        {children}
+        <footer>
+          <p>Мой подвал</p>
+        </footer>
+      </body>
     </html>
   );
 }
