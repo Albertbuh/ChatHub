@@ -1,4 +1,4 @@
-import App from './page.js';
+import App from "./page";
 
 export default function ClientAppWrapper() {
   return <App />;

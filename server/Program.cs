@@ -18,10 +18,10 @@ var app = builder.Build();
 app.UseExceptionHandler();
 app.UseCors("AllowReactOrigin");
 
-//app.MapGet("/", (HttpContext context) =>
-//    {
-//        context.Response.Redirect("http://localhost:44144", true);
-//    });
+app.MapGet("/", (HttpContext context) =>
+   {
+       context.Response.Redirect("http://localhost:44144", true);
+   });
 
 app.UseRouting();
 
