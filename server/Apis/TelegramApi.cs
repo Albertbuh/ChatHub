@@ -34,9 +34,9 @@ public static class TelegramApi
     return TypedResults.Json(result);
   }
 
-  private static async Task<IResult> GetMessages(ITLService telegramService, long chatId, int offsetId, int limit)
+  private static async Task<IResult> GetMessages(ITLService telegramService, long chatId, int offset, int limit)
   {
-    var result = await telegramService.GetMessages(chatId, offsetId, limit);
+    var result = await telegramService.GetMessages(chatId, offset, limit);
     return TypedResults.Json(result);
   }
   

@@ -77,7 +77,7 @@ public class WClientTLService : ITLService
 		return new TLResponse($"User {_user} logout");
 	}
 
-	public async Task<TLResponse> GetMessages(long peerId, int offsetId, int limit)
+	public async Task<TLResponse> GetMessages(long peerId, int offset, int limit)
 	{
 		if (!IsLoggedIn)
 			return new TLResponse(StatusCodes.Status401Unauthorized, "Undefiend user");
@@ -90,30 +90,31 @@ public class WClientTLService : ITLService
 		if (peer != null)
 		{
 			if (peer is InputPeer inputPeer)
-				response.Data = await GetMessagesFromPeer(inputPeer, offsetId, limit);
-			else if (peer is Channel channel)
-				response.Data = await GetMessagesFromPeer(channel, offsetId, limit);
+				response.Data = await GetMessagesFromPeer(inputPeer, offset, limit);
+			else if (peer is ChatBase channel)
+				response.Data = await GetMessagesFromPeer(channel, offset, limit);
 			else
 				_logger.LogWarning($"Unsupported peer type: {peer.GetType().Name}");
 		}
 		return response;
 	}
 
-	private async Task<List<MessageDTO>> GetMessagesFromPeer(InputPeer peer, int offsetId, int limit)
+	private async Task<List<MessageDTO>> GetMessagesFromPeer(InputPeer peer, int offset, int limit)
 	{
 		var result = new List<MessageDTO>();
-        var messages = await _client.Messages_GetHistory(peer, add_offset: offsetId, limit: limit);
-        foreach (var msgBase in messages.Messages)
-        {
-            result.Add(CreateMessageDTO(msgBase));
-        }
+		var messages = await _client.Messages_GetHistory(peer, add_offset: offset, limit: limit);
+		// _logger.LogInformation($"Read history of user {peer.ID} (length: {messages.Messages.Length}; limit: {limit})");
+		foreach (var msgBase in messages.Messages)
+		{
+			result.Add(CreateMessageDTO(msgBase));
+		}
 		return result;
-    }
+	}
 
-  private IPeerInfo? GetPeerFromMessage(Messages_MessagesBase collection, MessageBase message)
-  {
-    return collection.UserOrChat(message.From ?? message.Peer);
-  }
+	private IPeerInfo? GetPeerFromMessage(Messages_MessagesBase collection, MessageBase message)
+	{
+		return collection.UserOrChat(message.From ?? message.Peer);
+	}
 
 	private IPeerInfo? GetPeerFromDialogs(Messages_Dialogs dialogs, long peerId)
 	{
@@ -142,7 +143,7 @@ public class WClientTLService : ITLService
 		result.Data = list;
 		return result;
 	}
-  
+
 	private PeerDTO CreatePeerDTO(IPeerInfo? peer) =>
 		peer switch
 		{
@@ -181,9 +182,10 @@ public class WClientTLService : ITLService
 				break;
 			default:
 				throw new InvalidCastException("Cant find message class");
-		};
+		}
+		;
 		result.Sender = CreatePeerDTO(_dialogs!.UserOrChat(message?.From ?? message?.Peer));
-    return result;
+		return result;
 	}
 
 	private async Task<DialogDTO> CreateDialogDTO(Dialog dialog)
@@ -195,7 +197,7 @@ public class WClientTLService : ITLService
 		switch (_dialogs.UserOrChat(dialog))
 		{
 			case User user when user.IsActive:
-        result = _mapper.Map<DialogDTO>(user);
+				result = _mapper.Map<DialogDTO>(user);
 				break;
 			case ChatBase chat when chat.IsActive:
 				result = _mapper.Map<DialogDTO>(chat);
@@ -204,8 +206,8 @@ public class WClientTLService : ITLService
 		var topMessage = _dialogs
 			.Messages
 			.First(m => m.Peer.ID == dialog.peer.ID && m.ID == dialog.TopMessage);
-    result.TopMessage = CreateMessageDTO(topMessage);
-    
+		result.TopMessage = CreateMessageDTO(topMessage);
+
 		return result;
 	}
 
@@ -213,14 +215,24 @@ public class WClientTLService : ITLService
 	{
 		if (!IsLoggedIn)
 			return new TLResponse(StatusCodes.Status401Unauthorized, "Undefiend user");
-
+		if (_dialogs == null)
+			_dialogs = await _client.Messages_GetAllDialogs();
+    
 		var response = new TLResponse($"undefiend {peerId}");
-		var dialogs = await _client.Messages_GetAllDialogs();
-		InputPeer? peer = (InputPeer?)GetPeerFromDialogs(dialogs, peerId);
+		IPeerInfo? peer = GetPeerFromDialogs(_dialogs, peerId);
 		if (peer != null)
 		{
-			response.Data = await _client.SendMessageAsync(peer, message);
-			response.Message = $"Send to {peer}";
+			switch (peer)
+			{
+				case User u:
+					response.Data = CreateMessageDTO(await _client.SendMessageAsync(u, message));
+          response.Message = $"Send to {u.MainUsername}";
+					break;
+				case ChatBase cb:
+					response.Data = CreateMessageDTO(await _client.SendMessageAsync(cb, message));
+          response.Message = $"Send to {cb.MainUsername}";
+					break;
+			}
 		}
 		return response;
 	}
