@@ -1,5 +1,6 @@
 using ChatHub.Api;
 using ChatHub.Extensions;
+using server.Apis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(typeof(ChatHub.Mappers.Telegram.WClientMapperProfile));
 builder.Services.AddTelegramApiService();
+builder.Services.AddVkApiService();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -50,5 +52,6 @@ else if (app.Environment.IsProduction())
 }
 
 app.MapGroup("/api/v1.0/telegram").WithTags("Telegram api").MapTelegramApi();
+app.MapGroup("/api/v1.0/vk").WithTags("Vk api").MapVkApi();
 
 app.Run();
