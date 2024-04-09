@@ -26,6 +26,9 @@ builder.Services.AddVkApiService();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
 app.UseExceptionHandler();
 app.UseCors("AllowReactOrigin");
