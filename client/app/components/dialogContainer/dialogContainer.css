@@ -1,0 +1,33 @@
+.peer-container {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  padding: 10px;
+  width: 300px;
+  border: 1px solid black;
+}
+
+
+.peer-container .image {
+  border-radius:50%;
+  width: 3rem;
+  height: 3rem
+}
+
+.peer-container .main-info {
+  width: 100%;
+  margin-left: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+.peer-container .head {
+  display: flex;
+  justify-content: space-between;
+}
+
+.peer-container .body {
+  margin-top: 5px;
+}
