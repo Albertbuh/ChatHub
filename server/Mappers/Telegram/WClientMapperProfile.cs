@@ -1,5 +1,4 @@
 using ChatHub.Models.Telegram.DTO;
-using server.Models.Vk.DTO;
 using TL;
 
 namespace ChatHub.Mappers.Telegram;

@@ -1,5 +1,4 @@
-﻿using ChatHub.Models.Telegram;
-using server.Models.Vk;
+﻿using server.Models.Vk;
 
 namespace server.Services.Vk
 {
