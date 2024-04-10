@@ -1,2 +1,2 @@
-global using Microsoft.AspNetCore.Diagnostics;
 global using AutoMapper;
+global using Microsoft.AspNetCore.Diagnostics;
