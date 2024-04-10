@@ -1,6 +1,4 @@
 ﻿using ChatHub.Models.Telegram.DTO;
-using ChatHub.Services.Telegram;
-using server.Models.Vk.DTO;
 using server.Services.Vk;
 
 namespace server.Apis

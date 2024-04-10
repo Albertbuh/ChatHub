@@ -1,16 +1,11 @@
-﻿using ChatHub.Models.Telegram;
-using ChatHub.Services.Telegram;
+﻿using ChatHub.Services.Telegram;
 using server.Models.Vk;
+using server.Models.Vk.DTO;
 using VkNet;
 using VkNet.AudioBypassService.Extensions;
 using VkNet.Enums.Filters;
-using VkNet.Model;
-using VkNet.NLog.Extensions.Logging.Extensions;
-using VkNet.NLog.Extensions.Logging;
 using VkNet.Enums.StringEnums;
-using server.Models.Vk.Conversation;
-using Microsoft.VisualBasic;
-using server.Models.Vk.DTO;
+using VkNet.Model;
 
 namespace server.Services.Vk
 {
@@ -19,7 +14,9 @@ namespace server.Services.Vk
         private readonly VkApi? api;
         readonly ILogger<WClientTLService> _logger;
         readonly IMapper _mapper;
-        Conversations _conversation = null;
+        GetConversationsResult _conversation = null!;
+        public List<User> Users = null!;
+        public List<Group> Groups = null!;
         ulong _applicationId;
         public WClientVKService(
             ILogger<WClientTLService> logger,
@@ -43,30 +40,29 @@ namespace server.Services.Vk
 
             if (_conversation == null)
             {
-                var conversations = await api.Messages.GetConversationsAsync(new GetConversationsParams()
+                _conversation = await api.Messages.GetConversationsAsync(new GetConversationsParams()
                 {
                     Count = limit,
                     Offset = offsetId
                 });
-                var userIds = conversations.Items
+                var userIds = _conversation.Items
                     .Where(chat => chat.Conversation.Peer.Type == ConversationPeerType.User)
                     .Select(chat => chat.Conversation.Peer.Id)
                     .ToList();
 
-                var groupIds = conversations.Items
+                var groupIds = _conversation.Items
                     .Where(chat => chat.Conversation.Peer.Type == ConversationPeerType.Group)
                     .Select(chat => Math.Abs(chat.Conversation.Peer.Id).ToString())
                     .ToList();
-                var users = (await api!.Users.GetAsync(userIds, ProfileFields.All)).ToList();
-                var groups = (await api.Groups.GetByIdAsync(groupIds, null, GroupsFields.All)).ToList();
+                Users = (await api!.Users.GetAsync(userIds, ProfileFields.All)).ToList();
+                Groups = (await api.Groups.GetByIdAsync(groupIds, null, GroupsFields.All)).ToList();
 
-                _conversation = new Conversations(conversations, users, groups);
 
             }
 
             var result = new VKResponse(StatusCodes.Status200OK, "Get dialogs");
             var list = new List<VkDialogDTO>();
-            foreach (var conversation in _conversation.ConversationsList.Items)
+            foreach (var conversation in _conversation.Items)
             {
                 list.Add(CreateConversationDTO(conversation));
             }
@@ -87,7 +83,7 @@ namespace server.Services.Vk
             switch (conversation.Conversation.Peer.Type)
             {
                 case ConversationPeerType.User:
-                    var participant = _conversation.Users.FirstOrDefault(u => u.Id == id);
+                    var participant = Users.FirstOrDefault(u => u.Id == id);
                     dialogDto.MainUsername = participant?.ScreenName ?? " ";
 
                     if (participant != null)
@@ -102,7 +98,7 @@ namespace server.Services.Vk
 
                     break;
                 case ConversationPeerType.Group:
-                    var group = _conversation.Groups.FirstOrDefault(f => f.Id == Math.Abs(id));
+                    var group = Groups.FirstOrDefault(f => f.Id == Math.Abs(id));
                     dialogDto.PhotoUri = group?.Photo100.AbsoluteUri.ToString() ?? " ";
                     dialogDto.MainUsername = group?.ScreenName ?? " ";
                     name = group?.Name ?? "";
@@ -115,7 +111,7 @@ namespace server.Services.Vk
             dialogDto.Title = name;
             dialogDto.Id = id;
             dialogDto.TopMessage = CreateMessageDto(conversation.LastMessage, user);
-            
+
             return dialogDto;
         }
 
@@ -142,7 +138,7 @@ namespace server.Services.Vk
 
         public async Task<VKResponse> GetMessages(long chatId, int offsetId, int limit)
         {
-           if (!api.IsAuthorized )
+            if (!api.IsAuthorized)
                 return new VKResponse(StatusCodes.Status401Unauthorized, "Undefined user");
 
             var messages = await api.Messages.GetHistoryAsync(new MessagesGetHistoryParams()
@@ -171,7 +167,8 @@ namespace server.Services.Vk
                     user.Id = groupVk.Id;
                     user.PhotoUri = groupVk?.Photo100?.AbsoluteUri.ToString() ?? " ";
                     user.ScreenName = groupVk?.ScreenName;
-                }else
+                }
+                else
                 {
                     user.Id = userVk.Id;
                     user.PhotoUri = userVk.Photo100?.AbsoluteUri?.ToString() ?? " ";
@@ -182,7 +179,7 @@ namespace server.Services.Vk
             }
             result.Data = messageList;
             return result;
-            
+
         }
 
 

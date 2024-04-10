@@ -8,6 +8,7 @@ public class WClientTLService : ITLService
 {
     readonly WTelegram.Client _client = null!;
     readonly WTelegram.UpdateManager _manager = null!;
+    
     User _user => _client.User;
     Messages_Dialogs? _dialogs;
 
@@ -240,7 +241,6 @@ public class WClientTLService : ITLService
         }
         return response;
     }
-
     private async Task OnUpdate(Update update)
     {
         switch (update)
