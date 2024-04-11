@@ -6,6 +6,7 @@ import LoginForm from './LoginForm/LoginForm';
 import { navigate } from './actions'
 
 
+
 //TODO: FIX colorful background
 //TODO: remake verificationForm
 export default function LoginPage() {
@@ -19,7 +20,7 @@ export default function LoginPage() {
 
 
   return (
-    <div>
+    <div >
       <h1>{heading}</h1>
       <LoginForm onLoginSuccess={handleLoginSuccess} />
     </div>

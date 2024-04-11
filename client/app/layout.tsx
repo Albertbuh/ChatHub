@@ -2,6 +2,9 @@ import Link from 'next/link';
 import LoginPage from './telegram/authorization/login/page';
 import VerificationForm from './telegram/authorization/verification/VerificationForm/VerificationForm';
 
+import bg from './telegram/assets/background.jpg'
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -9,7 +12,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body style={{
+        backgroundImage: `url(${bg.src})`}}>
         <nav>
           <ul>
             <li>
@@ -24,7 +28,6 @@ export default function RootLayout({
           </ul>
         </nav>
         {children}
-        {/* <LoginPage /> */}
       </body>
     </html>
   );
