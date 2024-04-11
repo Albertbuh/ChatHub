@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import LoginPage from './telegram/authorization/login';
-
+import LoginPage from './telegram/authorization/login/page';
+import VerificationForm from './telegram/authorization/verification/VerificationForm/VerificationForm';
 
 export default function RootLayout({
   children,
@@ -10,9 +10,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-
-        {/* {children} */}
-        <LoginPage />
+        <nav>
+          <ul>
+            <li>
+              <Link href="/">HomeLESS</Link>
+            </li>
+            <li>
+              <Link href="/telegram/authorization/login">Login</Link>
+            </li>
+            <li>
+              <Link href="/telegram/authorization/verification">Verification</Link>
+            </li>
+          </ul>
+        </nav>
+        {children}
+        {/* <LoginPage /> */}
       </body>
     </html>
   );

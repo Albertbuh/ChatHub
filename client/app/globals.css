@@ -1,1 +1,48 @@
 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body, html {
+    height: 100%;
+    font-family: Arial, sans-serif;
+  }
+  
+  ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  a {
+    text-decoration: none;
+    color: #333;
+  }
+  
+  body {
+    background-color: #f0f0f0;
+  }
+  
+  h1 {
+    text-align: left;
+    margin: 0;
+  }
+  
+  .flex {
+    display: block;
+  }
+  
+  .items-center {
+    align-items: unset;
+  }
+  
+  .justify-center {
+    justify-content: unset;
+  }
+  
+  .h-screen {
+    height: unset;
+  }
+  

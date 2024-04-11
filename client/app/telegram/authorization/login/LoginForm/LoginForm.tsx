@@ -1,9 +1,12 @@
 import "./LoginForm.css"
 import { BsFillTelephoneFill } from "react-icons/bs";
-import { info } from "console";
 import { useState } from 'react';
 
-const LoginForm = () => {
+interface LoginFormProps {
+    onLoginSuccess: () => void;
+}
+
+const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
     const [phoneNumber, setPhoneNumber] = useState('');
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -15,19 +18,21 @@ const LoginForm = () => {
                     "Content-Type": "application/json",
                 },
             });
-    
+
             if (!response.ok) {
                 throw new Error("Unable to login");
             }
-    
+
             const data = await response.json();
-            console.log(data);
+
+            // Вызов функции обратного вызова
+            onLoginSuccess();
         } catch (error) {
             console.log(error);
         }
     }
-    
-    
+
+
     return (
         <div className="wrapper" >
             <form action="" onSubmit={handleSubmit}>
