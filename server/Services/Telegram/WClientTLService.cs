@@ -7,6 +7,8 @@ namespace ChatHub.Services.Telegram;
 public class WClientTLService : ITLService
 {
     readonly WTelegram.Client _client = null!;
+    readonly WTelegram.UpdateManager _manager = null!;
+    
     User _user => _client.User;
     Messages_Dialogs? _dialogs;
 
@@ -23,6 +25,7 @@ public class WClientTLService : ITLService
     )
     {
         _client = new WTelegram.Client(api_id, api_hash);
+        _manager = _client.WithUpdateManager(OnUpdate);
         WTelegram.Helpers.Log = (lvl, msg) => logger.Log((LogLevel)lvl, msg);
 
         _logger = logger;
@@ -55,6 +58,7 @@ public class WClientTLService : ITLService
                 {
                     result.Message = $"User {_user} (id {_user.id}) is successfully logged-in";
                     _dialogs = await _client.Messages_GetAllDialogs();
+                    _dialogs.CollectUsersChats(_manager.Users, _manager.Chats);
                 }
             }
             else
@@ -103,7 +107,6 @@ public class WClientTLService : ITLService
     {
         var result = new List<MessageDTO>();
         var messages = await _client.Messages_GetHistory(peer, add_offset: offset, limit: limit);
-        // _logger.LogInformation($"Read history of user {peer.ID} (length: {messages.Messages.Length}; limit: {limit})");
         foreach (var msgBase in messages.Messages)
         {
             result.Add(CreateMessageDTO(msgBase));
@@ -137,7 +140,9 @@ public class WClientTLService : ITLService
         var list = new List<DialogDTO>();
         foreach (Dialog dialog in _dialogs.dialogs)
         {
-            list.Add(await CreateDialogDTO(dialog));
+            var dto = await CreateDialogDTO(dialog);
+            if (dto.Id > 0)
+                list.Add(dto);
         }
 
         result.Data = list;
@@ -235,5 +240,28 @@ public class WClientTLService : ITLService
             }
         }
         return response;
+    }
+    private async Task OnUpdate(Update update)
+    {
+        switch (update)
+        {
+            case UpdateNewMessage unm:
+            case UpdateEditMessage uem:
+            // Note: UpdateNewChannelMessage and UpdateEditChannelMessage are also handled by above cases
+            case UpdateDeleteChannelMessages udcm:
+            case UpdateDeleteMessages udm:
+            case UpdateUserTyping uut:
+            case UpdateChatUserTyping ucut:
+            case UpdateChannelUserTyping ucut2:
+            case UpdateChatParticipants { participants: ChatParticipants cp }:
+            case UpdateUserStatus uus:
+            case UpdateUserName uun:
+            case UpdateUser uu:
+                _dialogs = await _client.Messages_GetAllDialogs();
+                _logger.LogInformation($"New message in runtime");
+                break;
+            default:
+                break; // there are much more update types than the above example cases
+        }
     }
 }
