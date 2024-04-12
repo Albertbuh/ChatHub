@@ -18,19 +18,6 @@ export default function RootLayout({
     <html lang="en">
       <body style={{
         backgroundImage: `url(${bg.src})`}}>
-        <nav>
-          <ul>
-            <li>
-              <Link href="/">HomeLESS</Link>
-            </li>
-            <li>
-              <Link href="/telegram/authorization/login">Login</Link>
-            </li>
-            <li>
-              <Link href="/telegram/authorization/verification">Verification</Link>
-            </li>
-          </ul>
-        </nav>
         <Navbar />
         {children}
       </body>
