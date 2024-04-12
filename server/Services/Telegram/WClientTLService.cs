@@ -93,8 +93,8 @@ public class WClientTLService : ITLService
 
         if (peer != null)
         {
-            if (peer is InputPeer inputPeer)
-                response.Data = await GetMessagesFromPeer(inputPeer, offset, limit);
+            if (peer is User user)
+                response.Data = await GetMessagesFromPeer(user, offset, limit);
             else if (peer is ChatBase channel)
                 response.Data = await GetMessagesFromPeer(channel, offset, limit);
             else
