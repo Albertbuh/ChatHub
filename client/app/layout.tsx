@@ -4,21 +4,29 @@ import VerificationForm from './telegram/authorization/verification/Verification
 
 import bg from './telegram/assets/background.jpg'
 
-
 import Navbar from "./components/navbar/navbar";
+import SideNav from './components/navbarNew/navbar';
 import "./components/navbar/navbar.css";
 import "./globals.css";
 
+
+
+interface RootLayoutProps {
+  children: React.ReactNode;
+}
+
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: RootLayoutProps) {
+
   return (
     <html lang="en">
-      <body style={{
-        backgroundImage: `url(${bg.src})`}}>
-        <Navbar />
+      <body 
+      style={{
+        backgroundImage: `url(${bg.src})`}}
+        >
+        {/* <Navbar /> */}
+        <SideNav />
         {children}
       </body>
     </html>

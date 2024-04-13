@@ -1,4 +1,4 @@
-import "./LoginForm.css"
+import styles from './LoginForm.module.css'
 import { BsFillTelephoneFill } from "react-icons/bs";
 import { useState } from 'react';
 
@@ -34,21 +34,21 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
 
 
     return (
-        <div className="wrapper" >
+        <div className={styles.wrapper}>
             <form action="" onSubmit={handleSubmit}>
                 <h1>Login</h1>
-                <div className="input-box">
+                <div className={styles.inputBox}>
                     <input type="text" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder='Phone-Number' required />
-                    <BsFillTelephoneFill className="icon" />
+                    <BsFillTelephoneFill className={styles.icon} />
                 </div>
-                <div className="remember-forgot">
+                <div className={styles.rememberForgot}>
                     <label><input type="checkbox" />Remember me</label>
                     <a href="#">Forgot phone?</a>
                 </div>
 
                 <button type="submit">NEXT</button>
 
-                <div className="register-link">
+                <div className={styles.registerLink}>
                     <p>Don&apos;t have Telegram account? <a href="#">Registration</a></p>
                 </div>
             </form>

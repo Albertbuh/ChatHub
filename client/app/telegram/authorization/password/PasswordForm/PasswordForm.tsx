@@ -1,21 +1,21 @@
-import styles from './VerificationForm.module.css'
+import styles from './PasswordForm.module.css'
 import { useState } from 'react';
 import Link from 'next/link';
 
-import { Bs123 } from "react-icons/bs";
+import { BsFillKeyFill } from "react-icons/bs";
 
-interface VerificationFormProps {
-    onVerificationSuccess: () => void;
+interface PasswordFormProps {
+    onPasswordSuccess: () => void;
 }
 
-const VerificationForm = ({ onVerificationSuccess }: VerificationFormProps) => {
-    const [verificationCode, setverificationCode] = useState('');
+const PasswordForm = ({ onPasswordSuccess }: PasswordFormProps) => {
+    const [PasswordCode, setPasswordCode] = useState('');
 
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         try {
-            const response = await fetch(`http://localhost:5041/api/v1.0/telegram/login?info=${verificationCode}`, {
+            const response = await fetch(`http://localhost:5041/api/v1.0/telegram/login?info=${PasswordCode}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -23,13 +23,13 @@ const VerificationForm = ({ onVerificationSuccess }: VerificationFormProps) => {
             });
 
             if (!response.ok) {
-                throw new Error("Unable to verificate");
+                throw new Error("Unable to login with password");
             }
 
             const data = await response.json();
 
             // Вызов функции обратного вызова
-            onVerificationSuccess();
+            onPasswordSuccess();
         } catch (error) {
             console.log(error);
         }
@@ -38,19 +38,24 @@ const VerificationForm = ({ onVerificationSuccess }: VerificationFormProps) => {
     return (
         <div className={styles.wrapper} >
             <form action="" onSubmit={handleSubmit}>
-                <h1>Verification</h1>
+                <h1>Password</h1>
                 <div className={styles.inputBox}>
-                    <input type="text" value={verificationCode} onChange={(e) => setverificationCode(e.target.value)} placeholder='Verification-code' required />
-                    <Bs123 className={styles.icon}/>
+                    <input type="text" value={PasswordCode} onChange={(e) => setPasswordCode(e.target.value)} placeholder='Password-code' required />
+                    <BsFillKeyFill  className={styles.icon} />
                 </div>
 
-                <button type="submit">NEXT</button>
+                <div className={styles.rememberForgot}>
+                    <label><input type="checkbox" />Remember me</label>
+                    <a href="#">Forgot password?</a>
+                </div>
+
+                <button type="submit">AUTHORIZE</button>
 
                 <div className={styles.backwards}>
                     <p>
                         Incorrect phone?{' '}
                         <Link href="/telegram/authorization/login">
-                            BACK
+                            LOGIN
                         </Link>
                     </p>
                 </div>
@@ -59,4 +64,4 @@ const VerificationForm = ({ onVerificationSuccess }: VerificationFormProps) => {
     )
 }
 
-export default VerificationForm;
+export default PasswordForm;
