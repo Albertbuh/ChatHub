@@ -1,0 +1,13 @@
+.message {
+    border: 1px solid black;
+    padding: 5px;
+    position: relative;
+    max-width: 40vw;
+}
+
+.message .time {
+    position: absolute;
+    bottom: 1rem;
+    right: 5%;
+    font-size: 0.8rem;
+}

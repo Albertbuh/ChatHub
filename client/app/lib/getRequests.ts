@@ -1,7 +1,5 @@
-import { IMessageInfo } from "../models/dto/IMessageInfo";
-import { IDialogInfo } from '../models/dto/IDialogInfo';
 
-export async function GetMessages(dialogId: number, offset: number, limit: number): Promise<IMessageInfo[]> {
+export async function GetMessages(dialogId: number, offset: number, limit: number) {
     const url = "http://localhost:5041/api/v1.0/telegram/peers";
     let messages = [];
 
@@ -20,7 +18,7 @@ export async function GetMessages(dialogId: number, offset: number, limit: numbe
     }
 }
 
-export async function GetDialogs(): Promise<IDialogInfo[]> {
+export async function GetDialogs() {
     let dialogs = [];
     try {
         const res = await fetch("http://localhost:5041/api/v1.0/telegram/dialogs");

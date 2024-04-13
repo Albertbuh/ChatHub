@@ -1,9 +1,11 @@
+import Link from "next/link";
+
 export default function SideNav() {
   return (
     <div className="sidenav">
-      <a href='/telegram'>Telegram</a>
-      <a href='/vkontakte'>Vkontakte</a>
-      <a href='#section'>Add more...</a>
+      <Link href='/telegram'>Telegram</Link>
+      <Link href='/vkontakte'>Vkontakte</Link>
+      <Link href='#section'>Add more...</Link>
     </div>
   );
 };

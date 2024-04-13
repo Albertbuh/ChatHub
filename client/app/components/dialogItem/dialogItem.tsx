@@ -1,14 +1,13 @@
-'use client';
 import Image from "next/image";
 import Timestamp from "../timestamp/timestamp";
-import "./dialogContainer.css";
+import "./dialogItem.css";
 import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
 
 interface ContainerProps {
     dialogInfo: IDialogInfo;
 }
 
-export default function DialogContainer({dialogInfo}: ContainerProps) {
+export default function DialogItem({dialogInfo}: ContainerProps) {
     return (
         <section className="peer-container">
             <Image

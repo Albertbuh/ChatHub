@@ -1,8 +1,8 @@
 import { IMessageInfo } from "@/app/models/dto/IMessageInfo";
 import Timestamp from "../timestamp/timestamp";
-import "./message.css";
+import "./messageItem.css";
 
-export default function Message(props: IMessageInfo) {
+export default function MessageItem(props: IMessageInfo) {
     return (
         <div className="message">
             <p style={{fontWeight:"bold"}}>{props.sender?.username}</p>
