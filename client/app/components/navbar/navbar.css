@@ -1,6 +1,5 @@
 .sidenav {
   height: 100%;
-  width: 0;
   position: fixed;
   z-index: 1;
   top: 0;
@@ -9,7 +8,7 @@
   overflow-x: hidden;
   transition: 0.5s;
   padding-top: 20px;
-  width: var(--navbar-width)
+  width: var(--navbar-width);
 }
 
 .sidenav a {
