@@ -8,10 +8,14 @@ public class WClientTLService : ITLService
 {
     readonly WTelegram.Client _client = null!;
     readonly WTelegram.UpdateManager _manager = null!;
-    
+
     User _user => _client.User;
     Messages_Dialogs? _dialogs;
 
+    private IPeerInfo User(long id) => _manager.Users[id];
+    private IPeerInfo Chat(long id) => _manager.Chats[id];
+    private IPeerInfo Peer(Peer? peer) => _manager.UserOrChat(peer);
+    
     bool IsLoggedIn => _client.User != null;
 
     readonly ILogger<WClientTLService> _logger;
@@ -86,15 +90,15 @@ public class WClientTLService : ITLService
         if (!IsLoggedIn)
             return new TLResponse(StatusCodes.Status401Unauthorized, "Undefiend user");
         if (_dialogs == null)
-            _dialogs = await _client.Messages_GetAllDialogs();
+            _dialogs = await UpdateDialogs();
 
         var response = new TLResponse();
         var peer = GetPeerFromDialogs(_dialogs, peerId);
 
         if (peer != null)
         {
-            if (peer is InputPeer inputPeer)
-                response.Data = await GetMessagesFromPeer(inputPeer, offset, limit);
+            if (peer is User user)
+                response.Data = await GetMessagesFromPeer(user, offset, limit);
             else if (peer is ChatBase channel)
                 response.Data = await GetMessagesFromPeer(channel, offset, limit);
             else
@@ -109,14 +113,10 @@ public class WClientTLService : ITLService
         var messages = await _client.Messages_GetHistory(peer, add_offset: offset, limit: limit);
         foreach (var msgBase in messages.Messages)
         {
+            messages.CollectUsersChats(_manager.Users, _manager.Chats);
             result.Add(CreateMessageDTO(msgBase));
         }
         return result;
-    }
-
-    private IPeerInfo? GetPeerFromMessage(Messages_MessagesBase collection, MessageBase message)
-    {
-        return collection.UserOrChat(message.From ?? message.Peer);
     }
 
     private IPeerInfo? GetPeerFromDialogs(Messages_Dialogs dialogs, long peerId)
@@ -134,7 +134,7 @@ public class WClientTLService : ITLService
         if (!IsLoggedIn)
             return new TLResponse(StatusCodes.Status401Unauthorized, "Undefiend user");
         if (_dialogs == null)
-            _dialogs = await _client.Messages_GetAllDialogs();
+            _dialogs = await UpdateDialogs();
 
         var result = new TLResponse(StatusCodes.Status200OK, "Get dialogs");
         var list = new List<DialogDTO>();
@@ -149,12 +149,12 @@ public class WClientTLService : ITLService
         return result;
     }
 
-    private PeerDTO CreatePeerDTO(IPeerInfo? peer) =>
+    private PeerDTO? CreatePeerDTO(IPeerInfo? peer) =>
         peer switch
         {
             User u => _mapper.Map<PeerDTO>(u),
             ChatBase cb => _mapper.Map<PeerDTO>(cb),
-            _ => throw new InvalidCastException("Cant find peer class")
+            _ => null //throw new InvalidCastException($"Cant find peer type: {peer?.GetType()}")
         };
 
     private long GetPhotoIdByPeer(IPeerInfo info)
@@ -186,20 +186,19 @@ public class WClientTLService : ITLService
                 result = _mapper.Map<MessageDTO>(ms);
                 break;
             default:
-                throw new InvalidCastException("Cant find message class");
+                throw new InvalidCastException($"Cant find message type: {message.GetType()}");
         }
-        ;
-        result.Sender = CreatePeerDTO(_dialogs!.UserOrChat(message?.From ?? message?.Peer));
+        result.Sender = CreatePeerDTO(Peer(message?.From ?? message?.Peer));
         return result;
     }
 
     private async Task<DialogDTO> CreateDialogDTO(Dialog dialog)
     {
         if (_dialogs == null)
-            _dialogs = await _client.Messages_GetAllDialogs();
+            _dialogs = await UpdateDialogs();
 
         DialogDTO result = new();
-        switch (_dialogs.UserOrChat(dialog))
+        switch (Peer(dialog.Peer))
         {
             case User user when user.IsActive:
                 result = _mapper.Map<DialogDTO>(user);
@@ -221,7 +220,7 @@ public class WClientTLService : ITLService
         if (!IsLoggedIn)
             return new TLResponse(StatusCodes.Status401Unauthorized, "Undefiend user");
         if (_dialogs == null)
-            _dialogs = await _client.Messages_GetAllDialogs();
+            _dialogs = await UpdateDialogs();
 
         var response = new TLResponse($"undefiend {peerId}");
         IPeerInfo? peer = GetPeerFromDialogs(_dialogs, peerId);
@@ -241,6 +240,7 @@ public class WClientTLService : ITLService
         }
         return response;
     }
+
     private async Task OnUpdate(Update update)
     {
         switch (update)
@@ -257,11 +257,18 @@ public class WClientTLService : ITLService
             case UpdateUserStatus uus:
             case UpdateUserName uun:
             case UpdateUser uu:
-                _dialogs = await _client.Messages_GetAllDialogs();
-                _logger.LogInformation($"New message in runtime");
+                await UpdateDialogs();
                 break;
             default:
                 break; // there are much more update types than the above example cases
         }
     }
+
+    private async Task<TL.Messages_Dialogs> UpdateDialogs()
+    {
+        _dialogs = await _client.Messages_GetAllDialogs();
+        _dialogs.CollectUsersChats(_manager.Users, _manager.Chats);
+        return _dialogs;
+    }
+
 }
