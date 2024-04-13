@@ -1,26 +1,15 @@
+"use server";
+import { useCallback } from "react";
+import MessageList from "../components/messageList/messageList";
 import MessengerContainer from "../components/messengerContainer/messengerContainer";
-import { IDialogInfo } from "../models/dto/IDialogInfo";
+import { IMessageInfo } from "../models/dto/IMessageInfo";
+import { GetDialogs } from "../lib/getRequests";
 
 export default async function Home() {
     let dialogs = await GetDialogs();
     return (
-        <MessengerContainer dialogs={dialogs}/>
+        <section>
+            <MessengerContainer dialogs={dialogs} />
+        </section>
     );
-}
-
-async function GetDialogs(): Promise<IDialogInfo[]> {
-  let dialogs = [];
-  try {
-    console.log("start fetch");
-    const res = await fetch("http://localhost:5041/api/v1.0/telegram/dialogs");
-    if (!res.ok) {
-      throw new Error("Unable to get telegram dialogs data");
-    }
-    dialogs = await res.json();
-    console.log(dialogs);
-  } catch (error) {
-    console.log(error);
-  } finally {
-    return dialogs;
-  }
 }

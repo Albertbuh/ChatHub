@@ -23,7 +23,7 @@ export default function DialogContainer({dialogInfo}: ContainerProps) {
                     <p className="truncate" style={{ fontWeight: "bold", width: "70%" }}>
                         {dialogInfo.title}
                     </p>
-                    <Timestamp time={dialogInfo.topMessage.date}/>
+                    <Timestamp time={dialogInfo.topMessage.date} className=""/>
                 </div>
                 <div className="body truncate">
                     {dialogInfo.topMessage.sender?.username != dialogInfo.mainUsername &&
