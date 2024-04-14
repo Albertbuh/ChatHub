@@ -1,21 +1,25 @@
 "use client";
 
+import { AuthStageContext } from '../../contexts/AuthContext';
 import '../authorization.css';
+import { navigate } from '../login/actions';
 import VerificationForm from './VerificationForm/VerificationForm';
-import { useState } from 'react';
 
-
+import { useContext } from 'react';
 
 export default function VerificationPage() {
-  const [heading, setHeading] = useState('Verification TEST');
+  const { setAuthStage } = useContext(AuthStageContext);
+
     
   const handleVerificationSuccess = () => {
-    setHeading('Success');
+    console.log('Verification success');
+    console.log('New auth stage:', 'password');
+    setAuthStage('password');
+    navigate('/telegram/authorization/password');
   };
 
     return (
       <div >
-        <h1>{heading}</h1>
         <VerificationForm onVerificationSuccess={handleVerificationSuccess} />
       </div>
     );

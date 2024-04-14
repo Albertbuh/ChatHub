@@ -11,10 +11,11 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
+
         try {
             const response = await fetch(`http://localhost:5041/api/v1.0/telegram/login?info=${phoneNumber}`, {
                 method: "POST",
-                headers: {
+                headers: {  
                     "Content-Type": "application/json",
                 },
             });
@@ -25,8 +26,13 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
 
             const data = await response.json();
 
-            // Вызов функции обратного вызова
-            onLoginSuccess();
+            if (data.statusCode === 200 && data.message === "Send verification code") {
+                // Вызов функции обратного вызова
+                onLoginSuccess();
+            } else {
+                console.log("Unexpected response from server:", data);
+            }
+            
         } catch (error) {
             console.log(error);
         }

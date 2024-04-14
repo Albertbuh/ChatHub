@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 
 import { Bs123 } from "react-icons/bs";
+import { navigate } from '../../login/actions';
 
 interface VerificationFormProps {
     onVerificationSuccess: () => void;
@@ -28,8 +29,14 @@ const VerificationForm = ({ onVerificationSuccess }: VerificationFormProps) => {
 
             const data = await response.json();
 
-            // Вызов функции обратного вызова
-            onVerificationSuccess();
+
+            if (data.statusCode === 200 && data.message === "Enter your password") {
+                // Вызов функции обратного вызова
+                onVerificationSuccess();
+            } else {
+                console.log("Password not required", data);
+                navigate('/telegram');
+            }
         } catch (error) {
             console.log(error);
         }

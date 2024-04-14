@@ -3,6 +3,7 @@ import { IDialogInfo } from "../models/dto/IDialogInfo";
 
 export default async function Home() {
     let dialogs = await GetDialogs();
+    console.log(dialogs);
     return (
         <MessengerContainer dialogs={dialogs}/>
     );
