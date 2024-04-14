@@ -43,9 +43,6 @@ public static class TelegramApi
     private static async Task<IResult> GetDialogs(ITLService telegramService)
     {
         var result = await telegramService.GetAllDialogs();
-        if (result.Data is List<DialogDTO> dialogs)
-            return TypedResults.Ok(dialogs);
-        else
             return TypedResults.Json(result);
     }
 }
