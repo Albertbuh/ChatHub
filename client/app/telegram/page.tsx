@@ -1,11 +1,10 @@
-import MessengerContainer from "../components/messengerContainer/messengerContainer";
 import { IDialogInfo } from "../models/dto/IDialogInfo";
 
 export default async function Home() {
     let dialogs = await GetDialogs();
     console.log(dialogs);
     return (
-        <MessengerContainer dialogs={dialogs}/>
+        <h1>Dialogs</h1>
     );
 }
 

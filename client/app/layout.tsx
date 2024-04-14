@@ -23,11 +23,6 @@ export default function RootLayout({ children, }: RootLayoutProps) {
           {children}
         </AuthStageProvider>
 
-
-        {/* <AuthProvider>
-          <SideNav />
-        </AuthProvider>
-        {children} */}
       </body>
     </html>
   );
