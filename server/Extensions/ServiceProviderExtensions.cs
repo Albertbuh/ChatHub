@@ -7,7 +7,7 @@ public static class ServiceProviderExtensions
 {
     public static void AddVkApiService(
         this IServiceCollection services,
-        ulong appId = 51893810
+        ulong appId = 0
         )
     {
 
@@ -27,8 +27,8 @@ public static class ServiceProviderExtensions
 
     public static void AddTelegramApiService(
         this IServiceCollection services,
-        int apiId = 26480952,
-        string apiHash = "9187299c98d618a467686d98606c7328"
+        int apiId = 0,
+        string apiHash = ""
     )
     {
         if (apiId == 0)
