@@ -13,9 +13,11 @@ public class WClientTLService : ITLService
     Messages_Dialogs? _dialogs;
 
     private IPeerInfo User(long id) => _manager.Users[id];
+
     private IPeerInfo Chat(long id) => _manager.Chats[id];
+
     private IPeerInfo Peer(Peer? peer) => _manager.UserOrChat(peer);
-    
+
     bool IsLoggedIn => _client.User != null;
 
     readonly ILogger<WClientTLService> _logger;
@@ -157,21 +159,37 @@ public class WClientTLService : ITLService
             _ => null //throw new InvalidCastException($"Cant find peer type: {peer?.GetType()}")
         };
 
-    private long GetPhotoIdByPeer(IPeerInfo info)
+    private string GetStringRepresentationOfPeerType(IPeerInfo? peer) =>
+        peer is not null ? peer.GetType().ToString() : "null";
+
+    int loadedAmount = 0;
+    const string imageDir = @"./images/profileImages";
+
+    private async Task LoadProfilePicture(IPeerInfo peer)
     {
-        long id = 0;
-        switch (info)
+        if (loadedAmount > 20)
+            return;
+        if (!Directory.Exists(imageDir))
         {
-            case User u:
-                if (u.photo is UserProfilePhoto userPhoto)
-                    id = userPhoto.photo_id;
-                break;
-            case ChatBase chat:
-                if (chat.Photo is ChatPhoto chatPhoto)
-                    id = chatPhoto.photo_id;
-                break;
+            lock (new object())
+                Directory.CreateDirectory(imageDir);
         }
-        return id;
+
+        string name = peer.MainUsername != null ? peer.MainUsername : $"{peer.ID}";
+        var filename = Path.Combine(imageDir, $"{name}_ProfilePhoto.jpg");
+        _logger.LogInformation("Downloading " + filename);
+        using var fileStream = File.Create(filename);
+        var type = await _client.DownloadProfilePhotoAsync(peer, fileStream);
+        fileStream.Close();
+        _logger.LogInformation("Download finished");
+        if (type is not Storage_FileType.unknown and not Storage_FileType.partial)
+            File.Move(
+                filename,
+                $"{Path.Combine(imageDir, Path.GetFileNameWithoutExtension(filename))}.{type}",
+                true
+            );
+
+        Interlocked.Increment(ref loadedAmount);
     }
 
     private MessageDTO CreateMessageDTO(MessageBase message)
@@ -202,6 +220,7 @@ public class WClientTLService : ITLService
         {
             case User user when user.IsActive:
                 result = _mapper.Map<DialogDTO>(user);
+                await LoadProfilePicture(user);
                 break;
             case ChatBase chat when chat.IsActive:
                 result = _mapper.Map<DialogDTO>(chat);
@@ -270,5 +289,4 @@ public class WClientTLService : ITLService
         _dialogs.CollectUsersChats(_manager.Users, _manager.Chats);
         return _dialogs;
     }
-
 }
