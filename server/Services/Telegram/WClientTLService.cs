@@ -70,6 +70,7 @@ public class WClientTLService : ITLService
             else
                 result.Message = $"User {_user} (id {_user.id}) is already logged-in";
         }
+
         catch (RpcException e)
         {
             result.StatusCode = e.Code;
