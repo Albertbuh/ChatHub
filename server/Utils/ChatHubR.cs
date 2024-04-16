@@ -20,5 +20,10 @@ namespace server.HubR
         {
             await chatHub.Clients.All.SendAsync("updateDialogsTL", dialogs);
         }
+
+        public static async Task UpdateMessagesTL(IHubContext<ChatHubR> chatHub, Object? messages)
+        {
+            await chatHub.Clients.All.SendAsync("updateMessagesTL", messages);
+        }
     }
 }

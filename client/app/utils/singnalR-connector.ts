@@ -1,4 +1,3 @@
-'use-client'
 import * as signalR from "@microsoft/signalr";
 import { IDialogInfo } from "../models/dto/IDialogInfo";
 const URL = process.env.HUB_ADDRESS ?? "http://localhost:5041/chat"; //or whatever your backend port is
@@ -14,12 +13,14 @@ class Connector {
         this.connection.start();
         this.registerEventHandlers();
     }
-    public setOnDialogsUpdateCallback(callback: (dialogs: IDialogInfo[]) => void) {
+    public setOnDialogsUpdateCallback(callback: (dialogs:  IDialogInfo[]) => void) {
         this.onDialogsUpdateCallback = callback;
       }
     
       private registerEventHandlers() {
-        this.connection.on("updateDialogsTL", (dialogs: IDialogInfo[]) => {
+        this.connection.on("updateDialogsTL", (dialogs:  IDialogInfo[]) => {
+          console.log(`${JSON.stringify(dialogs, null, 2)}`);
+
           if (this.onDialogsUpdateCallback) {
             this.onDialogsUpdateCallback(dialogs);
           }

@@ -10,6 +10,7 @@ interface MessengerInfo {
 
 export default function MessengerContainer(props: MessengerInfo) {
     let dialogs = props.dialogs;
+    
     const [currentId, setCurrentId] = useState(dialogs[0].id);
 
     return (

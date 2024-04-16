@@ -11,6 +11,7 @@ public class WClientTLService : ITLService
     readonly WTelegram.Client _client = null!;
     readonly WTelegram.UpdateManager _manager = null!;
 
+    long lastDialogId = 0;
     User _user => _client.User;
     Messages_Dialogs? _dialogs;
 
@@ -18,7 +19,7 @@ public class WClientTLService : ITLService
     private IPeerInfo Chat(long id) => _manager.Chats[id];
     private IPeerInfo Peer(Peer? peer) => _manager.UserOrChat(peer);
     readonly IHubContext<ChatHubR> _chatHub;
-    bool IsLoggedIn =>_client.User != null;
+    bool IsLoggedIn => _client.User != null;
 
     readonly ILogger<WClientTLService> _logger;
     readonly IMapper _mapper;
@@ -31,6 +32,7 @@ public class WClientTLService : ITLService
         string api_hash
     )
     {
+
         _client = new WTelegram.Client(api_id, api_hash);
         _manager = _client.WithUpdateManager(OnUpdate);
         WTelegram.Helpers.Log = (lvl, msg) => logger.Log((LogLevel)lvl, msg);
@@ -42,6 +44,8 @@ public class WClientTLService : ITLService
         if (!String.IsNullOrEmpty(phone))
             Task.WaitAll(Task.Run(async () => await Login(phone)));
     }
+
+
 
     public async Task<TLResponse> Login(string loginInfo)
     {
@@ -92,6 +96,7 @@ public class WClientTLService : ITLService
     {
         if (!IsLoggedIn)
             return new TLResponse(StatusCodes.Status401Unauthorized, "Undefiend user");
+        if (_dialogs == null)
             _dialogs = await UpdateDialogs();
 
         var response = new TLResponse();
@@ -135,6 +140,7 @@ public class WClientTLService : ITLService
     {
         if (!IsLoggedIn)
             return new TLResponse(StatusCodes.Status401Unauthorized, "Undefiend user");
+        if (_dialogs == null)
             _dialogs = await UpdateDialogs();
 
         var result = new TLResponse(StatusCodes.Status200OK, "Get dialogs");
@@ -145,7 +151,7 @@ public class WClientTLService : ITLService
             if (dto.Id > 0)
                 list.Add(dto);
         }
-
+        lastDialogId = list[0].Id;
         result.Data = list;
         return result;
     }
@@ -247,8 +253,14 @@ public class WClientTLService : ITLService
         switch (update)
         {
             case UpdateNewMessage unm:
+                //if (unm.message.Peer.ID == lastDialogId)
+                //    await SendUpdatedMessages();
+                //else
+                //    await SendUpdatedDialogs();
+
+                //break;
             case UpdateEditMessage uem:
-            // Note: UpdateNewChannelMessage and UpdateEditChannelMessage are also handled by above cases
+
             case UpdateDeleteChannelMessages udcm:
             case UpdateDeleteMessages udm:
             case UpdateUserTyping uut:
@@ -258,7 +270,7 @@ public class WClientTLService : ITLService
             case UpdateUserStatus uus:
             case UpdateUserName uun:
             case UpdateUser uu:
-
+                await UpdateDialogs();
                 await SendUpdatedDialogs();
                 break;
             default:
@@ -266,10 +278,17 @@ public class WClientTLService : ITLService
         }
     }
 
+    private async Task SendUpdatedMessages()
+    {
+        var messages = await GetMessages(lastDialogId, 0, 100);
+        await ChatHubR.UpdateMessagesTL(_chatHub, messages);
+        _logger.Log(LogLevel.Information, "Updated messages were sended");
+    }
+
     private async Task SendUpdatedDialogs()
     {
         var dialogs = await GetAllDialogs();
-        await ChatHubR.UpdateDialogsTL(_chatHub,dialogs.Data);
+        await ChatHubR.UpdateDialogsTL(_chatHub, dialogs.Data);
         _logger.Log(LogLevel.Information, "Updated dialogs were sended");
 
     }

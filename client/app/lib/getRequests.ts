@@ -23,7 +23,10 @@ export async function GetMessages(dialogId: number, offset: number, limit: numbe
 export async function GetDialogs(): Promise<IDialogInfo[]> {
     let dialogs = [];
     try {
-        const res = await fetch("http://localhost:5041/api/v1.0/telegram/dialogs");
+        const res = await fetch("http://localhost:5041/api/v1.0/telegram/dialogs",{headers: {
+            'Cache-Control': 'no-cache'
+          }});
+          console.log(res);
         if (!res.ok) {
             throw new Error("Unable to get telegram dialogs data");
         }
