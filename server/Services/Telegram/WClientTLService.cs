@@ -120,8 +120,53 @@ public class WClientTLService : ITLService
         {
             messages.CollectUsersChats(_manager.Users, _manager.Chats);
             result.Add(CreateMessageDTO(msgBase));
+            if (msgBase is Message m && m.media != null)
+                await LoadMessageMedia(m, peer);
         }
         return result;
+    }
+
+    private async Task LoadMessageMedia(Message message, InputPeer peer)
+    {
+        if (message.media is null)
+            return;
+
+        string profilePictureDirectoryPath = Path.Combine(mainImageDirectory, peer.ID.ToString());
+        if (!Directory.Exists(profilePictureDirectoryPath))
+        {
+            lock (new object())
+                Directory.CreateDirectory(profilePictureDirectoryPath);
+        }
+
+        string filename = $"{message.ID}";
+        if (!IsFileExists(profilePictureDirectoryPath, filename))
+        {
+            if (message.media is MessageMediaDocument { document: Document document })
+            {
+                filename = $"{filename}.{document.mime_type[(document.mime_type.IndexOf('/') + 1)..]}";
+                var filepath = Path.Combine(profilePictureDirectoryPath, filename);
+                using var fileStream = File.Create(filepath);
+                await _client.DownloadFileAsync(document, fileStream);
+            }
+            else if (message.media is MessageMediaPhoto { photo: Photo photo })
+            {
+                filename = $"{message.ID}.jpg";
+                var filepath = Path.Combine(profilePictureDirectoryPath, filename);
+                using var fileStream = File.Create(filepath);
+                var type = await _client.DownloadFileAsync(photo, fileStream);
+                fileStream.Close();
+
+                if (type != 0u && type is not Storage_FileType.unknown and not Storage_FileType.partial)
+                    File.Move(
+                        filepath,
+                        $"{Path.Combine(profilePictureDirectoryPath, Path.GetFileNameWithoutExtension(filename))}.{type}",
+                        true
+                    );
+            }
+            _logger.LogInformation($"Media for {message.ID} has been loaded");
+        }
+        else
+            _logger.LogInformation($"Media {message.ID} already loaded");
     }
 
     private IPeerInfo? GetPeerFromDialogs(Messages_Dialogs dialogs, long peerId)
@@ -158,17 +203,21 @@ public class WClientTLService : ITLService
         {
             User u => _mapper.Map<PeerDTO>(u),
             ChatBase cb => _mapper.Map<PeerDTO>(cb),
-            _ => throw new InvalidCastException($"Cant find peer type: {GetStringRepresentationOfPeerType(peer)}")
+            _
+                => throw new InvalidCastException(
+                    $"Cant find peer type: {GetStringRepresentationOfPeerType(peer)}"
+                )
         };
 
     private string GetStringRepresentationOfPeerType(IPeerInfo? peer) =>
         peer is not null ? peer.GetType().ToString() : "null";
 
-    private bool IsFileExists(string directory, string filename) {
-        var files = Directory.GetFiles(directory,filename + ".*");
+    private bool IsFileExists(string directory, string filename)
+    {
+        var files = Directory.GetFiles(directory, filename + ".*");
         return files.Length > 0;
     }
-    
+
     private async Task LoadProfilePicture(IPeerInfo peer)
     {
         string profilePictureDirectoryPath = Path.Combine(mainImageDirectory, peer.ID.ToString());
@@ -177,20 +226,20 @@ public class WClientTLService : ITLService
             lock (new object())
                 Directory.CreateDirectory(profilePictureDirectoryPath);
         }
-        const string filename = "profile";
-        if(!IsFileExists(profilePictureDirectoryPath, filename))
+        const string filename = "profile.jpg";
+        const string filenameWithoutExtension = "profile";
+        if (!IsFileExists(profilePictureDirectoryPath, filenameWithoutExtension))
         {
             var filepath = Path.Combine(profilePictureDirectoryPath, filename);
             using var fileStream = File.Create(filepath);
             var type = await _client.DownloadProfilePhotoAsync(peer, fileStream);
             fileStream.Close();
-            _logger.LogInformation($"Load profile photo of {filepath}");
 
             if (type != 0u && type is not Storage_FileType.unknown and not Storage_FileType.partial)
             {
                 File.Move(
                     filepath,
-                    $"{filepath}.{type}",
+                    $"{Path.Combine(profilePictureDirectoryPath, filenameWithoutExtension)}.{type}",
                     true
                 );
             }
