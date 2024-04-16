@@ -2,7 +2,6 @@ import './globals.css';
 
 export default function Home() {
   return (
-    // <h1 className="flex items-center justify-center h-screen"> Beginning </h1>
-    <div className='container'>Dialogs</div>
+    <h1 className="flex items-center justify-center h-screen"> Beginning </h1>
   );
 }

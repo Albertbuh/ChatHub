@@ -29,8 +29,8 @@ export default function RootLayout({ children, }: RootLayoutProps) {
         <AuthStageProvider>
           <SideNav>
           </SideNav>
-          <RealTimeChat />
-          {/* {children} */}
+          {/* <RealTimeChat /> */}
+          {children}
         </AuthStageProvider>
 
       </body>

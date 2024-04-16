@@ -8,6 +8,7 @@ import styles from './navbar.module.css';
 import { AiOutlineMenu, AiOutlineHome } from "react-icons/ai";
 import { SlSocialVkontakte } from "react-icons/sl";
 import { LiaTelegram } from "react-icons/lia";
+import { BsChatSquareHeart } from "react-icons/bs";
 import { AuthStageContext } from '@/app/telegram/contexts/AuthContext';
 
 // TODO: Time dependent drop-down
@@ -113,7 +114,13 @@ export default function SideNav() {
                         <SlSocialVkontakte className={styles.listItemIcon} />
                         <span className={styles.linkName}>VK Verification</span>
                     </Link>
+                </li>
 
+                <li className={`${styles.listItem} ${getActiveClass('/realTimeChat')}`}>
+                    <Link href="/realTimeChat">
+                        <BsChatSquareHeart className={styles.listItemIcon} />
+                        <span className={styles.linkName}> Real Time Chat</span>
+                    </Link>
                 </li>
             </ul>
         </nav>
