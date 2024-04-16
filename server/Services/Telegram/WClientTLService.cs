@@ -19,6 +19,10 @@ public class WClientTLService : ITLService
     private IPeerInfo Peer(Peer? peer) => _manager.UserOrChat(peer);
 
     bool IsLoggedIn => _client.User != null;
+    string mainImageDirectory =>
+        IsLoggedIn
+            ? @$"../client/app/telegram/assets/userAssets/{_client.User.MainUsername}"
+            : @"./images/";
 
     readonly ILogger<WClientTLService> _logger;
     readonly IMapper _mapper;
@@ -63,14 +67,12 @@ public class WClientTLService : ITLService
                 if (_user != null)
                 {
                     result.Message = $"User {_user} (id {_user.id}) is successfully logged-in";
-                    _dialogs = await _client.Messages_GetAllDialogs();
-                    _dialogs.CollectUsersChats(_manager.Users, _manager.Chats);
+                    await UpdateDialogs();
                 }
             }
             else
                 result.Message = $"User {_user} (id {_user.id}) is already logged-in";
         }
-
         catch (RpcException e)
         {
             result.StatusCode = e.Code;
@@ -144,8 +146,7 @@ public class WClientTLService : ITLService
         foreach (Dialog dialog in _dialogs.dialogs)
         {
             var dto = await CreateDialogDTO(dialog);
-            if (dto.Id > 0)
-                list.Add(dto);
+            list.Add(dto);
         }
 
         result.Data = list;
@@ -157,40 +158,45 @@ public class WClientTLService : ITLService
         {
             User u => _mapper.Map<PeerDTO>(u),
             ChatBase cb => _mapper.Map<PeerDTO>(cb),
-            _ => null //throw new InvalidCastException($"Cant find peer type: {peer?.GetType()}")
+            _ => throw new InvalidCastException($"Cant find peer type: {GetStringRepresentationOfPeerType(peer)}")
         };
 
     private string GetStringRepresentationOfPeerType(IPeerInfo? peer) =>
         peer is not null ? peer.GetType().ToString() : "null";
 
-    int loadedAmount = 0;
-    const string imageDir = @"./images/profileImages";
-
+    private bool IsFileExists(string directory, string filename) {
+        var files = Directory.GetFiles(directory,filename + ".*");
+        return files.Length > 0;
+    }
+    
     private async Task LoadProfilePicture(IPeerInfo peer)
     {
-        if (loadedAmount > 20)
-            return;
-        if (!Directory.Exists(imageDir))
+        string profilePictureDirectoryPath = Path.Combine(mainImageDirectory, peer.ID.ToString());
+        if (!Directory.Exists(profilePictureDirectoryPath))
         {
             lock (new object())
-                Directory.CreateDirectory(imageDir);
+                Directory.CreateDirectory(profilePictureDirectoryPath);
         }
+        const string filename = "profile";
+        if(!IsFileExists(profilePictureDirectoryPath, filename))
+        {
+            var filepath = Path.Combine(profilePictureDirectoryPath, filename);
+            using var fileStream = File.Create(filepath);
+            var type = await _client.DownloadProfilePhotoAsync(peer, fileStream);
+            fileStream.Close();
+            _logger.LogInformation($"Load profile photo of {filepath}");
 
-        string name = peer.MainUsername != null ? peer.MainUsername : $"{peer.ID}";
-        var filename = Path.Combine(imageDir, $"{name}_ProfilePhoto.jpg");
-        _logger.LogInformation("Downloading " + filename);
-        using var fileStream = File.Create(filename);
-        var type = await _client.DownloadProfilePhotoAsync(peer, fileStream);
-        fileStream.Close();
-        _logger.LogInformation("Download finished");
-        if (type is not Storage_FileType.unknown and not Storage_FileType.partial)
-            File.Move(
-                filename,
-                $"{Path.Combine(imageDir, Path.GetFileNameWithoutExtension(filename))}.{type}",
-                true
-            );
-
-        Interlocked.Increment(ref loadedAmount);
+            if (type != 0u && type is not Storage_FileType.unknown and not Storage_FileType.partial)
+            {
+                File.Move(
+                    filepath,
+                    $"{filepath}.{type}",
+                    true
+                );
+            }
+        }
+        else
+            _logger.LogInformation("Profile photo already loaded");
     }
 
     private MessageDTO CreateMessageDTO(MessageBase message)
@@ -221,16 +227,20 @@ public class WClientTLService : ITLService
         {
             case User user when user.IsActive:
                 result = _mapper.Map<DialogDTO>(user);
-                await LoadProfilePicture(user);
                 break;
             case ChatBase chat when chat.IsActive:
                 result = _mapper.Map<DialogDTO>(chat);
                 break;
         }
-        var topMessage = _dialogs
-            .Messages
-            .First(m => m.Peer.ID == dialog.peer.ID && m.ID == dialog.TopMessage);
-        result.TopMessage = CreateMessageDTO(topMessage);
+        if (result.Id > 0)
+        {
+            var t = Task.Run(() => LoadProfilePicture(Peer(dialog.Peer)));
+            var topMessage = _dialogs
+                .Messages
+                .First(m => m.Peer.ID == dialog.peer.ID && m.ID == dialog.TopMessage);
+            result.TopMessage = CreateMessageDTO(topMessage);
+            Task.WaitAll(t);
+        }
 
         return result;
     }
