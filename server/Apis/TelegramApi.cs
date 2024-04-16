@@ -44,7 +44,7 @@ public static class TelegramApi
     {
         var result = await telegramService.GetAllDialogs();
         if (result.Data is List<DialogDTO> dialogs)
-            return TypedResults.Ok(dialogs);
+            return TypedResults.Ok(result);
         else
             return TypedResults.Json(result);
     }
