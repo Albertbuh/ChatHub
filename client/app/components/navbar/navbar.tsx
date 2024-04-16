@@ -12,6 +12,11 @@ import { AuthStageContext } from '@/app/telegram/contexts/AuthContext';
 
 // TODO: Time dependent drop-down
 export default function SideNav() {
+    let container = null;
+    if (typeof window !== 'undefined') {
+        container = document.getElementById('container');
+      }
+    let telegramIsLogged = false;
     const { authStage } = useContext(AuthStageContext);
     // console.log('Auth stage in SideNav:', authStage);
 
@@ -24,6 +29,11 @@ export default function SideNav() {
 
         const handleClick = () => {
             setSidebarActive(!sidebarActive);
+            if (sidebarActive === false && container) {
+                container.style.marginLeft = '10%';
+              } else if (container) {
+                container.style.marginLeft = '0';
+              }
         };
 
         if (toggleBtn) {
@@ -38,6 +48,7 @@ export default function SideNav() {
     }, [sidebarActive]);
 
     const getActiveClass = (path: string) => {
+        authStage === 'telegramLogged' ? telegramIsLogged : true;
         return pathname === path ? styles.listItemActive : '';
     };
 
