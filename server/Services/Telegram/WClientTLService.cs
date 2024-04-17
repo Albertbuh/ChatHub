@@ -253,14 +253,7 @@ public class WClientTLService : ITLService
         switch (update)
         {
             case UpdateNewMessage unm:
-                //if (unm.message.Peer.ID == lastDialogId)
-                //    await SendUpdatedMessages();
-                //else
-                //    await SendUpdatedDialogs();
-
-                //break;
             case UpdateEditMessage uem:
-
             case UpdateDeleteChannelMessages udcm:
             case UpdateDeleteMessages udm:
             case UpdateUserTyping uut:
@@ -270,8 +263,9 @@ public class WClientTLService : ITLService
             case UpdateUserStatus uus:
             case UpdateUserName uun:
             case UpdateUser uu:
-                await UpdateDialogs();
-                await SendUpdatedDialogs();
+                    await SendUpdatedMessages();
+                    await UpdateDialogs();
+                    await SendUpdatedDialogs();
                 break;
             default:
                 break; // there are much more update types than the above example cases
@@ -280,8 +274,8 @@ public class WClientTLService : ITLService
 
     private async Task SendUpdatedMessages()
     {
-        var messages = await GetMessages(lastDialogId, 0, 100);
-        await ChatHubR.UpdateMessagesTL(_chatHub, messages);
+        var messages = await GetMessages(lastDialogId, 0, 20);
+        await ChatHubR.UpdateMessagesTL(_chatHub, messages.Data);
         _logger.Log(LogLevel.Information, "Updated messages were sended");
     }
 

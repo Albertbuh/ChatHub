@@ -7,6 +7,7 @@ import { GetDialogs } from "../lib/getRequests";
 import Connector from "../utils/singnalR-connector"
 import { IDialogInfo } from "../models/dto/IDialogInfo";
 import DialogContainer from "../components/dialogContainer/dialogContainer";
+import MessengerBase from "./messenger/messengerBase";
 // import DialogUpdateContainer from "../page"
 
 const MyComponent = () => {
@@ -14,7 +15,7 @@ const MyComponent = () => {
 };
 
 export default function Home() {
-  const [dialogUpdate, setDialogUpdate] = useState<IDialogInfo[]>([]);
+  const [dialogsUpdate, setDialogUpdate] = useState<IDialogInfo[]>([]);
 
   useEffect(() => {
     const handleDialogsUpdate = (dialogs: IDialogInfo[]) => {
@@ -31,21 +32,14 @@ export default function Home() {
 
     fetchData();
     const connectorInstance = Connector();
-    connectorInstance.setOnDialogsUpdateCallback(handleDialogsUpdate);
+    connectorInstance.setOnDialogsTLUpdateCallback(handleDialogsUpdate);
   }, []);
- 
+  if (dialogsUpdate.length > 0)
+    {
+  console.log(dialogsUpdate);
+  
   return (
-    <Suspense fallback={<p>load dialogs...</p>}>
-                <ul style={{ paddingLeft: 0 }}>
-                    {dialogUpdate.map((dialog) => (
-                        <li key={dialog.id} onClick={() => {
-                            alert(dialog.id);
-                            // setCurrentId(dialog.id);
-                        }}>
-                            <DialogContainer dialogInfo={dialog} />
-                        </li>
-                    ))}
-                </ul>
-      </Suspense>
+    <MessengerBase dialogs={dialogsUpdate}/>
   );
+}
 };
