@@ -12,9 +12,9 @@ public class WClientTLService : ITLService
     User _user => _client.User;
     Messages_Dialogs? _dialogs;
 
-    private IPeerInfo User(long id) => _manager.Users[id];
+    private IPeerInfo? User(long id) => _manager.Users.ContainsKey(id) ? _manager.Users[id] : null;
 
-    private IPeerInfo Chat(long id) => _manager.Chats[id];
+    private IPeerInfo? Chat(long id) => _manager.Users.ContainsKey(id) ? _manager.Chats[id] : null;
 
     private IPeerInfo Peer(Peer? peer) => _manager.UserOrChat(peer);
 
@@ -97,8 +97,8 @@ public class WClientTLService : ITLService
         if (_dialogs == null)
             _dialogs = await UpdateDialogs();
 
-        var response = new TLResponse();
-        var peer = GetPeerFromDialogs(_dialogs, peerId);
+        var response = new TLResponse(400, $"Undefiend user {peerId}");
+        var peer = GetPeerById(peerId);
 
         if (peer != null)
         {
@@ -108,6 +108,8 @@ public class WClientTLService : ITLService
                 response.Data = await GetMessagesFromPeer(channel, offset, limit);
             else
                 _logger.LogWarning($"Unsupported peer type: {peer.GetType().Name}");
+            response.Message = $"Get messages from dialog {peerId}";
+            response.StatusCode = StatusCodes.Status200OK;
         }
         return response;
     }
@@ -169,14 +171,14 @@ public class WClientTLService : ITLService
             _logger.LogInformation($"Media {message.ID} already loaded");
     }
 
-    private IPeerInfo? GetPeerFromDialogs(Messages_Dialogs dialogs, long peerId)
+    private IPeerInfo? GetPeerById(long peerId)
     {
-        if (dialogs.users.ContainsKey(peerId))
-            return dialogs.users[peerId];
-        else if (dialogs.chats.ContainsKey(peerId))
-            return dialogs.chats[peerId];
+         if (_dialogs!.users.ContainsKey(peerId))
+            return _dialogs.users[peerId];
+        else if (_dialogs.chats.ContainsKey(peerId))
+            return _dialogs.chats[peerId];
         else
-            return null;
+            return null;    
     }
 
     public async Task<TLResponse> GetAllDialogs()
@@ -294,30 +296,45 @@ public class WClientTLService : ITLService
         return result;
     }
 
-    public async Task<TLResponse> SendMessage(long peerId, string message)
+    public async Task<TLResponse> SendMessage(long peerId, string? message, string? mediaFilepath)
     {
         if (!IsLoggedIn)
             return new TLResponse(StatusCodes.Status401Unauthorized, "Undefiend user");
         if (_dialogs == null)
             _dialogs = await UpdateDialogs();
-
-        var response = new TLResponse($"undefiend {peerId}");
-        IPeerInfo? peer = GetPeerFromDialogs(_dialogs, peerId);
+        if(String.IsNullOrEmpty(message) && String.IsNullOrEmpty(mediaFilepath))
+            return new(StatusCodes.Status400BadRequest, "Nothing to send");        
+        
+        MessageDTO? createdMessage = !String.IsNullOrEmpty(mediaFilepath)
+            ? await SendMessageWithMedia(peerId, message, mediaFilepath)
+            :  await SendMessage(peerId, message!);
+        
+        return createdMessage  != null
+            ? new(StatusCodes.Status201Created, $"Send message to {peerId}", createdMessage )
+            : new(StatusCodes.Status400BadRequest, "Nothing to send");
+    }
+    
+    private async Task<MessageDTO?> SendMessageWithMedia(
+        long peerId,
+        string? caption,
+        string mediaFilepath
+    )
+    {
+        var peer = GetPeerById(peerId)?.ToInputPeer();
         if (peer != null)
         {
-            switch (peer)
-            {
-                case User u:
-                    response.Data = CreateMessageDTO(await _client.SendMessageAsync(u, message));
-                    response.Message = $"Send to {u.MainUsername}";
-                    break;
-                case ChatBase cb:
-                    response.Data = CreateMessageDTO(await _client.SendMessageAsync(cb, message));
-                    response.Message = $"Send to {cb.MainUsername}";
-                    break;
-            }
+            var inputFile = await _client.UploadFileAsync(mediaFilepath);
+            return CreateMessageDTO(await _client.SendMediaAsync(peer, caption, inputFile));
         }
-        return response;
+        return null;
+    }
+
+    private async Task<MessageDTO?> SendMessage(long peerId, string message)
+    {
+        var peer = GetPeerById(peerId)?.ToInputPeer();
+        return peer != null 
+            ? CreateMessageDTO(await _client.SendMessageAsync(peer, message))
+            : null;
     }
 
     private async Task OnUpdate(Update update)

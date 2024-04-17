@@ -1,5 +1,7 @@
+using ChatHub.Models.Telegram;
 using ChatHub.Models.Telegram.DTO;
 using ChatHub.Services.Telegram;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ChatHub.Api;
 
@@ -10,42 +12,56 @@ public static class TelegramApi
         app.MapPost("/login", Login);
         app.MapGet("/logout", Logout);
         app.MapGet("/dialogs", GetDialogs);
-        app.MapPost("/peers/{chatId}", SendMessage);
+        app.MapPost("/peers/{chatId}", PostMessage);
         app.MapGet("/peers/{chatId}", GetMessages);
 
         return app;
     }
 
-    private static async Task<IResult> Login(ITLService telegramService, string info)
+    private static async Task<Ok<TLResponse>> Login(ITLService telegramService, string info)
     {
         var result = await telegramService.Login(info);
-        return TypedResults.Json(result);
+        return TypedResults.Ok(result);
     }
 
-    private static async Task<IResult> Logout(ITLService telegramService)
+    private static async Task<Ok<TLResponse>> Logout(ITLService telegramService)
     {
         var result = await telegramService.Logout();
-        return TypedResults.Json(result);
+        return TypedResults.Ok(result);
     }
 
-    private static async Task<IResult> SendMessage(ITLService telegramService, long chatId, string message)
+    private static async Task<Results<Created<TLResponse>, BadRequest<TLResponse>>> PostMessage(
+        ITLService telegramService,
+        long peerId,
+        TLChatRequest request
+    )
     {
-        var result = await telegramService.SendMessage(chatId, message);
-        return TypedResults.Json(result);
+        if (request.MediaFilepath == null && request.Message == null)
+            return TypedResults.BadRequest(
+                new TLResponse(StatusCodes.Status400BadRequest, $"Nothing to send for {peerId}")
+            );
+
+        var result = await telegramService.SendMessage(peerId, request.Message, request.MediaFilepath);
+        long id = 0;
+        if (result.Data is MessageDTO m)
+            id = m.Id;
+        return TypedResults.Created($"/peers/{peerId}/messages/{id}", result);
     }
 
-    private static async Task<IResult> GetMessages(ITLService telegramService, long chatId, int offset, int limit)
+    private static async Task<Ok<TLResponse>> GetMessages(
+        ITLService telegramService,
+        long chatId,
+        int offset,
+        int limit
+    )
     {
         var result = await telegramService.GetMessages(chatId, offset, limit);
-        return TypedResults.Json(result);
+        return TypedResults.Ok(result);
     }
 
-    private static async Task<IResult> GetDialogs(ITLService telegramService)
+    private static async Task<Ok<TLResponse>> GetDialogs(ITLService telegramService)
     {
         var result = await telegramService.GetAllDialogs();
-        if (result.Data is List<DialogDTO> dialogs)
-            return TypedResults.Ok(result);
-        else
-            return TypedResults.Json(result);
+        return TypedResults.Ok(result);
     }
 }
