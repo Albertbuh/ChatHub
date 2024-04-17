@@ -42,8 +42,9 @@ namespace ChatHub.Services.Vk
                 _conversation = await api.Messages.GetConversationsAsync(new GetConversationsParams()
                 {
                     Count = limit,
-                    Offset = offsetId
-                });
+                    Offset = offsetId,
+
+                }) ;
                 var userIds = _conversation.Items
                     .Where(chat => chat.Conversation.Peer.Type == ConversationPeerType.User)
                     .Select(chat => chat.Conversation.Peer.Id)
@@ -83,8 +84,9 @@ namespace ChatHub.Services.Vk
             {
                 case ConversationPeerType.User:
                     var participant = Users.FirstOrDefault(u => u.Id == id);
+                    var senderU = Users.FirstOrDefault(u => u.Id == conversation.LastMessage.FromId);
+                    user = _mapper.Map<UserDTO>(senderU);
                     dialogDto.MainUsername = participant?.ScreenName ?? " ";
-
                     if (participant != null)
                     {
                         name = $"{participant.FirstName} {participant.LastName}";
@@ -93,6 +95,8 @@ namespace ChatHub.Services.Vk
                     break;
                 case ConversationPeerType.Chat:
                     name = conversation.Conversation.ChatSettings.Title;
+                    senderU = Users.FirstOrDefault(u => u.Id == conversation.LastMessage.FromId);
+                    user = _mapper.Map<UserDTO>(senderU);
                     dialogDto.PhotoUri = conversation.Conversation.ChatSettings.Photo?.Photo100.ToString() ?? "";
 
                     break;
@@ -100,13 +104,12 @@ namespace ChatHub.Services.Vk
                     var group = Groups.FirstOrDefault(f => f.Id == Math.Abs(id));
                     dialogDto.PhotoUri = group?.Photo100.AbsoluteUri.ToString() ?? " ";
                     dialogDto.MainUsername = group?.ScreenName ?? " ";
+                    var senderG = Groups.FirstOrDefault(u => u.Id == conversation.LastMessage.FromId);
+                    user = _mapper.Map<UserDTO>(senderG);
                     name = group?.Name ?? "";
                     break;
             }
 
-            user.Id = id;
-            user.PhotoUri = dialogDto.PhotoUri;
-            user.ScreenName = dialogDto.MainUsername;
             dialogDto.Title = name;
             dialogDto.Id = id;
             dialogDto.TopMessage = CreateMessageDto(conversation.LastMessage, user);
