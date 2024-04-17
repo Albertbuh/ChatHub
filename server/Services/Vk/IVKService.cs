@@ -1,6 +1,6 @@
-﻿using server.Models.Vk;
+﻿using ChatHub.Models.Vk;
 
-namespace server.Services.Vk
+namespace ChatHub.Services.Vk
 {
     public interface IVKService
     {

@@ -1,4 +1,4 @@
-﻿namespace server.Models.Vk
+﻿namespace ChatHub.Models.Vk
 {
     public class VKResponse
     {

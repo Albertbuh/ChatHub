@@ -1,5 +1,5 @@
 using ChatHub.Services.Telegram;
-using server.Services.Vk;
+using ChatHub.Services.Vk;
 
 namespace ChatHub.Extensions;
 
@@ -20,8 +20,8 @@ public static class ServiceProviderExtensions
                 );
         }
 
-        services.AddSingleton<IVKService, WClientVKService>(
-            _ => new WClientVKService(_.GetRequiredService<ILogger<WClientTLService>>(), _.GetRequiredService<IMapper>(), appId)
+        services.AddSingleton<IVKService, VkNetService>(
+            _ => new VkNetService(_.GetRequiredService<ILogger<VkNetService>>(), _.GetRequiredService<IMapper>(), appId)
             );
     }
 

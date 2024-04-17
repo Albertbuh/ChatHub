@@ -1,25 +1,24 @@
-﻿using ChatHub.Services.Telegram;
-using server.Models.Vk;
-using server.Models.Vk.DTO;
+using ChatHub.Models.Vk;
+using ChatHub.Models.Vk.DTO;
 using VkNet;
 using VkNet.AudioBypassService.Extensions;
 using VkNet.Enums.Filters;
 using VkNet.Enums.StringEnums;
 using VkNet.Model;
 
-namespace server.Services.Vk
+namespace ChatHub.Services.Vk
 {
-    public class WClientVKService : IVKService
+    public class VkNetService : IVKService
     {
-        private readonly VkApi? api;
-        readonly ILogger<WClientTLService> _logger;
+        private readonly VkApi api;
+        readonly ILogger _logger;
         readonly IMapper _mapper;
         GetConversationsResult _conversation = null!;
         public List<User> Users = null!;
         public List<Group> Groups = null!;
         ulong _applicationId;
-        public WClientVKService(
-            ILogger<WClientTLService> logger,
+        public VkNetService(
+            ILogger<VkNetService> logger,
             IMapper mapper,
             ulong appId)
         {
@@ -117,24 +116,15 @@ namespace server.Services.Vk
 
         private VkMessageDTO CreateMessageDto(Message message, UserDTO user)
         {
-            VkMessageDTO messageDTO = new();
-            messageDTO.Message = message.Text;
-            messageDTO.Date = message.Date;
-            messageDTO.Id = message.Id;
+            VkMessageDTO messageDTO = _mapper.Map<VkMessageDTO>(message);
             messageDTO.Sender = CreatePeerDto(user);
 
             return messageDTO;
         }
 
         private VkPeerDTO? CreatePeerDto(UserDTO user)
-        {
-            VkPeerDTO peerDTO = new();
-            peerDTO.Id = user.Id;
-            peerDTO.Username = user.ScreenName;
-            peerDTO.PhotoUrl = user.PhotoUri;
-
-            return peerDTO;
-        }
+            => _mapper.Map<VkPeerDTO>(user);
+        
 
         public async Task<VKResponse> GetMessages(long chatId, int offsetId, int limit)
         {

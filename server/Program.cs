@@ -1,6 +1,6 @@
 using ChatHub.Api;
 using ChatHub.Extensions;
-using server.Apis;
+using ChatHub.Apis;
 
 var builder = WebApplication.CreateBuilder(args);
 
