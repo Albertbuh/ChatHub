@@ -1,17 +1,28 @@
-import Navbar from "./components/navbar/navbar";
-import "./components/navbar/navbar.css";
-import "./globals.css";
+import bg from './telegram/assets/background.jpg'
 
-export default function RootLayout({
-  children,
-}: Readonly<{
+import SideNav from './components/navbar/navbar';
+import "./globals.css";
+import { AuthStageProvider } from './telegram/contexts/AuthContext';
+import { Component } from 'react';
+
+
+interface RootLayoutProps {
   children: React.ReactNode;
-}>) {
+}
+
+export default function RootLayout({ children, }: RootLayoutProps) {
+
   return (
     <html lang="en">
-      <body>
-        <Navbar />
-        {children}
+      <body
+        style={{ backgroundImage: `url(${bg.src})` }}
+      >
+
+        <AuthStageProvider>
+          <SideNav />
+          {children}
+        </AuthStageProvider>
+
       </body>
     </html>
   );
