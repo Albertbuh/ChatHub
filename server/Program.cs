@@ -19,7 +19,7 @@ builder
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddAutoMapper(typeof(ChatHub.Mappers.Telegram.WClientMapperProfile));
+builder.Services.AddAutoMapper(typeof(ChatHub.Mappers.Telegram.WClientMapperProfile), typeof(ChatHub.Mappers.Vk.VkNetMapperProfile));
 builder.Services.AddTelegramApiService();
 builder.Services.AddVkApiService();
 
