@@ -9,17 +9,20 @@ import { AiOutlineMenu, AiOutlineHome } from "react-icons/ai";
 import { SlSocialVkontakte } from "react-icons/sl";
 import { LiaTelegram } from "react-icons/lia";
 import { BsChatSquareHeart } from "react-icons/bs";
+import { CiLogout } from "react-icons/ci";
 import { AuthStageContext } from '@/app/telegram/contexts/AuthContext';
 
 // TODO: Time dependent drop-down
 export default function SideNav() {
+    const avatarPath = './avatars/Hayasaka.jpg';
+
     let container = null;
     if (typeof window !== 'undefined') {
         container = document.getElementById('container');
-      }
+    }
     let telegramIsLogged = false;
     const { authStage } = useContext(AuthStageContext);
-    // console.log('Auth stage in SideNav:', authStage);
+    console.log('Auth stage in SideNav:', authStage);
 
 
     const [sidebarActive, setSidebarActive] = useState(false);
@@ -32,9 +35,9 @@ export default function SideNav() {
             setSidebarActive(!sidebarActive);
             if (sidebarActive === false && container) {
                 container.style.marginLeft = '10%';
-              } else if (container) {
+            } else if (container) {
                 container.style.marginLeft = '0';
-              }
+            }
         };
 
         if (toggleBtn) {
@@ -120,6 +123,28 @@ export default function SideNav() {
                     <Link href="/realTimeChat">
                         <BsChatSquareHeart className={styles.listItemIcon} />
                         <span className={styles.linkName}> Real Time Chat</span>
+                    </Link>
+                </li>
+
+                <li className={`${styles.listItem} ${getActiveClass('/realTimeChat/authorization/login')}`}>
+                    <Link href="/realTimeChat/authorization/login">
+                        <BsChatSquareHeart className={styles.listItemIcon} />
+                        <span className={styles.linkName}> Real Time Chat login</span>
+                    </Link>
+                </li>
+            </ul>
+            <ul className={`${styles.list} ${styles.flexColumn}`}>
+                
+                <li className={`${styles.listItem} ${getActiveClass('/')}`}>
+                    <Link href="/realTimeChat">
+                        <CiLogout className={styles.listItemIcon} />
+                        <span className={styles.linkName}> Logout</span>
+                    </Link>
+                </li>
+                <li className={`${styles.listItem} ${getActiveClass('/')}`}>
+                    <Link href="/realTimeChat">
+                        <img className={styles.avatarImg} src={avatarPath} alt='' />
+                        <span className={styles.linkName}> Your Name</span>
                     </Link>
                 </li>
             </ul>

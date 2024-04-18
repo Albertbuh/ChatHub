@@ -1,10 +1,19 @@
+"use client"
+
 import styles from './chat.module.css'
 
 import { CiVideoOn, CiPhone, CiCircleInfo, CiImageOn, CiCamera, CiMicrophoneOn } from "react-icons/ci";
 import { BsEmojiNeutral } from "react-icons/bs";
+import { useEffect, useRef } from 'react';
 
 const Chat = () => {
     const avatarPath = './avatars/Hayasaka.jpg';
+
+    const endRef = useRef<HTMLDivElement>(null);
+
+    useEffect( () => {
+        endRef.current?.scrollIntoView({behavior: "smooth"})
+    },[]);
 
     return (
         <div className={styles.chat}>
@@ -74,6 +83,7 @@ const Chat = () => {
                         <span className={styles.span}>few seconds ago</span>
                     </div>
                 </div>
+                <div ref={endRef}></div>
             </div>
 
 
