@@ -18,7 +18,9 @@ builder
     );
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder
+    .Services
+    .AddSwaggerGen();
 
 builder.Services.AddAutoMapper(typeof(ChatHub.Mappers.Telegram.WClientMapperProfile));
 builder.Services.AddTelegramApiService();
@@ -29,13 +31,8 @@ builder.Services.AddSignalR();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-builder.Services.AddProblemDetails();
-
 var app = builder.Build();
 app.UseExceptionHandler();
-
-
 
 app.UseCors("AllowReactOrigin");
 
@@ -53,10 +50,7 @@ else if (app.Environment.IsProduction())
     app.UseCors("AllowReactOrigin");
     app.MapGet(
         "/",
-        (HttpContext context) =>
-        {
-            context.Response.Redirect("http://localhost:44144", true);
-        }
+        (HttpContext context) => context.Response.Redirect("http://localhost:44144", true)
     );
 }
 
@@ -64,7 +58,5 @@ app.MapHub<ChatHubR>("/chat");
 
 app.MapGroup("/api/v1.0/telegram").WithTags("Telegram api").MapTelegramApi();
 app.MapGroup("/api/v1.0/vk").WithTags("Vk api").MapVkApi();
-
-
 
 app.Run();
