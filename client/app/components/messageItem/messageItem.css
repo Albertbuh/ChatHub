@@ -1,0 +1,14 @@
+.message {
+    border: 1px solid var(--main-color);
+    padding: 5px;
+    position: relative;
+    max-width: 40vw;
+    backdrop-filter: blur(40px);
+}
+
+.message .time {
+    position: absolute;
+    bottom: 1rem;
+    right: 5%;
+    font-size: 0.8rem;
+}

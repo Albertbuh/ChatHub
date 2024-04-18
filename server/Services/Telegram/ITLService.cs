@@ -7,5 +7,5 @@ public interface ITLService
     public Task<TLResponse> Logout();
     public Task<TLResponse> GetAllDialogs();
     public Task<TLResponse> GetMessages(long chatId, int offsetId, int limit);
-    public Task<TLResponse> SendMessage(long chatId, string message);
+    public Task<TLResponse> SendMessage(long chatId, string? message, string? mediaFilepath);
 }

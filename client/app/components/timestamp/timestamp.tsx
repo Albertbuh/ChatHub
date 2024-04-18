@@ -1,4 +1,4 @@
-export default function Timestamp({time, className = ""}: TimestampProps) {
+export default function Timestamp({time, className}: TimestampProps) {
     return <p className={className}>{formatDate(time)}</p>;
 }
 
