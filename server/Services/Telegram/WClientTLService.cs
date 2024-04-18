@@ -1,7 +1,7 @@
 using ChatHub.Models.Telegram;
 using ChatHub.Models.Telegram.DTO;
 using Microsoft.AspNetCore.SignalR;
-using server.HubR;
+using ChatHub.HubR;
 using TL;
 
 namespace ChatHub.Services.Telegram;
@@ -373,7 +373,7 @@ public class WClientTLService : ITLService
         var messages = await GetMessages(lastDialogId, 0, 20);
         await ChatHubR.UpdateMessagesTL(
             _chatHub,
-            new server.HubR.HubEntity { Id = lastDialogId, Data = messages.Data }
+            new ChatHub.HubR.HubEntity { Id = lastDialogId, Data = messages.Data }
         );
         _logger.Log(LogLevel.Information, "Updated messages were sended");
     }
@@ -383,7 +383,7 @@ public class WClientTLService : ITLService
         var dialogs = await GetAllDialogs();
         await ChatHubR.UpdateDialogsTL(
             _chatHub,
-            new server.HubR.HubEntity { Id = _user.id, Data = dialogs.Data }
+            new ChatHub.HubR.HubEntity { Id = _user.id, Data = dialogs.Data }
         );
         _logger.Log(LogLevel.Information, "Updated dialogs were sended");
     }

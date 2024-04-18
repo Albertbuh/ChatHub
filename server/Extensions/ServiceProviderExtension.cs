@@ -1,7 +1,7 @@
 using ChatHub.Services.Telegram;
 using ChatHub.Services.Vk;
 using Microsoft.AspNetCore.SignalR;
-using server.HubR;
+using ChatHub.HubR;
 
 namespace ChatHub.Extensions;
 
