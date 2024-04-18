@@ -16,8 +16,11 @@ public class WClientTLService : ITLService
     Messages_Dialogs? _dialogs;
 
     private IPeerInfo User(long id) => _manager.Users[id];
+
     private IPeerInfo Chat(long id) => _manager.Chats[id];
+
     private IPeerInfo Peer(Peer? peer) => _manager.UserOrChat(peer);
+
     readonly IHubContext<ChatHubR> _chatHub;
     bool IsLoggedIn => _client.User != null;
 
@@ -32,7 +35,6 @@ public class WClientTLService : ITLService
         string api_hash
     )
     {
-
         _client = new WTelegram.Client(api_id, api_hash);
         _manager = _client.WithUpdateManager(OnUpdate);
         WTelegram.Helpers.Log = (lvl, msg) => logger.Log((LogLevel)lvl, msg);
@@ -44,8 +46,6 @@ public class WClientTLService : ITLService
         if (!String.IsNullOrEmpty(phone))
             Task.WaitAll(Task.Run(async () => await Login(phone)));
     }
-
-
 
     public async Task<TLResponse> Login(string loginInfo)
     {
@@ -75,7 +75,6 @@ public class WClientTLService : ITLService
             else
                 result.Message = $"User {_user} (id {_user.id}) is already logged-in";
         }
-
         catch (RpcException e)
         {
             result.StatusCode = e.Code;
@@ -264,9 +263,9 @@ public class WClientTLService : ITLService
             case UpdateUserStatus uus:
             case UpdateUserName uun:
             case UpdateUser uu:
-                    await SendUpdatedMessages();
-                    await UpdateDialogs();
-                    await SendUpdatedDialogs();
+                await SendUpdatedMessages();
+                await UpdateDialogs();
+                await SendUpdatedDialogs();
                 break;
             default:
                 break; // there are much more update types than the above example cases
@@ -276,22 +275,27 @@ public class WClientTLService : ITLService
     private async Task SendUpdatedMessages()
     {
         var messages = await GetMessages(lastDialogId, 0, 20);
-        await ChatHubR.UpdateMessagesTL(_chatHub, messages.Data);
+        await ChatHubR.UpdateMessagesTL(
+            _chatHub,
+            new server.HubR.HubEntity { Id = lastDialogId, Data = messages.Data }
+        );
         _logger.Log(LogLevel.Information, "Updated messages were sended");
     }
 
     private async Task SendUpdatedDialogs()
     {
         var dialogs = await GetAllDialogs();
-        await ChatHubR.UpdateDialogsTL(_chatHub, dialogs.Data);
+        await ChatHubR.UpdateDialogsTL(
+            _chatHub,
+            new server.HubR.HubEntity { Id = _user.id, Data = dialogs.Data }
+        );
         _logger.Log(LogLevel.Information, "Updated dialogs were sended");
-
     }
+
     private async Task<TL.Messages_Dialogs> UpdateDialogs()
     {
         _dialogs = await _client.Messages_GetAllDialogs();
         _dialogs.CollectUsersChats(_manager.Users, _manager.Chats);
         return _dialogs;
     }
-
 }
