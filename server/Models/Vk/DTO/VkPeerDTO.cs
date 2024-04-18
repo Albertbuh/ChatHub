@@ -1,4 +1,4 @@
-namespace server.Models.Vk.DTO;
+namespace ChatHub.Models.Vk.DTO;
 
 public struct VkPeerDTO
 {

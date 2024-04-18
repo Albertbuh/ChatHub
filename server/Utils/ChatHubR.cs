@@ -1,7 +1,6 @@
-﻿using ChatHub.Models.Telegram.DTO;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 
-namespace server.HubR
+namespace ChatHub.HubR
 {
     public class ChatHubR : Hub
     {
@@ -16,12 +15,12 @@ namespace server.HubR
             await base.OnDisconnectedAsync(exception);
         }
 
-        public static async Task UpdateDialogsTL(IHubContext<ChatHubR> chatHub,Object? dialogs)
+        public static async Task UpdateDialogsTL(IHubContext<ChatHubR> chatHub,HubEntity? dialogs)
         {
             await chatHub.Clients.All.SendAsync("updateDialogsTL", dialogs);
         }
 
-        public static async Task UpdateMessagesTL(IHubContext<ChatHubR> chatHub, Object? messages)
+        public static async Task UpdateMessagesTL(IHubContext<ChatHubR> chatHub, HubEntity? messages)
         {
             await chatHub.Clients.All.SendAsync("updateMessagesTL", messages);
         }

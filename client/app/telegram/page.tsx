@@ -1,43 +1,34 @@
-"use client"
+"use client";
 import React, { Suspense, useEffect, useState } from "react";
-import MessageList from "../components/messageList/messageList";
-import { IMessageInfo } from "../models/dto/IMessageInfo";
-import { GetDialogs } from "../lib/getRequests";
+import { GetDialogs } from "../utils/getRequests";
 import Connector from "../utils/singnalR-connector"
 import { IDialogInfo } from "../models/dto/IDialogInfo";
 import MessengerBase from "./messenger/messengerBase";
-// import DialogUpdateContainer from "../page"
-
-const MyComponent = () => {
-
-};
+import { ConnectorEntity } from "../models/connectorEntity";
 
 export default function Home() {
-  const [dialogsUpdate, setDialogUpdate] = useState<IDialogInfo[]>([]);
-
-  useEffect(() => {
-    const handleDialogsUpdate = (dialogs: IDialogInfo[]) => {
-      setDialogUpdate(dialogs);
+    const [dialogsUpdate, setDialogsUpdate] = useState<IDialogInfo[]>([]);
+    
+    const handleDialogsUpdate = (connectorEntity: ConnectorEntity) => {
+        setDialogsUpdate(connectorEntity.data as IDialogInfo[]);
     };
-    const fetchData = async () => {
-      try {
-        const updatedDialogs = await GetDialogs();
-        setDialogUpdate(updatedDialogs);
-      } catch (error) {
-        console.error('Ошибка при получении диалогов:', error);
-      }
-    };
-
-    fetchData();
+    
     const connectorInstance = Connector();
     connectorInstance.setOnDialogsTLUpdateCallback(handleDialogsUpdate);
-  }, []);
-  if (dialogsUpdate.length > 0)
-    {
-  console.log(dialogsUpdate);
-  
-  return (
-    <MessengerBase dialogs={dialogsUpdate}/>
-  );
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const updatedDialogs = await GetDialogs();
+                setDialogsUpdate(updatedDialogs);
+            } catch (error) {
+                console.error("Ошибка при получении диалогов:", error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    if (dialogsUpdate.length > 0) {
+        return <MessengerBase dialogs={dialogsUpdate} />;
+    }
 }
-};

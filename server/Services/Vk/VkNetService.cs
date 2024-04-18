@@ -1,18 +1,17 @@
-﻿using ChatHub.Services.Telegram;
-using server.Models.Vk;
-using server.Models.Vk.DTO;
+using ChatHub.Models.Vk;
+using ChatHub.Models.Vk.DTO;
 using VkNet;
 using VkNet.AudioBypassService.Extensions;
 using VkNet.Enums.Filters;
 using VkNet.Enums.StringEnums;
 using VkNet.Model;
 
-namespace server.Services.Vk
+namespace ChatHub.Services.Vk
 {
-    public class WClientVKService : IVKService
+    public class VkNetService : IVKService
     {
-        private readonly VkApi? api;
-        readonly ILogger<WClientTLService> _logger;
+        private readonly VkApi api;
+        readonly ILogger _logger;
         readonly IMapper _mapper;
         GetConversationsResult _conversation = null!;
         private List<User> Users = null!;
@@ -21,8 +20,8 @@ namespace server.Services.Vk
         private ulong? pts;
         private ulong ts;
         ulong _applicationId;
-        public WClientVKService(
-            ILogger<WClientTLService> logger,
+        public VkNetService(
+            ILogger<VkNetService> logger,
             IMapper mapper,
             ulong appId)
         {
@@ -46,8 +45,9 @@ namespace server.Services.Vk
                 _conversation = await api.Messages.GetConversationsAsync(new GetConversationsParams()
                 {
                     Count = limit,
-                    Offset = offsetId
-                });
+                    Offset = offsetId,
+
+                }) ;
                 var userIds = _conversation.Items
                     .Where(chat => chat.Conversation.Peer.Type == ConversationPeerType.User)
                     .Select(chat => chat.Conversation.Peer.Id)
@@ -87,8 +87,9 @@ namespace server.Services.Vk
             {
                 case ConversationPeerType.User:
                     var participant = Users.FirstOrDefault(u => u.Id == id);
+                    var senderU = Users.FirstOrDefault(u => u.Id == conversation.LastMessage.FromId);
+                    user = _mapper.Map<UserDTO>(senderU);
                     dialogDto.MainUsername = participant?.ScreenName ?? " ";
-
                     if (participant != null)
                     {
                         name = $"{participant.FirstName} {participant.LastName}";
@@ -97,6 +98,8 @@ namespace server.Services.Vk
                     break;
                 case ConversationPeerType.Chat:
                     name = conversation.Conversation.ChatSettings.Title;
+                    senderU = Users.FirstOrDefault(u => u.Id == conversation.LastMessage.FromId);
+                    user = _mapper.Map<UserDTO>(senderU);
                     dialogDto.PhotoUri = conversation.Conversation.ChatSettings.Photo?.Photo100.ToString() ?? "";
 
                     break;
@@ -104,13 +107,12 @@ namespace server.Services.Vk
                     var group = Groups.FirstOrDefault(f => f.Id == Math.Abs(id));
                     dialogDto.PhotoUri = group?.Photo100.AbsoluteUri.ToString() ?? " ";
                     dialogDto.MainUsername = group?.ScreenName ?? " ";
+                    var senderG = Groups.FirstOrDefault(u => u.Id == conversation.LastMessage.FromId);
+                    user = _mapper.Map<UserDTO>(senderG);
                     name = group?.Name ?? "";
                     break;
             }
 
-            user.Id = id;
-            user.PhotoUri = dialogDto.PhotoUri;
-            user.ScreenName = dialogDto.MainUsername;
             dialogDto.Title = name;
             dialogDto.Id = id;
             dialogDto.TopMessage = CreateMessageDto(conversation.LastMessage, user);
@@ -120,24 +122,15 @@ namespace server.Services.Vk
 
         private VkMessageDTO CreateMessageDto(Message message, UserDTO user)
         {
-            VkMessageDTO messageDTO = new();
-            messageDTO.Message = message.Text;
-            messageDTO.Date = message.Date;
-            messageDTO.Id = message.Id;
+            VkMessageDTO messageDTO = _mapper.Map<VkMessageDTO>(message);
             messageDTO.Sender = CreatePeerDto(user);
 
             return messageDTO;
         }
 
         private VkPeerDTO? CreatePeerDto(UserDTO user)
-        {
-            VkPeerDTO peerDTO = new();
-            peerDTO.Id = user.Id;
-            peerDTO.Username = user.ScreenName;
-            peerDTO.PhotoUrl = user.PhotoUri;
-
-            return peerDTO;
-        }
+            => _mapper.Map<VkPeerDTO>(user);
+        
 
         public async Task<VKResponse> GetMessages(long chatId, int offsetId, int limit)
         {
