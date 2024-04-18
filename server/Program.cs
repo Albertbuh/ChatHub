@@ -1,6 +1,7 @@
 using ChatHub.Api;
 using ChatHub.Extensions;
 using server.Apis;
+using server.HubR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,7 @@ builder
         {
             options.AddPolicy(
                 "AllowReactOrigin",
-                builder => builder.WithOrigins("http://localhost:44144").AllowAnyHeader().AllowAnyMethod()
+                builder => builder.WithOrigins("http://localhost:44144").AllowAnyHeader().AllowAnyMethod().AllowCredentials()
             );
         }
     );
@@ -24,6 +25,8 @@ builder
 builder.Services.AddAutoMapper(typeof(ChatHub.Mappers.Telegram.WClientMapperProfile));
 builder.Services.AddTelegramApiService();
 builder.Services.AddVkApiService();
+
+builder.Services.AddSignalR();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -50,6 +53,8 @@ else if (app.Environment.IsProduction())
         (HttpContext context) => context.Response.Redirect("http://localhost:44144", true)
     );
 }
+
+app.MapHub<ChatHubR>("/chat");
 
 app.MapGroup("/api/v1.0/telegram").WithTags("Telegram api").MapTelegramApi();
 app.MapGroup("/api/v1.0/vk").WithTags("Vk api").MapVkApi();

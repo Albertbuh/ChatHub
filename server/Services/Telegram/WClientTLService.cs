@@ -1,5 +1,7 @@
 using ChatHub.Models.Telegram;
 using ChatHub.Models.Telegram.DTO;
+using Microsoft.AspNetCore.SignalR;
+using server.HubR;
 using TL;
 
 namespace ChatHub.Services.Telegram;
@@ -9,8 +11,12 @@ public class WClientTLService : ITLService
     readonly WTelegram.Client _client = null!;
     readonly WTelegram.UpdateManager _manager = null!;
 
+    long lastDialogId = 0;
     User _user => _client.User;
     Messages_Dialogs? _dialogs;
+
+
+    readonly IHubContext<ChatHubR> _chatHub;
 
     private IPeerInfo? User(long id) => _manager.Users.ContainsKey(id) ? _manager.Users[id] : null;
 
@@ -30,6 +36,7 @@ public class WClientTLService : ITLService
     public WClientTLService(
         ILogger<WClientTLService> logger,
         IMapper mapper,
+        IHubContext<ChatHubR> chatHub,
         int api_id,
         string api_hash
     )
@@ -37,7 +44,7 @@ public class WClientTLService : ITLService
         _client = new WTelegram.Client(api_id, api_hash);
         _manager = _client.WithUpdateManager(OnUpdate);
         WTelegram.Helpers.Log = (lvl, msg) => logger.Log((LogLevel)lvl, msg);
-
+        _chatHub = chatHub;
         _logger = logger;
         _mapper = mapper;
 
@@ -195,7 +202,7 @@ public class WClientTLService : ITLService
             var dto = await CreateDialogDTO(dialog);
             list.Add(dto);
         }
-
+        lastDialogId = list[0].Id;
         result.Data = list;
         return result;
     }
@@ -343,7 +350,6 @@ public class WClientTLService : ITLService
         {
             case UpdateNewMessage unm:
             case UpdateEditMessage uem:
-            // Note: UpdateNewChannelMessage and UpdateEditChannelMessage are also handled by above cases
             case UpdateDeleteChannelMessages udcm:
             case UpdateDeleteMessages udm:
             case UpdateUserTyping uut:
@@ -353,11 +359,33 @@ public class WClientTLService : ITLService
             case UpdateUserStatus uus:
             case UpdateUserName uun:
             case UpdateUser uu:
+                await SendUpdatedMessages();
                 await UpdateDialogs();
+                await SendUpdatedDialogs();
                 break;
             default:
                 break; // there are much more update types than the above example cases
         }
+    }
+
+    private async Task SendUpdatedMessages()
+    {
+        var messages = await GetMessages(lastDialogId, 0, 20);
+        await ChatHubR.UpdateMessagesTL(
+            _chatHub,
+            new server.HubR.HubEntity { Id = lastDialogId, Data = messages.Data }
+        );
+        _logger.Log(LogLevel.Information, "Updated messages were sended");
+    }
+
+    private async Task SendUpdatedDialogs()
+    {
+        var dialogs = await GetAllDialogs();
+        await ChatHubR.UpdateDialogsTL(
+            _chatHub,
+            new server.HubR.HubEntity { Id = _user.id, Data = dialogs.Data }
+        );
+        _logger.Log(LogLevel.Information, "Updated dialogs were sended");
     }
 
     private async Task<TL.Messages_Dialogs> UpdateDialogs()
