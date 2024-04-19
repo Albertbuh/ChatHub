@@ -1,5 +1,7 @@
+using ChatHub.HubR;
 using ChatHub.Models.Vk;
 using ChatHub.Models.Vk.DTO;
+using Microsoft.AspNetCore.SignalR;
 using VkNet;
 using VkNet.AudioBypassService.Extensions;
 using VkNet.Enums.Filters;
@@ -13,18 +15,21 @@ namespace ChatHub.Services.Vk
         private readonly VkApi api;
         readonly ILogger _logger;
         readonly IMapper _mapper;
+        readonly IHubContext<ChatHubR> _chatHub;
         GetConversationsResult _conversation = null!;
         private List<User> Users = null!;
         private List<Group> Groups = null!;
-
+        private long lastDialogId;
         private ulong? pts;
         private ulong ts;
         ulong _applicationId;
         public VkNetService(
             ILogger<VkNetService> logger,
             IMapper mapper,
+            IHubContext<ChatHubR> chatHub,
             ulong appId)
         {
+            _chatHub = chatHub;
             _logger = logger;
             _mapper = mapper;
             var services = new ServiceCollection();
@@ -69,7 +74,7 @@ namespace ChatHub.Services.Vk
             {
                 list.Add(CreateConversationDTO(conversation));
             }
-
+            lastDialogId = list[0].Id;
             result.Data = list;
             return result;
 
@@ -137,6 +142,8 @@ namespace ChatHub.Services.Vk
             if (!api.IsAuthorized)
                 return new VKResponse(StatusCodes.Status401Unauthorized, "Undefined user");
 
+            lastDialogId = chatId;
+
             var messages = await api.Messages.GetHistoryAsync(new MessagesGetHistoryParams()
             {
                 Count = limit,
@@ -191,7 +198,7 @@ namespace ChatHub.Services.Vk
                 TwoFactorAuthorization = () => Console.ReadLine()
             });
 
-            this.StartMessagesHandling();
+            StartMessagesHandling();
             return new VKResponse($"User {api.UserId} was logged in");
 
         }
@@ -225,8 +232,50 @@ namespace ChatHub.Services.Vk
             Task.Run(LongPollEventLoop);
         }
 
-        private void LongPollEventLoop()
+        private async Task SendMessages()
         {
+            var messages = await GetMessages(lastDialogId,0, 20);
+            await ChatHubR.UpdateMessagesVK(
+            _chatHub,
+                new HubEntity { Id = api.UserId ?? 0, Data = messages.Data }
+            );
+            _logger.Log(LogLevel.Information, "Updated messages were sended");
+        }
+
+        private async Task SendConversations()
+        {
+            var dialogs = await GetDialogs(0,200);
+            await ChatHubR.UpdateDialogsVK(
+            _chatHub,
+                new HubEntity { Id = api.UserId ?? 0, Data = dialogs.Data }
+            );
+            _logger.Log(LogLevel.Information, "Updated dialogs were sended");
+        }
+
+        private async Task UpdateConversations()
+        {
+            _conversation = await api.Messages.GetConversationsAsync(new GetConversationsParams()
+            {
+                Count = 200,
+                Offset = 0
+
+            });
+            var userIds = _conversation.Items
+                .Where(chat => chat.Conversation.Peer.Type == ConversationPeerType.User)
+                .Select(chat => chat.Conversation.Peer.Id)
+                .ToList();
+
+            var groupIds = _conversation.Items
+                .Where(chat => chat.Conversation.Peer.Type == ConversationPeerType.Group)
+                .Select(chat => Math.Abs(chat.Conversation.Peer.Id).ToString())
+                .ToList();
+            Users = (await api!.Users.GetAsync(userIds, ProfileFields.All)).ToList();
+            Groups = (await api.Groups.GetByIdAsync(groupIds, null, GroupsFields.All)).ToList();
+        }
+
+        private async void LongPollEventLoop()
+        {
+            bool messageUpdate = false;
             while (true)
             {
                 try
@@ -244,10 +293,14 @@ namespace ChatHub.Services.Vk
                         switch (longPollResponse.History[i][0])
                         {
                             case 4:
-                                Console.WriteLine(longPollResponse.Messages[i].Text);
+                                await UpdateConversations();
+                                await SendConversations();
+                                await SendMessages();
 
                                 break;
                         }
+                        if (messageUpdate)
+                            break;
                     }
                 }
                 catch (Exception ex)

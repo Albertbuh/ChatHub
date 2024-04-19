@@ -373,7 +373,7 @@ public class WClientTLService : ITLService
         var messages = await GetMessages(lastDialogId, 0, 20);
         await ChatHubR.UpdateMessagesTL(
             _chatHub,
-            new ChatHub.HubR.HubEntity { Id = lastDialogId, Data = messages.Data }
+            new HubEntity { Id = lastDialogId, Data = messages.Data }
         );
         _logger.Log(LogLevel.Information, "Updated messages were sended");
     }
@@ -383,7 +383,7 @@ public class WClientTLService : ITLService
         var dialogs = await GetAllDialogs();
         await ChatHubR.UpdateDialogsTL(
             _chatHub,
-            new ChatHub.HubR.HubEntity { Id = _user.id, Data = dialogs.Data }
+            new HubEntity { Id = _user.id, Data = dialogs.Data }
         );
         _logger.Log(LogLevel.Information, "Updated dialogs were sended");
     }

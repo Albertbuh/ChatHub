@@ -1,61 +1,72 @@
 import * as signalR from "@microsoft/signalr";
 import { ConnectorEntity } from "../models/connectorEntity";
-const URL = process.env.HUB_ADDRESS ?? "http://localhost:5041/chat";
-
+const URL = process.env.HUB_ADDRESS ?? "http://localhost:5041/chat"; //or whatever your backend port is
 class Connector {
-    private connection: signalR.HubConnection;
-    private onDialogsTLUpdateCallback: ((connectorEntity: ConnectorEntity) => void) | null = null;
-    private onMessagesTLUpdateCallback: ((connectorEntity: ConnectorEntity) => void) | null = null;
-    static instance: Connector;
+  private connection: signalR.HubConnection;
+  private onDialogsTLUpdateCallback: ((dialogs: ConnectorEntity) => void) | null = null;
+  private onMessagesTLUpdateCallback: ((messages: ConnectorEntity) => void) | null = null;
+  private onMessagesVKUpdateCallback: ((messages: ConnectorEntity) => void) | null = null;
+  private onDialogsVKUpdateCallback: ((dialgos: ConnectorEntity) => void) | null = null;
 
-    constructor() {
-        this.connection = new signalR.HubConnectionBuilder()
-            .withUrl(URL)
-            .withAutomaticReconnect()
-            .build();
-        this.connection.start();
-        this.registerEventHandlers();
-    }
 
-    public setOnDialogsTLUpdateCallback(
-        callback: (connectorEntity: ConnectorEntity) => void,
-    ) {
-        this.onDialogsTLUpdateCallback = callback;
-    }
+  static instance: Connector;
+  constructor() {
+    this.connection = new signalR.HubConnectionBuilder()
+      .withUrl(URL)
+      .withAutomaticReconnect()
+      .build();
+    this.connection.start();
+    this.registerEventHandlers();
+  }
+  public setOnDialogsTLUpdateCallback(callback: (dialogs: ConnectorEntity) => void) {
+    this.onDialogsTLUpdateCallback = callback;
+  }
 
-    public setOnMessagesTLUpdateCallback(
-        callback: (connectorEntity: ConnectorEntity) => void,
-    ) {
-        this.onMessagesTLUpdateCallback = callback;
-    }
+  public setOnMessagesTLUpdateCallback(callback: (messages: ConnectorEntity) => void) {
+    this.onMessagesTLUpdateCallback = callback;
+  }
 
-    public resetOnMessagesTLUpdateCallback() {
-        this.onMessagesTLUpdateCallback = null;
-    }
+  public setOnDialogsVKUpdateCallback(callback: (dialogs: ConnectorEntity) => void) {
+    this.onDialogsVKUpdateCallback = callback;
+  }
 
-    private registerEventHandlers() {
-        this.connection.on("updateDialogsTL", (connectorEntity: ConnectorEntity) => {
-            console.log(`${JSON.stringify(connectorEntity, null, 2)}`);
+  public setOnMessagesVKUpdateCallback(callback: (messages: ConnectorEntity) => void) {
+    this.onMessagesVKUpdateCallback = callback;
+  }
 
-            if (this.onDialogsTLUpdateCallback) {
-                this.onDialogsTLUpdateCallback(connectorEntity);
-            }
-        });
+  private registerEventHandlers() {
+    this.connection.on("updateDialogsTL", (dialogs: ConnectorEntity) => {
+      console.log(`${JSON.stringify(dialogs, null, 2)}`);
+      if (this.onDialogsTLUpdateCallback) {
+        this.onDialogsTLUpdateCallback(dialogs);
+      }
+    });
 
-        this.connection.on("updateMessagesTl", (connectorEntity: ConnectorEntity) => {
-            console.log(`${JSON.stringify(connectorEntity, null, 2)}`);
+    this.connection.on("updateMessagesTL", (messages: ConnectorEntity) => {
+      console.log(`${JSON.stringify(messages, null, 2)}`);
+      if (this.onMessagesTLUpdateCallback) {
+        this.onMessagesTLUpdateCallback(messages);
+      }
+    })
 
-            if (this.onMessagesTLUpdateCallback) {
-                this.onMessagesTLUpdateCallback(connectorEntity);
-            }
-        });
-    }
+    this.connection.on("updateDialogsVK", (dialogs: ConnectorEntity) => {
+      console.log(`${JSON.stringify(dialogs, null, 2)}`);
+      if (this.onDialogsVKUpdateCallback) {
+        this.onDialogsVKUpdateCallback(dialogs);
+      }
+    });
 
-    public static getInstance(): Connector {
-        if (!Connector.instance) {
-            Connector.instance = new Connector();
-        }
-        return Connector.instance;
-    }
+    this.connection.on("updateMessagesVK", (messages: ConnectorEntity) => {
+      console.log(`${JSON.stringify(messages, null, 2)}`);
+      if (this.onMessagesVKUpdateCallback) {
+        this.onMessagesVKUpdateCallback(messages);
+      }
+    });
+  }
+  public static getInstance(): Connector {
+    if (!Connector.instance)
+      Connector.instance = new Connector();
+    return Connector.instance;
+  }
 }
 export default Connector.getInstance;
