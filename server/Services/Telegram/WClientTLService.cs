@@ -27,7 +27,7 @@ public class WClientTLService : ITLService
     bool IsLoggedIn => _client.User != null;
     string mainImageDirectory =>
         IsLoggedIn
-            ? @$"../client/app/telegram/assets/userAssets/{_client.User.MainUsername}"
+            ? @$"../client/public/assets/telegram/userAssets/{_client.User.MainUsername}"
             : @"./images/";
 
     readonly ILogger<WClientTLService> _logger;
@@ -65,6 +65,7 @@ public class WClientTLService : ITLService
             };
         var result = new TLResponse();
 
+        var loadUserProfileTask = new Task(async() => await LoadProfilePicture(_user));
         try
         {
             if (_user == null)
@@ -73,12 +74,18 @@ public class WClientTLService : ITLService
 
                 if (_user != null)
                 {
+                    loadUserProfileTask.Start();
                     result.Message = $"User {_user} (id {_user.id}) is successfully logged-in";
+                    result.Data = _mapper.Map<PeerDTO>(_user);
                     await UpdateDialogs();
+                    Task.WaitAll(loadUserProfileTask);
                 }
             }
             else
+            {
                 result.Message = $"User {_user} (id {_user.id}) is already logged-in";
+                result.Data = _mapper.Map<PeerDTO>(_user);
+            }
         }
         catch (RpcException e)
         {
@@ -125,12 +132,16 @@ public class WClientTLService : ITLService
     {
         var result = new List<MessageDTO>();
         var messages = await _client.Messages_GetHistory(peer, add_offset: offset, limit: limit);
+        messages.CollectUsersChats(_manager.Users, _manager.Chats);
         foreach (var msgBase in messages.Messages)
         {
-            messages.CollectUsersChats(_manager.Users, _manager.Chats);
             result.Add(CreateMessageDTO(msgBase));
-            if (msgBase is Message m && m.media != null)
-                await LoadMessageMedia(m, peer);
+            if(msgBase is Message m)
+            {
+                await LoadProfilePicture(Peer(m.From ?? m.Peer));
+                if(m.media != null)
+                    await LoadMessageMedia(m, peer);
+            }
         }
         return result;
     }
@@ -174,8 +185,8 @@ public class WClientTLService : ITLService
             }
             _logger.LogInformation($"Media for {message.ID} has been loaded");
         }
-        else
-            _logger.LogInformation($"Media {message.ID} already loaded");
+        // else
+        //     _logger.LogInformation($"Media {message.ID} already loaded");
     }
 
     private IPeerInfo? GetPeerById(long peerId)
@@ -200,7 +211,8 @@ public class WClientTLService : ITLService
         foreach (Dialog dialog in _dialogs.dialogs)
         {
             var dto = await CreateDialogDTO(dialog);
-            list.Add(dto);
+            if(dto.Id > 0)
+                list.Add(dto);
         }
         lastDialogId = list[0].Id;
         result.Data = list;
@@ -235,7 +247,7 @@ public class WClientTLService : ITLService
             lock (new object())
                 Directory.CreateDirectory(profilePictureDirectoryPath);
         }
-        const string filename = "profile.jpg";
+        const string filename = "profile.jpeg";
         const string filenameWithoutExtension = "profile";
         if (!IsFileExists(profilePictureDirectoryPath, filenameWithoutExtension))
         {
@@ -253,8 +265,8 @@ public class WClientTLService : ITLService
                 );
             }
         }
-        else
-            _logger.LogInformation("Profile photo already loaded");
+        // else
+        //     _logger.LogInformation("Profile photo already loaded");
     }
 
     private MessageDTO CreateMessageDTO(MessageBase message)
@@ -370,7 +382,7 @@ public class WClientTLService : ITLService
 
     private async Task SendUpdatedMessages()
     {
-        var messages = await GetMessages(lastDialogId, 0, 20);
+        var messages = await GetMessages(lastDialogId, 0, 1);
         await ChatHubR.UpdateMessagesTL(
             _chatHub,
             new ChatHub.HubR.HubEntity { Id = lastDialogId, Data = messages.Data }

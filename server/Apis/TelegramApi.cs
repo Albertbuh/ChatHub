@@ -12,8 +12,8 @@ public static class TelegramApi
         app.MapPost("/login", Login);
         app.MapGet("/logout", Logout);
         app.MapGet("/dialogs", GetDialogs);
-        app.MapPost("/peers/{chatId}", PostMessage);
-        app.MapGet("/peers/{chatId}", GetMessages);
+        app.MapPost("/peers/{peerId}", PostMessage);
+        app.MapGet("/peers/{peerId}", GetMessages);
 
         return app;
     }
@@ -50,12 +50,12 @@ public static class TelegramApi
 
     private static async Task<Ok<TLResponse>> GetMessages(
         ITLService telegramService,
-        long chatId,
+        long peerId,
         int offset,
         int limit
     )
     {
-        var result = await telegramService.GetMessages(chatId, offset, limit);
+        var result = await telegramService.GetMessages(peerId, offset, limit);
         return TypedResults.Ok(result);
     }
 

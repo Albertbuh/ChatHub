@@ -54,7 +54,8 @@ public class WClientMapperProfile : Profile
                 dest => dest.Username,
                 opt => opt.MapFrom(user => $"{user.first_name} {user.last_name}".Trim())
             )
-            .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(user => GetUserPhotoId(user)));
+            .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(user => GetUserPhotoId(user)))
+            .ForMember(dest => dest.Tag, opt => opt.MapFrom(user => user.MainUsername));
     }
 
     private long GetUserPhotoId(User u) => (u.photo is UserProfilePhoto photo) ? photo.photo_id : 0;
