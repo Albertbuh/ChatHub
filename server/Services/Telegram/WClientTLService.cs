@@ -76,7 +76,7 @@ public class WClientTLService : ITLService
 
                     result.Message = $"User {_user} (id {_user.id}) is successfully logged-in";
                     await UpdateDialogs();
-                    result.Data = new PeerDTO(_user.id,_user.username,_user.photo.photo_id);
+                    result.Data = CreatePeerDTO(_user);
                 }
             }
             else
