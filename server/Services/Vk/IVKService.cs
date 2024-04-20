@@ -1,4 +1,4 @@
-﻿using ChatHub.Models.Vk;
+﻿using server.Models.Vk;
 
 namespace ChatHub.Services.Vk
 {

@@ -1,7 +1,9 @@
 using ChatHub.HubR;
-using ChatHub.Models.Vk;
-using ChatHub.Models.Vk.DTO;
+
 using Microsoft.AspNetCore.SignalR;
+using server.HubR;
+using server.Models.Vk;
+using server.Models.Vk.DTO;
 using VkNet;
 using VkNet.AudioBypassService.Extensions;
 using VkNet.Enums.Filters;
@@ -280,7 +282,7 @@ namespace ChatHub.Services.Vk
             {
                 try
                 {
-                    Thread.Sleep(340);
+                    Thread.Sleep(500);
                     LongPollHistoryResponse longPollResponse = api!.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams()
                     {
                         Ts = ts,

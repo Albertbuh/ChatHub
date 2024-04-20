@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using server.HubR;
 
 namespace ChatHub.HubR
 {
