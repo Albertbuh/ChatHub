@@ -1,6 +1,8 @@
 ﻿using ChatHub.Services.Telegram;
 using server.Models.Vk;
 using server.Models.Vk.DTO;
+using System.Net.Http.Headers;
+using System.Text;
 using VkNet;
 using VkNet.AudioBypassService.Extensions;
 using VkNet.Enums.Filters;
@@ -210,19 +212,50 @@ namespace server.Services.Vk
             return new VKResponse($"User {id} logout");
         }
 
-        public async Task<VKResponse> SendMessage(string message, long peerId)
+        public async Task<VKResponse> SendMessage(string message, long peerId, string file)
         {
+            var extension = Path.GetExtension(file);
+            UploadServerInfo uploadServer = null!;
+            if (extension == ".ogg")
+                uploadServer = api.Docs.GetMessagesUploadServer(api.UserId, DocMessageType.AudioMessage);
+            else
+                uploadServer = api.Docs.GetMessagesUploadServer(api.UserId);
+            var response = await UploadFile(uploadServer.UploadUrl, file, extension);
+            var title = Path.GetFileName(file); 
+            var attachment = new List<MediaAttachment>
+            {
+                api.Docs.Save(   response, title ?? Guid.NewGuid().ToString())[0].Instance
+            };
             var messageId = await api!.Messages.SendAsync(new MessagesSendParams
             {
                 PeerId = peerId,
                 Message = message,
+                Attachments = attachment,
                 RandomId = 0
             });
 
             return new VKResponse($"Message with id: {messageId} was sended");
         }
+        private  byte[] GetBytes(string filePath) => File.ReadAllBytes(filePath);
 
 
+        private  async Task<string> UploadFile(string serverUrl, string file, string fileExtension)
+        {
+            var data = GetBytes(file);
+
+            using (var client = new HttpClient())
+            {
+                var requestContent = new MultipartFormDataContent();
+                var content = new ByteArrayContent(data);
+                content.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/form-data");
+                requestContent.Add(content, "file", $"file.{fileExtension}");
+
+                var response = client.PostAsync(serverUrl, requestContent).Result;
+                return Encoding.Default.GetString(await response.Content.ReadAsByteArrayAsync());
+            }
+        }
+
+      
         private void StartMessagesHandling()
         {
             LongPollServerResponse longPoolServerResponse = api.Messages.GetLongPollServer(needPts: true);
@@ -238,20 +271,19 @@ namespace server.Services.Vk
             {
                 try
                 {
-                    Thread.Sleep(340);
+                    Thread.Sleep(500);
                     LongPollHistoryResponse longPollResponse = api!.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams()
                     {
                         Ts = ts,
                         Pts = pts
                     });
                     pts = longPollResponse.NewPts;
-
+                    Console.WriteLine("Messager update");
                     for (int i = 0; i < longPollResponse.History.Count; i++)
                     {
                         switch (longPollResponse.History[i][0])
                         {
                             case 4:
-                                Console.WriteLine(longPollResponse.Messages[i].Text);
 
                                 break;
                         }

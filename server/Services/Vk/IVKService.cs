@@ -8,6 +8,6 @@ namespace server.Services.Vk
         public Task<VKResponse> Logout();
         public Task<VKResponse> GetDialogs(ulong offsetId, ulong limit);
         public Task<VKResponse> GetMessages(long chatId, int offsetId, int limit);
-        public Task<VKResponse> SendMessage(string message, long peerId);
+        public Task<VKResponse> SendMessage(string message, long peerId, string file);
     }
 }

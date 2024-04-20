@@ -29,9 +29,9 @@ namespace server.Apis
 
         }
 
-        private static async Task<IResult> SendMessage(IVKService vkService, string message, long peerId)
+        private static async Task<IResult> SendMessage(IVKService vkService,  long peerId, string message = "", string file = "")
         {
-            var result = await vkService.SendMessage(message, peerId);
+            var result = await vkService.SendMessage(message, peerId, file);
             return TypedResults.Json(result);
 
 
