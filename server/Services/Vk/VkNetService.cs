@@ -1,5 +1,9 @@
+using ChatHub.HubR;
 using ChatHub.Models.Vk;
 using ChatHub.Models.Vk.DTO;
+using Microsoft.AspNetCore.SignalR;
+using System.Net.Http.Headers;
+using System.Text;
 using VkNet;
 using VkNet.AudioBypassService.Extensions;
 using VkNet.Enums.Filters;
@@ -13,18 +17,21 @@ namespace ChatHub.Services.Vk
         private readonly VkApi api;
         readonly ILogger _logger;
         readonly IMapper _mapper;
+        readonly IHubContext<ChatHubR> _chatHub;
         GetConversationsResult _conversation = null!;
         private List<User> Users = null!;
         private List<Group> Groups = null!;
-
+        private long lastDialogId;
         private ulong? pts;
         private ulong ts;
         ulong _applicationId;
         public VkNetService(
             ILogger<VkNetService> logger,
             IMapper mapper,
+            IHubContext<ChatHubR> chatHub,
             ulong appId)
         {
+            _chatHub = chatHub;
             _logger = logger;
             _mapper = mapper;
             var services = new ServiceCollection();
@@ -42,23 +49,7 @@ namespace ChatHub.Services.Vk
 
             if (_conversation == null)
             {
-                _conversation = await api.Messages.GetConversationsAsync(new GetConversationsParams()
-                {
-                    Count = limit,
-                    Offset = offsetId,
-
-                }) ;
-                var userIds = _conversation.Items
-                    .Where(chat => chat.Conversation.Peer.Type == ConversationPeerType.User)
-                    .Select(chat => chat.Conversation.Peer.Id)
-                    .ToList();
-
-                var groupIds = _conversation.Items
-                    .Where(chat => chat.Conversation.Peer.Type == ConversationPeerType.Group)
-                    .Select(chat => Math.Abs(chat.Conversation.Peer.Id).ToString())
-                    .ToList();
-                Users = (await api!.Users.GetAsync(userIds, ProfileFields.All)).ToList();
-                Groups = (await api.Groups.GetByIdAsync(groupIds, null, GroupsFields.All)).ToList();
+                await UpdateConversations();
 
 
             }
@@ -69,7 +60,7 @@ namespace ChatHub.Services.Vk
             {
                 list.Add(CreateConversationDTO(conversation));
             }
-
+            lastDialogId = list[0].Id;
             result.Data = list;
             return result;
 
@@ -137,6 +128,8 @@ namespace ChatHub.Services.Vk
             if (!api.IsAuthorized)
                 return new VKResponse(StatusCodes.Status401Unauthorized, "Undefined user");
 
+            lastDialogId = chatId;
+
             var messages = await api.Messages.GetHistoryAsync(new MessagesGetHistoryParams()
             {
                 Count = limit,
@@ -179,20 +172,33 @@ namespace ChatHub.Services.Vk
         }
 
 
-        public async Task<VKResponse> Login(string login, string password)
+        public async Task<VKResponse> Login(string login, string password, string code)
         {
-
+            var response = new VKResponse();
             await api!.AuthorizeAsync(new ApiAuthParams
             {
                 ApplicationId = _applicationId,
                 Login = login,
                 Password = password,
                 Settings = Settings.All,
-                TwoFactorAuthorization = () => Console.ReadLine()
+                TwoFactorAuthorization = () =>
+                {
+                    if (code == "")
+                    {
+                        response.StatusCode = 301;
+                        response.Message = "Enter autentification code";
+                        throw new ArgumentException("Enter autentification code");
+                    }
+                    return code;
+                }
             });
 
-            this.StartMessagesHandling();
-            return new VKResponse($"User {api.UserId} was logged in");
+            User? user = api.Users.Get(new[] { api.UserId!.Value }, ProfileFields.Photo100 | ProfileFields.ScreenName ).FirstOrDefault();
+            response.StatusCode = 200;
+            response.Message = $"User {api.UserId} was logged in";
+            response.Data = CreatePeerDto(_mapper.Map<UserDTO>(user));
+            StartMessagesHandling();
+            return response;
 
         }
 
@@ -203,18 +209,7 @@ namespace ChatHub.Services.Vk
             return new VKResponse($"User {id} logout");
         }
 
-        public async Task<VKResponse> SendMessage(string message, long peerId)
-        {
-            var messageId = await api!.Messages.SendAsync(new MessagesSendParams
-            {
-                PeerId = peerId,
-                Message = message,
-                RandomId = 0
-            });
-
-            return new VKResponse($"Message with id: {messageId} was sended");
-        }
-
+       
 
         private void StartMessagesHandling()
         {
@@ -225,29 +220,122 @@ namespace ChatHub.Services.Vk
             Task.Run(LongPollEventLoop);
         }
 
-        private void LongPollEventLoop()
+        public async Task<VKResponse> SendMessage(string message, long peerId, string file)
         {
+            var extension = Path.GetExtension(file);
+            UploadServerInfo uploadServer = null!;
+            if (extension == ".ogg")
+                uploadServer = api.Docs.GetMessagesUploadServer(api.UserId, DocMessageType.AudioMessage);
+            else
+                uploadServer = api.Docs.GetMessagesUploadServer(api.UserId);
+            var response = await UploadFile(uploadServer.UploadUrl, file, extension);
+            var title = Path.GetFileName(file);
+            var attachment = new List<MediaAttachment>
+            {
+                api.Docs.Save(   response, title ?? Guid.NewGuid().ToString())[0].Instance
+            };
+            var messageId = await api!.Messages.SendAsync(new MessagesSendParams
+            {
+                PeerId = peerId,
+                Message = message,
+                Attachments = attachment,
+                RandomId = 0
+            });
+
+            return new VKResponse($"Message with id: {messageId} was sended");
+        }
+        private byte[] GetBytes(string filePath) => File.ReadAllBytes(filePath);
+
+
+        private async Task<string> UploadFile(string serverUrl, string file, string fileExtension)
+        {
+            var data = GetBytes(file);
+
+            using (var client = new HttpClient())
+            {
+                var requestContent = new MultipartFormDataContent();
+                var content = new ByteArrayContent(data);
+                content.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/form-data");
+                requestContent.Add(content, "file", $"file.{fileExtension}");
+
+                var response = client.PostAsync(serverUrl, requestContent).Result;
+                return Encoding.Default.GetString(await response.Content.ReadAsByteArrayAsync());
+            }
+        }
+
+        private async Task SendUpdatedConversations()
+        {
+            var dialogs = await GetDialogs(0,200);
+            await ChatHubR.UpdateDialogsVK(
+            _chatHub,
+                new HubEntity { Id = api.UserId ?? 0, Data = dialogs.Data }
+            );
+            _logger.Log(LogLevel.Information, "Updated dialogs were sended");
+        }
+
+        private async Task SendUpdatedMessages()
+        {
+            var dialogs = await GetMessages(lastDialogId, 0, 50);
+            await ChatHubR.UpdateDialogsVK(
+            _chatHub,
+                new HubEntity { Id = api.UserId ?? 0, Data = dialogs.Data }
+            );
+            _logger.Log(LogLevel.Information, "Updated dialogs were sended");
+        }
+
+        private async Task UpdateConversations()
+        {
+            _conversation = await api.Messages.GetConversationsAsync(new GetConversationsParams()
+            {
+                Count = 200,
+                Offset = 0
+
+            });
+            var userIds = _conversation.Items
+                .Where(chat => chat.Conversation.Peer.Type == ConversationPeerType.User)
+                .Select(chat => chat.Conversation.Peer.Id)
+                .ToList();
+
+            var groupIds = _conversation.Items
+                .Where(chat => chat.Conversation.Peer.Type == ConversationPeerType.Group)
+                .Select(chat => Math.Abs(chat.Conversation.Peer.Id).ToString())
+                .ToList();
+            if (userIds != null)
+            Users = (await api!.Users.GetAsync(userIds, ProfileFields.Photo100 | ProfileFields.ScreenName | ProfileFields.FirstName | ProfileFields.LastName )).ToList();
+            if (groupIds != null)
+            Groups = (await api.Groups.GetByIdAsync(groupIds, null, GroupsFields.All)).ToList();
+        }
+
+        private async void LongPollEventLoop()
+        {
+            bool messageUpdate = false;
             while (true)
             {
                 try
                 {
-                    Thread.Sleep(340);
+                    Thread.Sleep(500);
                     LongPollHistoryResponse longPollResponse = api!.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams()
                     {
                         Ts = ts,
                         Pts = pts
                     });
                     pts = longPollResponse.NewPts;
-
+                    Console.WriteLine("Messages update");
+                    messageUpdate = false;
                     for (int i = 0; i < longPollResponse.History.Count; i++)
                     {
                         switch (longPollResponse.History[i][0])
                         {
                             case 4:
-                                Console.WriteLine(longPollResponse.Messages[i].Text);
-
+                                await UpdateConversations();
+                                await SendUpdatedConversations();
+                                Thread.Sleep(250);
+                                await SendUpdatedMessages();
+                                messageUpdate = true;
                                 break;
                         }
+                        if (messageUpdate)
+                            break;
                     }
                 }
                 catch (Exception ex)

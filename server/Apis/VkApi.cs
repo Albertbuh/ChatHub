@@ -16,9 +16,9 @@ namespace ChatHub.Apis
             return app;
         }
 
-        private static async Task<IResult> Login(IVKService vkService, string login, string password)
+        private static async Task<IResult> Login(IVKService vkService, string login, string password, string code = "")
         {
-            var result = await vkService.Login(login, password);
+            var result = await vkService.Login(login, password, code);
             return TypedResults.Json(result);
         }
 
@@ -29,9 +29,9 @@ namespace ChatHub.Apis
 
         }
 
-        private static async Task<IResult> SendMessage(IVKService vkService, string message, long peerId)
+        private static async Task<IResult> SendMessage(IVKService vkService, long peerId, string message = "", string file = "")
         {
-            var result = await vkService.SendMessage(message, peerId);
+            var result = await vkService.SendMessage(message, peerId, file);
             return TypedResults.Json(result);
 
 
@@ -48,10 +48,8 @@ namespace ChatHub.Apis
         private static async Task<IResult> GetDialogs(IVKService vkService, ulong offsetId, ulong limit)
         {
             var result = await vkService.GetDialogs(offsetId, limit);
-            if (result.Data is List<DialogDTO> dialogs)
-                return TypedResults.Ok(dialogs);
-            else
-                return TypedResults.Json(result);
+
+            return TypedResults.Json(result);
 
         }
     }
