@@ -1,0 +1,123 @@
+.wrapper {
+    width: 420px;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(30px);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    color: #fff;
+    border-radius: 10px;
+    padding: 30px 40px;
+  }
+  
+  .wrapper h1 {
+    font-size: 36px;
+    text-align: center;
+  }
+  
+  .wrapper .inputBox {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    margin: 30px 0;
+  }
+  
+  .inputBox input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    outline: none;
+    border-radius: 40px;
+    font-size: 16px;
+    color: #fff;
+    padding: 20px 45px 20px 20px;
+  }
+  
+  .inputBox input::placeholder {
+    color: #fff;
+  }
+  
+  .inputBox .icon {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+  }
+  
+  .wrapper .rememberForgot {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14.5px;
+    margin: -15px 0 15px;
+  }
+  
+  .rememberForgot label input {
+    accent-color: #fff;
+    margin-right: 4px;
+  }
+  
+  .rememberForgot a {
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  .rememberForgot a:hover {
+    text-decoration: underline;
+  }
+  
+  .wrapper .button {
+    width: 100%;
+    height: 45px;
+    background: #fff;
+    border: none;
+    outline: none;
+    border-radius: 40px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    font-size: 16px;
+    color: #333;
+    font-weight: 700;
+  }
+  
+  .wrapper .button:disabled {
+      cursor: not-allowed;
+      background-color: #3333333b;;
+  }
+  
+  .wrapper .registerLink {
+    font-size: 14.5px;
+    text-align: center;
+    margin: 20px 0 15px;
+  }
+  
+  .registerLink p a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  
+  .registerLink p a:hover {
+    text-decoration: underline;
+  }
+  
+  .fileImg {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    object-fit: cover;
+    opacity: 0.6;
+  }
+  
+  .avatarLabel {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+  
+  .avatarLabel:hover {
+      text-decoration: underline;
+    }
+  
