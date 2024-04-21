@@ -1,15 +1,15 @@
 "use client";
 import React, { Suspense, useEffect, useState } from "react";
-import { GetDialogs, GetMessages } from "../utils/getRequests";
+import { GetDialogsTL, GetMessagesTL } from "../utils/getRequests";
 import Connector from "../utils/singnalR-connector";
-import { IDialogInfo } from "../models/dto/IDialogInfo";
+import { IDialogInfo } from "./dto/IDialogInfo";
 import { ConnectorEntity } from "../models/connectorEntity";
 import List from "./list/list";
 
 import styles from "./telegram.module.css";
 import Chat from "./chat/chat";
-import { IMessageInfo } from "../models/dto/IMessageInfo";
-import TLResponse from "../models/dto/TLResponse";
+import { IMessageInfo } from "./dto/IMessageInfo";
+import TLResponse from "./dto/TLResponse";
 
 export default function Home() {
     const [dialogsUpdate, setDialogsUpdate] = useState<IDialogInfo[]>([]);
@@ -34,7 +34,7 @@ export default function Home() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const updatedDialogs = await GetDialogs();
+                const updatedDialogs = await GetDialogsTL();
                 setDialogsUpdate(updatedDialogs);
             } catch (error) {
                 console.error("Ошибка при получении диалогов:", error);
@@ -50,7 +50,7 @@ export default function Home() {
                 return;
             }
 
-            const newMessages = await GetMessages(currentDialogId, 0, 50);
+            const newMessages = await GetMessagesTL(currentDialogId, 0, 50);
             setMessages(newMessages);
         };
 

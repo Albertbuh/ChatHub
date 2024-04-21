@@ -6,6 +6,8 @@ class Connector {
     private connection: signalR.HubConnection;
     private onDialogsTLUpdateCallback: ((connectorEntity: ConnectorEntity) => void) | null = null;
     private onMessagesTLUpdateCallback: ((connectorEntity: ConnectorEntity) => void) | null = null;
+    private onDialogsVKUpdateCallback: ((connectorEntity: ConnectorEntity) => void) | null = null;
+    private onMessagesVKUpdateCallback: ((connectorEntity: ConnectorEntity) => void) | null = null;
     static instance: Connector;
 
     constructor() {
@@ -29,6 +31,19 @@ class Connector {
         this.onMessagesTLUpdateCallback = callback;
     }
 
+    public setOnDialogsVKUpdateCallback(
+        callback: (connectorEntity: ConnectorEntity) => void,
+    ) {
+        this.onDialogsVKUpdateCallback = callback;
+    }
+
+    public setOnMessagesVKUpdateCallback(
+        callback: (connectorEntity: ConnectorEntity) => void,
+    ) {
+        this.onMessagesVKUpdateCallback = callback;
+    }
+
+
     public resetOnMessagesTLUpdateCallback() {
         this.onMessagesTLUpdateCallback = null;
     }
@@ -41,10 +56,24 @@ class Connector {
             }
         });
 
-        this.connection.on("updateMessagesTl", (connectorEntity: ConnectorEntity) => {
+        this.connection.on("updateMessagesTL", (connectorEntity: ConnectorEntity) => {
 
             if (this.onMessagesTLUpdateCallback) {
                 this.onMessagesTLUpdateCallback(connectorEntity);
+            }
+        });
+
+        this.connection.on("updateDialogsVK", (connectorEntity: ConnectorEntity) => {
+
+            if (this.onDialogsVKUpdateCallback) {
+                this.onDialogsVKUpdateCallback(connectorEntity);
+            }
+        });
+
+        this.connection.on("updateMessagesVK", (connectorEntity: ConnectorEntity) => {
+
+            if (this.onMessagesVKUpdateCallback) {
+                this.onMessagesVKUpdateCallback(connectorEntity);
             }
         });
     }

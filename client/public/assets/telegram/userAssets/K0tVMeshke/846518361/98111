@@ -1,0 +1,132 @@
+
+
+--9.	Создать хранимую процедуру, автоматически создающую и наполняющую данными таблицу «arrears», 
+--в которой должны быть представлены идентификаторы и имена читателей, у которых до сих пор находится на руках хотя 
+--бы одна книга, по которой дата возврата установлена в прошлом относительно текущей даты.
+GO
+CREATE or ALTER PROCEDURE [CreateArrearsTable]
+AS
+BEGIN
+    DECLARE @Flag INT = 0;
+    DECLARE @subscriber_id INT;
+    DECLARE @subscriber_name VARCHAR(255);
+
+    DECLARE [cur] CURSOR FOR 
+        SELECT [s].[sb_subscriber], [sub].[s_name]
+        FROM [subscriptions] AS [s]
+		JOIN [subscribers] AS [sub] ON [s].[sb_subscriber] = [sub].[s_id]
+        WHERE [s].[sb_finish] < GETDATE() AND [s].[sb_is_active] = 'Y';
+
+    DROP TABLE IF EXISTS [arrears];
+    CREATE TABLE [arrears] (
+        [subscriber_id] INT,
+        [subscriber_name] VARCHAR(255)
+    );
+
+    OPEN [cur];
+    FETCH NEXT FROM [cur] INTO @subscriber_id, @subscriber_name;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        INSERT INTO [arrears] ([subscriber_id], [subscriber_name]) VALUES (@subscriber_id, @subscriber_name);
+        FETCH NEXT FROM [cur] INTO @subscriber_id, @subscriber_name;
+    END;
+
+    CLOSE [cur];
+    DEALLOCATE [cur];
+END;
+GO
+
+EXEC [CreateArrearsTable]
+--3.	Создать хранимую функцию, получающую на вход идентификатор читателя 
+--и воз-вращающую 1, если у читателя на руках сейчас менее десяти книг, и 0 в противном случае.
+GO
+CREATE or ALTER FUNCTION [CheckSubscriversBooks](@subscriverId INT)
+RETURNS INT
+AS
+BEGIN
+	DECLARE @result INT
+	DECLARE @count INT
+				  SELECT @count = count(*)
+					FROM [subscriptions]
+					WHERE [sb_is_active] = 'Y'
+					GROUP BY [sb_subscriber]
+	SET @result = CASE
+					WHEN @count <= 10 then 1
+					else 0
+				  END;
+RETURN @result
+END;
+GO
+
+SELECT [dbo].[CheckSubscriversBooks]([s_id]) from [subscribers]
+--4.	Создать хранимую функцию, получающую на вход год издания книги и возвра-щающую 1, 
+--если книга издана менее ста лет назад, и 0 в противном случае.
+GO
+CREATE or ALTER FUNCTION [CheckBookDate](@bookDate INT)
+RETURNS INT
+AS
+BEGIN
+	DECLARE @CurrentDate INT
+	SET @CurrentDate = YEAR(GETDATE())
+	DECLARE @result INT
+	IF (100 > @CurrentDate- @bookDate)
+		SET @result = 1
+	ELSE
+		SET @result = 0
+RETURN @result
+END;
+GO
+SELECT [dbo].[CheckBookDate](b_year) from [books]
+GO
+--1.	Создать хранимую функцию, получающую на вход идентификатор читателя и воз-вращающую список идентификаторов книг, 
+--которые он уже прочитал и вернул в библиотеку.
+CREATE or ALTER FUNCTION [GetReturnedBooks](@subscriberId INT)
+RETURNS TABLE
+AS
+RETURN
+    SELECT [sb_book]
+    FROM [subscriptions]
+    WHERE [sb_subscriber] = @subscriberId
+      AND [sb_is_active] = 'N';
+GO
+
+SELECT * FROM [GetReturnedBooks](1)
+
+--5.	Создать хранимую процедуру, обновляющую все поля типа DATE (если такие есть) 
+--всех записей указанной таблицы на значение текущей даты.
+GO
+
+CREATE or ALTER PROCEDURE [UpdateDateFields]
+    @tableName NVARCHAR(255)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @fieldName NVARCHAR(255);
+    DECLARE @sql NVARCHAR(MAX);
+
+    DECLARE [cur] CURSOR FOR
+    SELECT [COLUMN_NAME]
+    FROM [INFORMATION_SCHEMA].[COLUMNS]
+    WHERE [TABLE_NAME] = @tableName AND [DATA_TYPE] = 'date';
+
+    OPEN [cur];
+    FETCH NEXT FROM [cur] INTO @fieldName;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        SET @sql = 'UPDATE ' + QUOTENAME(@tableName) + ' SET ' + QUOTENAME(@fieldName) + ' = GETDATE();';
+        EXEC sp_executesql @sql;
+
+        FETCH NEXT FROM [cur] INTO @fieldName;
+    END;
+
+    CLOSE [cur];
+    DEALLOCATE [cur];
+END;
+GO
+EXEC [UpdateDateFields] 'subscriptions';
+
+
+
