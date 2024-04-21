@@ -10,8 +10,6 @@ export default function LoginPage() {
   
   const handleLoginSuccess = () => {
 
-    console.log('Login success');
-    console.log('New auth stage:', 'verification');
   };
 
   return (

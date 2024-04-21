@@ -196,6 +196,12 @@ function MessageMedia({ mediaPath }: MediaProps) {
         );
     }
 
+    if (ext === "mp3" || ext === "ogg") {
+        return (
+        <audio controls src={mediaPath}></audio>
+        )
+    }
+
     return <h1>Undefined media</h1>;
 }
 

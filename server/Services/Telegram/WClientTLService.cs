@@ -361,31 +361,49 @@ public class WClientTLService : ITLService
     private async Task<MessageDTO?> SendMessage(long peerId, string message)
     {
         var peer = GetPeerById(peerId)?.ToInputPeer();
-        return peer != null ? CreateMessageDTO(await _client.SendMessageAsync(peer, message)) : null;
+        MessageDTO? result =
+            peer != null ? CreateMessageDTO(await _client.SendMessageAsync(peer, message)) : null;
+        if (result != null)
+        {
+            await UpdateDialogs();
+            await SendUpdatedDialogs();
+        }
+        return result;
     }
 
     private async Task OnUpdate(Update update)
     {
+        bool isUpdated = true;
         switch (update)
         {
             case UpdateNewMessage unm:
+                _logger.LogInformation("Update new message");
+                break;
             case UpdateEditMessage uem:
+                _logger.LogInformation("Update edit message");
+                break;
             case UpdateDeleteChannelMessages udcm:
+                _logger.LogInformation("Update delete channel message");
+                break;
             case UpdateDeleteMessages udm:
-            case UpdateUserName uun:
-            case UpdateUser uu:
-                await SendUpdatedMessages();
-                await UpdateDialogs();
-                await SendUpdatedDialogs();
+                _logger.LogInformation("Update delete message");
                 break;
             default:
-                break; 
+                isUpdated = false;
+                break;
+        }
+        if (isUpdated)
+        {
+            _logger.LogInformation("send updates");
+            await SendUpdatedMessages();
+            await UpdateDialogs();
+            await SendUpdatedDialogs();
         }
     }
 
     private async Task SendUpdatedMessages()
     {
-        var messages = await GetMessages(lastDialogId, 0, 1);
+        var messages = await GetMessages(lastDialogId, 0, 50);
         await ChatHubR.UpdateMessagesTL(
             _chatHub,
             new ChatHub.HubR.HubEntity { Id = lastDialogId, Data = messages.Data }

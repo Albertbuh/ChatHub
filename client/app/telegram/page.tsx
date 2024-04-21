@@ -9,6 +9,7 @@ import List from "./list/list";
 import styles from "./telegram.module.css";
 import Chat from "./chat/chat";
 import { IMessageInfo } from "../models/dto/IMessageInfo";
+import TLResponse from "../models/dto/TLResponse";
 
 export default function Home() {
     const [dialogsUpdate, setDialogsUpdate] = useState<IDialogInfo[]>([]);
@@ -21,10 +22,8 @@ export default function Home() {
 
     const handleMessagesUpdate = (connectorEntity: ConnectorEntity) => {
         if (connectorEntity.id == currentDialogId) {
-            let newMessage = connectorEntity.data as IMessageInfo[];
-            if (!messages.find((m) => m.id === newMessage[0].id)) {
-                setMessages([newMessage[0], ...messages]);
-            }
+            let newMessages = connectorEntity.data as IMessageInfo[];
+            setMessages(newMessages);
         }
     };
 
@@ -63,8 +62,7 @@ export default function Home() {
     }
 
     const handleSendSubmit = async (data: SendData) => {
-        console.log(data);
-        await fetch(
+        var response = await fetch(
             `http://localhost:5041/api/v1.0/telegram/peers/${currentDialogId}`,
             {
                 method: "POST",
@@ -74,6 +72,12 @@ export default function Home() {
                 body: JSON.stringify(data),
             },
         );
+        if(response.ok) {
+            let message:TLResponse = await response.json();
+            let sendedMessage = message.data as IMessageInfo;
+            if(data)
+                setMessages([sendedMessage, ...messages]);
+        }
         if (data.media) {
             await fetch(
                 `http://localhost:5041/api/v1.0/telegram/peers/${currentDialogId}`,
@@ -106,3 +110,4 @@ export interface SendData {
     message: string;
     media: File | null;
 }
+
