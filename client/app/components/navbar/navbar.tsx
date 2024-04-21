@@ -12,10 +12,12 @@ import { BsChatSquareHeart } from "react-icons/bs";
 import { CiLogout } from "react-icons/ci";
 import { AuthStageContext } from '@/app/telegram/contexts/AuthContext';
 import { auth } from '@/app/realTimeChat/lib/firebase';
+import { useUserStore } from '@/app/realTimeChat/lib/userStore';
 
 // TODO: Time dependent drop-down
 export default function SideNav() {
     const avatarPath = '/avatars/Hayasaka.jpg';
+  const { currentUser } = useUserStore();
 
     let container = null;
     if (typeof window !== 'undefined') {
@@ -138,7 +140,7 @@ export default function SideNav() {
                 </li>
                 <li className={`${styles.listItem} ${getActiveClass('/')}`}>
                     <Link href="/realTimeChat">
-                        <img className={styles.avatarImg} src={avatarPath} alt='' />
+                        <img className={styles.avatarImg} src={currentUser?.avatar  ||avatarPath} alt='' />
                         <span className={styles.linkName}> Your Name</span>
                     </Link>
                 </li>
