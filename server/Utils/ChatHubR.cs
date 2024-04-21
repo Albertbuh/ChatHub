@@ -20,16 +20,6 @@ namespace ChatHub.HubR
             await chatHub.Clients.All.SendAsync("updateDialogsTL", dialogs);
         }
 
-        public static async Task UpdateDialogsVK(IHubContext<ChatHubR> chatHub, HubEntity? dialogs)
-        {
-            await chatHub.Clients.All.SendAsync("updateDialogsVk", dialogs);
-        }
-
-        public static async Task UpdateMessagesVK(IHubContext<ChatHubR> chatHub, HubEntity? messages)
-        {
-            await chatHub.Clients.All.SendAsync("updateMessagesVk", messages);
-        }
-
         public static async Task UpdateMessagesTL(IHubContext<ChatHubR> chatHub, HubEntity? messages)
         {
             await chatHub.Clients.All.SendAsync("updateMessagesTL", messages);

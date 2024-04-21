@@ -23,7 +23,7 @@ public static class ServiceProviderExtensions
         }
 
         services.AddSingleton<IVKService, VkNetService>(
-            _ => new VkNetService(_.GetRequiredService<ILogger<VkNetService>>(), _.GetRequiredService<IMapper>(), _.GetRequiredService<IHubContext<ChatHubR>>(), appId)
+            _ => new VkNetService(_.GetRequiredService<ILogger<VkNetService>>(), _.GetRequiredService<IMapper>(), appId)
             );
     }
 
