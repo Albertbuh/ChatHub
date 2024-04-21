@@ -1,7 +1,7 @@
 using ChatHub.Api;
 using ChatHub.Extensions;
-using server.Apis;
-using server.HubR;
+using ChatHub.Apis;
+using ChatHub.HubR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +22,7 @@ builder
     .Services
     .AddSwaggerGen();
 
-builder.Services.AddAutoMapper(typeof(ChatHub.Mappers.Telegram.WClientMapperProfile));
+builder.Services.AddAutoMapper(typeof(ChatHub.Mappers.Telegram.WClientMapperProfile), typeof(ChatHub.Mappers.Vk.VkNetMapperProfile));
 builder.Services.AddTelegramApiService();
 builder.Services.AddVkApiService();
 

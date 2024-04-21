@@ -1,7 +1,7 @@
 ﻿using ChatHub.Models.Telegram.DTO;
-using server.Services.Vk;
+using ChatHub.Services.Vk;
 
-namespace server.Apis
+namespace ChatHub.Apis
 {
     public static class VkApi
     {

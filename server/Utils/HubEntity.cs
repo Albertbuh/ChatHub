@@ -1,4 +1,4 @@
-namespace server.HubR;
+namespace ChatHub.HubR;
 
 public struct HubEntity
 {
