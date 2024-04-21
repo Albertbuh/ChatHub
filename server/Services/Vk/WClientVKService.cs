@@ -15,8 +15,11 @@ namespace server.Services.Vk
         readonly ILogger<WClientTLService> _logger;
         readonly IMapper _mapper;
         GetConversationsResult _conversation = null!;
-        public List<User> Users = null!;
-        public List<Group> Groups = null!;
+        private List<User> Users = null!;
+        private List<Group> Groups = null!;
+
+        private ulong? pts;
+        private ulong ts;
         ulong _applicationId;
         public WClientVKService(
             ILogger<WClientTLService> logger,
@@ -195,6 +198,7 @@ namespace server.Services.Vk
                 TwoFactorAuthorization = () => Console.ReadLine()
             });
 
+            this.StartMessagesHandling();
             return new VKResponse($"User {api.UserId} was logged in");
 
         }
@@ -216,6 +220,49 @@ namespace server.Services.Vk
             });
 
             return new VKResponse($"Message with id: {messageId} was sended");
+        }
+
+
+        private void StartMessagesHandling()
+        {
+            LongPollServerResponse longPoolServerResponse = api.Messages.GetLongPollServer(needPts: true);
+            ts = Convert.ToUInt64(longPoolServerResponse.Ts);
+            pts = longPoolServerResponse.Pts;
+
+            Task.Run(LongPollEventLoop);
+        }
+
+        private void LongPollEventLoop()
+        {
+            while (true)
+            {
+                try
+                {
+                    Thread.Sleep(340);
+                    LongPollHistoryResponse longPollResponse = api!.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams()
+                    {
+                        Ts = ts,
+                        Pts = pts
+                    });
+                    pts = longPollResponse.NewPts;
+
+                    for (int i = 0; i < longPollResponse.History.Count; i++)
+                    {
+                        switch (longPollResponse.History[i][0])
+                        {
+                            case 4:
+                                Console.WriteLine(longPollResponse.Messages[i].Text);
+
+                                break;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
+            }
         }
     }
 }

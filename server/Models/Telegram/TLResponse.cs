@@ -7,16 +7,18 @@ public struct TLResponse
     public Object? Data { get; set; }
 
     public TLResponse()
-      : this(200, "")
-    { }
+        : this(200, "") { }
 
     public TLResponse(string message)
-      : this(200, message)
-    { }
+        : this(200, message) { }
 
     public TLResponse(int statusCode, string message)
+        : this(statusCode, message, null) { }
+
+    public TLResponse(int statusCode, string message, object? data)
     {
         StatusCode = statusCode;
         Message = message;
+        Data = data;
     }
 }

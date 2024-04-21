@@ -14,5 +14,5 @@
     <PackageReference Include="VkNet.NLog.Extensions.Logging" Version="1.3.3" />
     <PackageReference Include="WTelegramClient" Version="4.0.0" />
   </ItemGroup>
-
+  
 </Project>
