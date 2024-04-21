@@ -1,7 +1,6 @@
 import * as signalR from "@microsoft/signalr";
 import { ConnectorEntity } from "../models/connectorEntity";
-const URL = process.env.HUB_ADDRESS ?? "http://localhost:5041/chat";
-
+const URL = process.env.HUB_ADDRESS ?? "http://localhost:5041/chat"; //or whatever your backend port is
 class Connector {
     private connection: signalR.HubConnection;
     private onDialogsTLUpdateCallback: ((connectorEntity: ConnectorEntity) => void) | null = null;
@@ -56,7 +55,7 @@ class Connector {
             }
         });
 
-        this.connection.on("updateMessagesTL", (connectorEntity: ConnectorEntity) => {
+        this.connection.on("updateMessagesTl", (connectorEntity: ConnectorEntity) => {
 
             if (this.onMessagesTLUpdateCallback) {
                 this.onMessagesTLUpdateCallback(connectorEntity);
