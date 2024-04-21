@@ -22,7 +22,6 @@ export default function SideNav() {
     }
     let telegramIsLogged = false;
     const { authStage } = useContext(AuthStageContext);
-    console.log('Auth stage in SideNav:', authStage);
 
 
     const [sidebarActive, setSidebarActive] = useState(false);

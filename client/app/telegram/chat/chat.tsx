@@ -116,7 +116,8 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
     let message = messageInfo.message.replace("TL.MessageMediaPhoto", "").replace(
         "TL.MessageMediaDocument",
         "",
-    );
+    ).replace("TL.MessageMediaWebPage", "");
+
     useEffect(() => {
         const getFilepath = async () => {
             let newPath = await GetPathToMediaFileWithoutExtension(
@@ -128,7 +129,13 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
             }
         };
 
-        getFilepath();
+        if (hasMedia) {
+            let isWeb = messageInfo.message.includes("TL.MessageMediaWebPage")
+            if (!isWeb)
+                getFilepath();
+            else
+                setMediaPath(message.trim());
+        }
     }, []);
 
     return (
@@ -155,6 +162,13 @@ interface MediaProps {
     mediaPath: string;
 }
 function MessageMedia({ mediaPath }: MediaProps) {
+    if (mediaPath.includes("https"))
+        return (
+            <iframe
+                src={mediaPath}
+            />
+        );
+        
     const imageTypes = ["jpeg", "jpg", "png", "webp"];
     var ext = mediaPath.split(".").pop() ?? "";
     if (imageTypes.includes(ext)) {
@@ -169,12 +183,20 @@ function MessageMedia({ mediaPath }: MediaProps) {
     const [isMuted, setIsMuted] = useState(true);
     if (ext === "mp4") {
         return (
-            <video className={styles.img} src={mediaPath} autoPlay loop muted={isMuted} onClick={() => setIsMuted(!isMuted) }>
+            <video
+                className={styles.img}
+                playsInline
+                autoPlay
+                muted={isMuted}
+                loop
+                onClick={() => setIsMuted(!isMuted)}
+            >
+                <source src={mediaPath} type="video/mp4" />
             </video>
         );
     }
-    
-    return "";
+
+    return <h1>Undefined media</h1>;
 }
 
 interface TopProps {

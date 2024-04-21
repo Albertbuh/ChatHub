@@ -23,12 +23,12 @@ export async function GetPathToMediaFileWithoutExtension(
         try {
             const response = await fetch(url);
             if (response.ok) {
-                console.log(url);
                 return url;
             }
         }catch {}
+        return "";
     });
     var results = await Promise.all(promises);
-    var result = results.find(result => result != undefined);
+    var result = results.find(result => result != "");
     return result;
 }
