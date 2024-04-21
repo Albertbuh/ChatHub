@@ -68,5 +68,6 @@ class Connector {
       Connector.instance = new Connector();
     return Connector.instance;
   }
+
 }
 export default Connector.getInstance;

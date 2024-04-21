@@ -13,16 +13,19 @@
 }
 
 body {
-    font-family: "Poppins", sans-serif;
-    color: var(--main-color);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    display: flex;
-    justify-content: flex-end;
-    min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  min-height: 100vh;
 
-    background: no-repeat;
-    background-size: cover;
+  background: no-repeat;
+  background-size: cover;
+
+  overflow-x: hidden;
 }
 
 
@@ -42,3 +45,5 @@ ul {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+
