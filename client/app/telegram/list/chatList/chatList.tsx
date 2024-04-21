@@ -10,46 +10,60 @@ import Image from "next/image";
 
 interface IChatProps {
     dialogs: IDialogInfo[];
-    handleClick: (id:number) => void;
+    handleClick: (id: number) => void;
 }
 
 const ChatList = ({ dialogs, handleClick }: IChatProps) => {
+    const [searchFilter, setSearchFilter] = useState("");
+
+    function handleSearchBarUpdate(filter: string) {
+        setSearchFilter(filter.toLowerCase());
+        console.log(searchFilter);
+    }
 
     return (
         <div className={styles.chatList}>
-            <SearchBar/>
+            <SearchBar onUpdate={handleSearchBarUpdate}/>
             <ul>
-            {dialogs.map((dialog) => (
-                <li
-                    key={dialog.id}
-                    className={styles.item}
-                    onClick={() => handleClick(dialog.id)}
-                >
-                    <Image
-                        className={styles.avatarImg}
-                        src={`/assets/telegram/userAssets/${localStorage.getItem('tag')}/${dialog.id}/profile.jpeg`}
-                        width={"50"}
-                        height={"50"}
-                        alt={"aboba"}
-                    />
-                    <div className={styles.texts}>
-                        <span className={styles.span}>{dialog.title}</span>
-                        <p className={styles.p}>{dialog.topMessage.message}</p>
-                    </div>
-                </li>
-            ))}
-        </ul>
+                {dialogs.filter((dialog) =>
+                    dialog.mainUsername?.toLowerCase().includes(searchFilter) ||
+                    dialog.title.toLowerCase().includes(searchFilter)
+                ).map((dialog) => (
+                    <li
+                        key={dialog.id}
+                        className={styles.item}
+                        onClick={() => handleClick(dialog.id)}
+                    >
+                        <Image
+                            className={styles.avatarImg}
+                            src={`/assets/telegram/userAssets/${localStorage.getItem("tag")
+                                }/${dialog.id}/profile.jpeg`}
+                            width={"50"}
+                            height={"50"}
+                            alt={"aboba"}
+                        />
+                        <div className={styles.texts}>
+                            <span className={styles.span}>{dialog.title}</span>
+                            <p className={styles.p}>{dialog.topMessage.message}</p>
+                        </div>
+                    </li>
+                ))}
+            </ul>
         </div>
     );
 };
 
-function SearchBar() {
+interface SearchBarProps {
+    onUpdate: (filter: string) => void; 
+}
+function SearchBar({onUpdate}: SearchBarProps) {
     const [addMode, setAddMode] = useState(false);
+    
     return (
         <div className={styles.search}>
             <div className={styles.searchBar}>
                 <IoIosSearch className={styles.img} />
-                <input className={styles.input} type="text" placeholder="Search" />
+                <input onChange={(e) => onUpdate(e.target.value)} className={styles.input} type="text" placeholder="Search" />
             </div>
             {addMode
                 ? (
@@ -67,6 +81,5 @@ function SearchBar() {
         </div>
     );
 }
-
 
 export default ChatList;

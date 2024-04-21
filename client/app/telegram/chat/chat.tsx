@@ -13,7 +13,11 @@ import {
 import { BsEmojiNeutral } from "react-icons/bs";
 import { useEffect, useRef, useState } from "react";
 import { IMessageInfo } from "@/app/models/dto/IMessageInfo";
-import { GetPathToProfilePhotoById } from "@/app/utils/filePaths";
+import {
+    GetPathToMediaFile,
+    GetPathToMediaFileWithoutExtension,
+    GetPathToProfilePhotoById,
+} from "@/app/utils/filePaths";
 import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
 import Timestamp from "@/app/components/timestamp/timestamp";
 import { SendData } from "../page";
@@ -23,28 +27,24 @@ interface ChatProps {
     currentDialog: IDialogInfo | undefined;
     onSendSubmit: (data: SendData) => void;
 }
+
 const Chat = ({ messages, currentDialog, onSendSubmit }: ChatProps) => {
     const endRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, []);
+    }, [currentDialog]);
 
-    console.log("Messages: ");
-    console.log(messages);
     return (
         <div className={styles.chat}>
             <Top dialog={currentDialog} />
             <div className={styles.center}>
                 {messages.map((message) => (
-                    message.sender.id === Number(localStorage.getItem("id"))
-                        ? <OwnMessage message={message} />
-                        : (
-                            <Message
-                                message={message}
-                                avatarPath={GetPathToProfilePhotoById(message.sender.id)}
-                            />
-                        )
+                    <Message
+                        key={message.id}
+                        message={message}
+                        dialogId={currentDialog!.id}
+                    />
                 ))}
             </div>
             <MessageSender onSubmit={onSendSubmit} />
@@ -57,17 +57,30 @@ interface MessageSenderProps {
 }
 function MessageSender({ onSubmit }: MessageSenderProps) {
     const [message, setMessage] = useState("");
-    
+    const [media, setMedia] = useState<File | null>(null);
+
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        onSubmit({message, mediaFilepath:""});
+        onSubmit({ message, media });
         setMessage("");
     };
-    
+
+    function handleImageClick() {
+        var input = document.createElement("input");
+        input.type = "file";
+        input.onchange = () => {
+            var files = input.files;
+            if (files) {
+                setMedia(files[0]);
+            }
+        };
+        input.click();
+    }
+
     return (
         <form action="" className={styles.bottom} onSubmit={handleSubmit}>
             <div className={styles.icons}>
-                <CiImageOn className={styles.imgI} />
+                <CiImageOn className={styles.imgI} onClick={handleImageClick} />
                 <CiCamera className={styles.imgI} />
                 <CiMicrophoneOn className={styles.imgI} />
             </div>
@@ -91,36 +104,77 @@ function MessageSender({ onSubmit }: MessageSenderProps) {
     );
 }
 
-interface OwnMessageProps {
+interface MessageProps {
     message: IMessageInfo;
+    dialogId: number;
 }
-function OwnMessage({ message }: OwnMessageProps) {
+function Message({ message: messageInfo, dialogId }: MessageProps) {
+    const hasMedia = messageInfo.message.includes("TL.MessageMedia");
+    const isOwn: boolean =
+        messageInfo.sender.id.toString() === localStorage.getItem("id");
+    const [mediaPath, setMediaPath] = useState("");
+    let message = messageInfo.message.replace("TL.MessageMediaPhoto", "").replace(
+        "TL.MessageMediaDocument",
+        "",
+    );
+    useEffect(() => {
+        const getFilepath = async () => {
+            let newPath = await GetPathToMediaFileWithoutExtension(
+                dialogId,
+                messageInfo.id,
+            );
+            if (newPath) {
+                setMediaPath(newPath);
+            }
+        };
+
+        getFilepath();
+    }, []);
+
     return (
-        <div className={`${styles.message} ${styles.messageOwn}`}>
+        <div className={`${styles.message} ${isOwn ? styles.messageOwn : ""}`}>
+            {!isOwn
+                ? (
+                    <img
+                        className={styles.avatarImg}
+                        src={GetPathToProfilePhotoById(messageInfo.sender.id)}
+                        alt=""
+                    />
+                )
+                : null}
             <div className={styles.texts}>
-                <p className={styles.p}>
-                    {message.message}
-                </p>
-                <Timestamp time={message.date} className={styles.span} />
+                {hasMedia ? <MessageMedia mediaPath={mediaPath} /> : null}
+                {message.trim() !== "" ? <p className={styles.p}>{message}</p> : null}
+                <Timestamp time={messageInfo.date} className={styles.span} />
             </div>
         </div>
     );
 }
 
-interface MessageProps {
-    message: IMessageInfo;
-    avatarPath: string;
+interface MediaProps {
+    mediaPath: string;
 }
-function Message({ message, avatarPath }: MessageProps) {
-    return (
-        <div className={styles.message}>
-            <img className={styles.avatarImg} src={avatarPath} alt="" />
-            <div className={styles.texts}>
-                <p className={styles.p}>{message.message}</p>
-                <Timestamp time={message.date} className={styles.span} />
-            </div>
-        </div>
-    );
+function MessageMedia({ mediaPath }: MediaProps) {
+    const imageTypes = ["jpeg", "jpg", "png", "webp"];
+    var ext = mediaPath.split(".").pop() ?? "";
+    if (imageTypes.includes(ext)) {
+        return (
+            <img
+                className={styles.img}
+                src={mediaPath}
+            />
+        );
+    }
+
+    const [isMuted, setIsMuted] = useState(true);
+    if (ext === "mp4") {
+        return (
+            <video className={styles.img} src={mediaPath} autoPlay loop muted={isMuted} onClick={() => setIsMuted(!isMuted) }>
+            </video>
+        );
+    }
+    
+    return "";
 }
 
 interface TopProps {

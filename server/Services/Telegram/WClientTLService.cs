@@ -1,7 +1,7 @@
+using ChatHub.HubR;
 using ChatHub.Models.Telegram;
 using ChatHub.Models.Telegram.DTO;
 using Microsoft.AspNetCore.SignalR;
-using ChatHub.HubR;
 using TL;
 
 namespace ChatHub.Services.Telegram;
@@ -14,7 +14,6 @@ public class WClientTLService : ITLService
     long lastDialogId = 0;
     User _user => _client.User;
     Messages_Dialogs? _dialogs;
-
 
     readonly IHubContext<ChatHubR> _chatHub;
 
@@ -65,7 +64,6 @@ public class WClientTLService : ITLService
             };
         var result = new TLResponse();
 
-        var loadUserProfileTask = new Task(async() => await LoadProfilePicture(_user));
         try
         {
             if (_user == null)
@@ -74,11 +72,10 @@ public class WClientTLService : ITLService
 
                 if (_user != null)
                 {
-                    loadUserProfileTask.Start();
+                    ThreadPool.QueueUserWorkItem(async (object? state) => await LoadProfilePicture(_user));
                     result.Message = $"User {_user} (id {_user.id}) is successfully logged-in";
                     result.Data = _mapper.Map<PeerDTO>(_user);
                     await UpdateDialogs();
-                    Task.WaitAll(loadUserProfileTask);
                 }
             }
             else
@@ -136,12 +133,20 @@ public class WClientTLService : ITLService
         foreach (var msgBase in messages.Messages)
         {
             result.Add(CreateMessageDTO(msgBase));
-            if(msgBase is Message m)
-            {
-                await LoadProfilePicture(Peer(m.From ?? m.Peer));
-                if(m.media != null)
-                    await LoadMessageMedia(m, peer);
-            }
+            ThreadPool.QueueUserWorkItem(
+                async (object? state) =>
+                {
+                    if (msgBase is Message m)
+                        await LoadProfilePicture(Peer(m.From ?? m.Peer));
+                }
+            );
+            ThreadPool.QueueUserWorkItem(
+                async (object? state) =>
+                {
+                    if (msgBase is Message m && m.media != null)
+                        await LoadMessageMedia(m, peer);
+                }
+            );
         }
         return result;
     }
@@ -151,52 +156,54 @@ public class WClientTLService : ITLService
         if (message.media is null)
             return;
 
-        string profilePictureDirectoryPath = Path.Combine(mainImageDirectory, peer.ID.ToString());
-        if (!Directory.Exists(profilePictureDirectoryPath))
+        try
         {
-            lock (new object())
-                Directory.CreateDirectory(profilePictureDirectoryPath);
-        }
-
-        string filename = $"{message.ID}";
-        if (!IsFileExists(profilePictureDirectoryPath, filename))
-        {
-            if (message.media is MessageMediaDocument { document: Document document })
+            string profilePictureDirectoryPath = Path.Combine(mainImageDirectory, peer.ID.ToString());
+            if (!Directory.Exists(profilePictureDirectoryPath))
             {
-                filename = $"{filename}.{document.mime_type[(document.mime_type.IndexOf('/') + 1)..]}";
-                var filepath = Path.Combine(profilePictureDirectoryPath, filename);
-                using var fileStream = File.Create(filepath);
-                await _client.DownloadFileAsync(document, fileStream);
+                lock (new object())
+                    Directory.CreateDirectory(profilePictureDirectoryPath);
             }
-            else if (message.media is MessageMediaPhoto { photo: Photo photo })
-            {
-                filename = $"{message.ID}.jpg";
-                var filepath = Path.Combine(profilePictureDirectoryPath, filename);
-                using var fileStream = File.Create(filepath);
-                var type = await _client.DownloadFileAsync(photo, fileStream);
-                fileStream.Close();
 
-                if (type != 0u && type is not Storage_FileType.unknown and not Storage_FileType.partial)
-                    File.Move(
-                        filepath,
-                        $"{Path.Combine(profilePictureDirectoryPath, Path.GetFileNameWithoutExtension(filename))}.{type}",
-                        true
-                    );
+            string filename = $"{message.ID}";
+            if (!IsFileExists(profilePictureDirectoryPath, filename))
+            {
+                if (message.media is MessageMediaDocument { document: Document document })
+                {
+                    filename = $"{filename}.{document.mime_type[(document.mime_type.IndexOf('/') + 1)..]}";
+                    var filepath = Path.Combine(profilePictureDirectoryPath, filename);
+                    using var fileStream = File.Create(filepath);
+                    await _client.DownloadFileAsync(document, fileStream);
+                }
+                else if (message.media is MessageMediaPhoto { photo: Photo photo })
+                {
+                    filename = $"{message.ID}.jpeg";
+                    var filepath = Path.Combine(profilePictureDirectoryPath, filename);
+                    using var fileStream = File.Create(filepath);
+                    var type = await _client.DownloadFileAsync(photo, fileStream);
+                    fileStream.Close();
+
+                    if (type != 0u && type is not Storage_FileType.unknown and not Storage_FileType.partial)
+                        File.Move(
+                            filepath,
+                            $"{Path.Combine(profilePictureDirectoryPath, Path.GetFileNameWithoutExtension(filename))}.{type}",
+                            true
+                        );
+                }
+                _logger.LogInformation($"Media for {message.ID} has been loaded");
             }
-            _logger.LogInformation($"Media for {message.ID} has been loaded");
         }
-        // else
-        //     _logger.LogInformation($"Media {message.ID} already loaded");
+        catch { }
     }
 
     private IPeerInfo? GetPeerById(long peerId)
     {
-         if (_dialogs!.users.ContainsKey(peerId))
+        if (_dialogs!.users.ContainsKey(peerId))
             return _dialogs.users[peerId];
         else if (_dialogs.chats.ContainsKey(peerId))
             return _dialogs.chats[peerId];
         else
-            return null;    
+            return null;
     }
 
     public async Task<TLResponse> GetAllDialogs()
@@ -211,7 +218,7 @@ public class WClientTLService : ITLService
         foreach (Dialog dialog in _dialogs.dialogs)
         {
             var dto = await CreateDialogDTO(dialog);
-            if(dto.Id > 0)
+            if (dto.Id > 0)
                 list.Add(dto);
         }
         lastDialogId = list[0].Id;
@@ -241,32 +248,34 @@ public class WClientTLService : ITLService
 
     private async Task LoadProfilePicture(IPeerInfo peer)
     {
-        string profilePictureDirectoryPath = Path.Combine(mainImageDirectory, peer.ID.ToString());
-        if (!Directory.Exists(profilePictureDirectoryPath))
+        try
         {
-            lock (new object())
-                Directory.CreateDirectory(profilePictureDirectoryPath);
-        }
-        const string filename = "profile.jpeg";
-        const string filenameWithoutExtension = "profile";
-        if (!IsFileExists(profilePictureDirectoryPath, filenameWithoutExtension))
-        {
-            var filepath = Path.Combine(profilePictureDirectoryPath, filename);
-            using var fileStream = File.Create(filepath);
-            var type = await _client.DownloadProfilePhotoAsync(peer, fileStream);
-            fileStream.Close();
-
-            if (type != 0u && type is not Storage_FileType.unknown and not Storage_FileType.partial)
+            string profilePictureDirectoryPath = Path.Combine(mainImageDirectory, peer.ID.ToString());
+            if (!Directory.Exists(profilePictureDirectoryPath))
             {
-                File.Move(
-                    filepath,
-                    $"{Path.Combine(profilePictureDirectoryPath, filenameWithoutExtension)}.{type}",
-                    true
-                );
+                lock (new object())
+                    Directory.CreateDirectory(profilePictureDirectoryPath);
+            }
+            const string filename = "profile.jpeg";
+            const string filenameWithoutExtension = "profile";
+            if (!IsFileExists(profilePictureDirectoryPath, filenameWithoutExtension))
+            {
+                var filepath = Path.Combine(profilePictureDirectoryPath, filename);
+                using var fileStream = File.Create(filepath);
+                var type = await _client.DownloadProfilePhotoAsync(peer, fileStream);
+                fileStream.Close();
+
+                if (type != 0u && type is not Storage_FileType.unknown and not Storage_FileType.partial)
+                {
+                    File.Move(
+                        filepath,
+                        $"{Path.Combine(profilePictureDirectoryPath, filenameWithoutExtension)}.{type}",
+                        true
+                    );
+                }
             }
         }
-        // else
-        //     _logger.LogInformation("Profile photo already loaded");
+        catch { }
     }
 
     private MessageDTO CreateMessageDTO(MessageBase message)
@@ -304,12 +313,13 @@ public class WClientTLService : ITLService
         }
         if (result.Id > 0)
         {
-            var t = Task.Run(() => LoadProfilePicture(Peer(dialog.Peer)));
+            ThreadPool.QueueUserWorkItem(
+                async (object? state) => await LoadProfilePicture((Peer(dialog.Peer)))
+            );
             var topMessage = _dialogs
                 .Messages
                 .First(m => m.Peer.ID == dialog.peer.ID && m.ID == dialog.TopMessage);
             result.TopMessage = CreateMessageDTO(topMessage);
-            Task.WaitAll(t);
         }
 
         return result;
@@ -321,18 +331,18 @@ public class WClientTLService : ITLService
             return new TLResponse(StatusCodes.Status401Unauthorized, "Undefiend user");
         if (_dialogs == null)
             _dialogs = await UpdateDialogs();
-        if(String.IsNullOrEmpty(message) && String.IsNullOrEmpty(mediaFilepath))
-            return new(StatusCodes.Status400BadRequest, "Nothing to send");        
-        
+        if (String.IsNullOrEmpty(message) && String.IsNullOrEmpty(mediaFilepath))
+            return new(StatusCodes.Status400BadRequest, "Nothing to send");
+
         MessageDTO? createdMessage = !String.IsNullOrEmpty(mediaFilepath)
             ? await SendMessageWithMedia(peerId, message, mediaFilepath)
-            :  await SendMessage(peerId, message!);
-        
-        return createdMessage  != null
-            ? new(StatusCodes.Status201Created, $"Send message to {peerId}", createdMessage )
+            : await SendMessage(peerId, message!);
+
+        return createdMessage != null
+            ? new(StatusCodes.Status201Created, $"Send message to {peerId}", createdMessage)
             : new(StatusCodes.Status400BadRequest, "Nothing to send");
     }
-    
+
     private async Task<MessageDTO?> SendMessageWithMedia(
         long peerId,
         string? caption,
@@ -351,9 +361,7 @@ public class WClientTLService : ITLService
     private async Task<MessageDTO?> SendMessage(long peerId, string message)
     {
         var peer = GetPeerById(peerId)?.ToInputPeer();
-        return peer != null 
-            ? CreateMessageDTO(await _client.SendMessageAsync(peer, message))
-            : null;
+        return peer != null ? CreateMessageDTO(await _client.SendMessageAsync(peer, message)) : null;
     }
 
     private async Task OnUpdate(Update update)
@@ -364,11 +372,6 @@ public class WClientTLService : ITLService
             case UpdateEditMessage uem:
             case UpdateDeleteChannelMessages udcm:
             case UpdateDeleteMessages udm:
-            case UpdateUserTyping uut:
-            case UpdateChatUserTyping ucut:
-            case UpdateChannelUserTyping ucut2:
-            case UpdateChatParticipants { participants: ChatParticipants cp }:
-            case UpdateUserStatus uus:
             case UpdateUserName uun:
             case UpdateUser uu:
                 await SendUpdatedMessages();
@@ -376,7 +379,7 @@ public class WClientTLService : ITLService
                 await SendUpdatedDialogs();
                 break;
             default:
-                break; // there are much more update types than the above example cases
+                break; 
         }
     }
 

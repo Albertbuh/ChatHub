@@ -22,8 +22,9 @@ export default function Home() {
     const handleMessagesUpdate = (connectorEntity: ConnectorEntity) => {
         if (connectorEntity.id == currentDialogId) {
             let newMessage = connectorEntity.data as IMessageInfo[];
-            if(!messages.find(m => m.id === newMessage[0].id))
+            if (!messages.find((m) => m.id === newMessage[0].id)) {
                 setMessages([newMessage[0], ...messages]);
+            }
         }
     };
 
@@ -62,6 +63,7 @@ export default function Home() {
     }
 
     const handleSendSubmit = async (data: SendData) => {
+        console.log(data);
         await fetch(
             `http://localhost:5041/api/v1.0/telegram/peers/${currentDialogId}`,
             {
@@ -72,6 +74,18 @@ export default function Home() {
                 body: JSON.stringify(data),
             },
         );
+        if (data.media) {
+            await fetch(
+                `http://localhost:5041/api/v1.0/telegram/peers/${currentDialogId}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    body: JSON.stringify(data.media),
+                },
+            );
+        }
     };
 
     if (dialogsUpdate && dialogsUpdate.length > 0) {
@@ -90,5 +104,5 @@ export default function Home() {
 
 export interface SendData {
     message: string;
-    mediaFilepath: string;
+    media: File | null;
 }
