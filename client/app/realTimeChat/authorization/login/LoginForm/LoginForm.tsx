@@ -37,6 +37,7 @@ const LoginForm = () => {
             toast.error(err.message);
         } finally {
             setLoading(false);
+            
         }
     }
 

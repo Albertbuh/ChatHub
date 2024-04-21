@@ -21,10 +21,11 @@ export default function RealTimeChat() {
   const { chatId } = useChatStore();
 
   useEffect(() => {
+    
     const unSub = onAuthStateChanged(auth, (user) => {
-      if (user && user.uid) { // <-- проверяем, что user и user.uid не равны null и undefined
-        fetchUserInfo(user.uid);
-      }
+
+        fetchUserInfo(user?.uid!);
+      
     });
 
     return () => {
@@ -32,13 +33,11 @@ export default function RealTimeChat() {
     };
   }, [fetchUserInfo]);
 
-  console.log(currentUser)
-  if (currentUser === null) navigate("/realTimeChat/authorization/login")
   if (isLoading) return <div className={`${styles.loading} ${styles.container}`}>Loading...</div>;
 
 
   return (
-    <div className={styles.container}>
+    <div className={currentUser ? styles.container : ''}>
       {
         currentUser ? (
           <>

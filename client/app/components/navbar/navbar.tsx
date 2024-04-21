@@ -23,7 +23,6 @@ export default function SideNav() {
     }
     let telegramIsLogged = false;
     const { authStage } = useContext(AuthStageContext);
-    console.log('Auth stage in SideNav:', authStage);
 
 
     const [sidebarActive, setSidebarActive] = useState(false);
@@ -127,19 +126,7 @@ export default function SideNav() {
                     </Link>
                 </li>
 
-                {/* <li className={`${styles.listItem} ${getActiveClass('/realTimeChat/authorization/login')}`}>
-                    <Link href="/realTimeChat/authorization/login">
-                        <BsChatSquareHeart className={styles.listItemIcon} />
-                        <span className={styles.linkName}> Real Time Chat login</span>
-                    </Link>
-                </li>
-
-                <li className={`${styles.listItem} ${getActiveClass('/realTimeChat/authorization/password')}`}>
-                    <Link href="/realTimeChat/authorization/password">
-                        <BsChatSquareHeart className={styles.listItemIcon} />
-                        <span className={styles.linkName}> Real Time Chat Registration</span>
-                    </Link>
-                </li> */}
+                
             </ul>
             <ul className={`${styles.list} ${styles.flexColumn}`}>
                 
