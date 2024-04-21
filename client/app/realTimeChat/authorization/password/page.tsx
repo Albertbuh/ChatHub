@@ -1,26 +1,19 @@
 "use client";
 
 import '../authorization.css';
-import { navigate } from '../login/actions';
-import PasswordForm from './RegistrationForm/RegistrationForm';
+import RegistrationForm from './RegistrationForm/RegistrationForm';
+import Notification from '../../notification/notification';
 
 
 
 export default function PasswordPage() {
     
-  const handlePasswordSuccess = () => {
-    navigate('/telegram');
-    setAuthStage('telegramLogged');
-  };
 
     return (
       <div >
-        <PasswordForm onPasswordSuccess={handlePasswordSuccess} />
+        <RegistrationForm />
+        <Notification/>
       </div>
     );
   }
-
-function setAuthStage(arg0: string) {
-  throw new Error('Function not implemented.');
-}
   

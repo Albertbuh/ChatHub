@@ -99,6 +99,13 @@
     object-fit: cover;
   }
 
+  .chat .center .messageOwn .avatarImg {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
   .chat .center .message .texts .img {
     width: 100%;
     height: 300px;
@@ -107,6 +114,12 @@
   }
   
   .chat .center .message .texts p {
+    padding: 20px;
+    background-color: rgba(17, 25, 40, 0.3);
+    border-radius: 10px;
+  }
+
+  .textSended{
     padding: 20px;
     background-color: rgba(17, 25, 40, 0.3);
     border-radius: 10px;
