@@ -1,7 +1,7 @@
 "use client";
-import React, { Suspense, useEffect, useRef, useState } from "react";
 import { GetDialogs, GetMessages } from "../utils/getRequests";
 import Connector from "../utils/singnalR-connector";
+import React, { useEffect, useState } from "react";
 import { IDialogInfo } from "../models/dto/IDialogInfo";
 import { ConnectorEntity } from "../models/connectorEntity";
 import List from "./list/list";

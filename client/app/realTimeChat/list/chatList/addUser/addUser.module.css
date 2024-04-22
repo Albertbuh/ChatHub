@@ -1,0 +1,88 @@
+.addUser {
+    width: max-content;
+    height: max-content;
+    padding: 30px;
+    background-color: rgba(17, 25, 40, 0.781);
+    border-radius: 10px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+  }
+  
+  .addUser .userForm {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .addUser .userForm .addUserInput {
+    padding: 20px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    
+  }
+
+  .searchBar {
+    flex: 1;
+    background-color: rgba(17, 25, 40, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  .searchBar .input {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    flex: 1;
+  }
+  
+   .userAddBtn {
+    background-color: #555555;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+   .userAddBtn:disabled {
+    background-color: #5555553a;
+    cursor: not-allowed;
+  }
+  
+  .addUser .user {
+    margin-top: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .addUser .user .detail {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .addUser .user .detail .addUserImg {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  /* .addUser .user .userAddBtn {
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    cursor: pointer;
+  } */
+  
