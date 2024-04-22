@@ -3,20 +3,29 @@ import styles from './detail.module.css'
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { GoDownload } from "react-icons/go";
 import { useUserStore } from '@/app/realTimeChat/lib/userStore';
+import { useState } from 'react';
 
 
 const imagePaths = ['/backgrounds/1.jpg', '/backgrounds/2.jpg',
     '/backgrounds/3.jpg', '/backgrounds/4.jpg', '/backgrounds/5.jpg'
 ];
 
+interface DetailProps {
+    backgroundImage: string;
+    setBackgroundImage: React.Dispatch<React.SetStateAction<string>>;
+  }
+
 const Detail = () => {
     const avatarPath = './avatars/Hayasaka.jpg';
 
     const { currentUser } = useUserStore();
-
+    const [backgroundImage, setBackgroundImage] = useState('');
 
     const handleBlock = async () => {
+    };
 
+    const handleDownloadClick = (image) => {
+        setBackgroundImage(image);
     };
 
     return (
@@ -50,10 +59,10 @@ const Detail = () => {
                         {imagePaths.map((photo, index) => (
                             <div key={index} className={styles.photoItem}>
                                 <div className={styles.photoDetail}>
-                                    <img className={styles.img} src={photo} alt={`Background:${index + 1}`} />
-                                    <span className={styles.span}>{`Background: ${index + 1}`}</span>
+                                    <img className={styles.img} src={photo} alt={`photo_${index + 1}`} />
+                                    <span className={styles.span}>{`photo_${index + 1}.jpg`}</span>
                                 </div>
-                                <GoDownload className={styles.icon} />
+                                <GoDownload className={styles.icon} onClick={() => handleDownloadClick(photo)} />
                             </div>
                         ))}
 

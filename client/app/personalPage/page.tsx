@@ -6,7 +6,6 @@ import styles from './personalPage.module.css'
 import { onAuthStateChanged } from "firebase/auth";
 import { ExpandContext } from "../components/navbar/expandContxt";
 import { auth } from "../realTimeChat/lib/firebase";
-import { useChatStore } from "../realTimeChat/lib/chatStore";
 import { useUserStore } from "../realTimeChat/lib/userStore";
 import LoginPage from "../realTimeChat/authorization/login/page";
 import Detail from "./detail/detail";
@@ -18,7 +17,7 @@ export default function personalPage() {
   const { isExpanded } = useContext(ExpandContext);
 
   const { currentUser, isLoading, fetchUserInfo } = useUserStore();
-  const { chatId } = useChatStore();
+  
 
   useEffect(() => {
 
