@@ -10,8 +10,7 @@ import bg5 from './assets/backgrounds/5.jpg'
 import SideNav from './components/navbar/navbar';
 import "./globals.css";
 import { AuthStageProvider } from './telegram/contexts/AuthContext';
-
-import RealTimeChat from './realTimeChat/page';
+import { ExpandContextProvider } from './components/navbar/expandContxt'
 
 
 interface RootLayoutProps {
@@ -27,10 +26,10 @@ export default function RootLayout({ children, }: RootLayoutProps) {
       >
 
         <AuthStageProvider>
-          <SideNav>
-          </SideNav>
-          {/* <RealTimeChat /> */}
-          {children}
+          <ExpandContextProvider>
+            <SideNav />
+            {children}
+          </ExpandContextProvider>
         </AuthStageProvider>
 
       </body>

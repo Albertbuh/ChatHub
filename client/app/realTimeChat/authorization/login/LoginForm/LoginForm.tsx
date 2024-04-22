@@ -1,7 +1,7 @@
 import styles from './LoginForm.module.css'
 import { CgRename } from "react-icons/cg";
-import { MdOutlineAlternateEmail, MdOutlinePassword } from "react-icons/md";
-import { useState } from 'react';
+import { MdOutlineAlternateEmail, MdOutlinePassword, MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
+import { useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/app/realTimeChat/lib/firebase';
@@ -11,6 +11,9 @@ import Link from 'next/link';
 
 
 const LoginForm = () => {
+    const passwordInputRef = useRef<HTMLInputElement>(null);
+    const [passwordVisible, setPasswordVisible] = useState(false);
+
     const [avatar, setAvatar] = useState<{
         file: File | null;
         url: string;
@@ -37,9 +40,18 @@ const LoginForm = () => {
             toast.error(err.message);
         } finally {
             setLoading(false);
-            
+
         }
     }
+
+    const togglePasswordVisibility = () => {
+        console.log('Show password')
+        setPasswordVisible(!passwordVisible);
+        if (passwordInputRef.current) {
+          passwordInputRef.current.type = passwordVisible ? "password" : "text";
+        }
+      };
+      
 
     return (
         <div className={styles.wrapper}>
@@ -52,9 +64,15 @@ const LoginForm = () => {
                 </div>
 
                 <div className={styles.inputBox}>
-                    <input type="text" name='password' placeholder='Password' required />
-                    <MdOutlinePassword className={styles.icon} />
+                    <input type={passwordVisible ? "text" : "password" } name='password' placeholder='Password' required ref={passwordInputRef}/>
+                    <MdOutlinePassword className={styles.icon} onClick={togglePasswordVisibility} />
                 </div>
+                {/* <div className={styles.inputBox}>
+                    <input type="text" name='password' placeholder='Password' required ref={passwordInputRef}/>
+                    <MdOutlinePassword className={styles.icon}  onClick={togglePasswordVisibility}>
+                        </MdOutlinePassword>
+                    
+                </div> */}
 
                 <div className={styles.rememberForgot}>
                     <label><input type="checkbox" />Remember me</label>
@@ -64,7 +82,7 @@ const LoginForm = () => {
                 <button className={styles.button} disabled={loading} type="submit"> {loading ? "Loading" : "Sign In"}</button>
 
                 <div className={styles.registerLink}>
-                    <p>Don&apos;t have account? 
+                    <p>Don&apos;t have account?
                         <Link href="/realTimeChat/authorization/password">
                             Registration
                         </Link>
