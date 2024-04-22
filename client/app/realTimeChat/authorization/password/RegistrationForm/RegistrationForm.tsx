@@ -1,7 +1,7 @@
 import styles from './RegistrationForm.module.css'
 import { CgRename } from "react-icons/cg";
 import { MdOutlineAlternateEmail, MdOutlinePassword } from "react-icons/md";
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '@/app/realTimeChat/lib/firebase';
@@ -74,6 +74,17 @@ const RegistrationForm = () => {
     };
 
 
+    const passwordInputRef = useRef<HTMLInputElement>(null);
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const togglePasswordVisibility = () => {
+        console.log('Show password')
+        setPasswordVisible(!passwordVisible);
+        if (passwordInputRef.current) {
+          passwordInputRef.current.type = passwordVisible ? "password" : "text";
+        }
+      };
+
+
     return (
         <div className={styles.wrapper}>
             <form onSubmit={handleRegister}>
@@ -101,9 +112,13 @@ const RegistrationForm = () => {
                 </div>
 
                 <div className={styles.inputBox}>
+                    <input type={passwordVisible ? "text" : "password" } name='password' placeholder='Password' required ref={passwordInputRef}/>
+                    <MdOutlinePassword className={styles.icon} onClick={togglePasswordVisibility} />
+                </div>
+                {/* <div className={styles.inputBox}>
                     <input type="text" name='password' placeholder='Password' required />
                     <MdOutlinePassword className={styles.icon} />
-                </div>
+                </div> */}
 
                 <button className={styles.button} disabled={loading} type="submit"> {loading ? "Loading" : "Sign Up"}</button>
 
