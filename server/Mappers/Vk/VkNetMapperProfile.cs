@@ -8,6 +8,8 @@ public class VkNetMapperProfile : Profile
     {
         CreateMapUserVkPeerDTO();
         CreateMapMessageDTO();
+        CreateMapUserUserDTO();
+        CreateMapGroupUserDTO();
     }
 
 

@@ -5,7 +5,7 @@ import styles from "./chatList.module.css";
 import { IoIosSearch } from "react-icons/io";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 import { useState } from "react";
-import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
+import { IDialogInfo } from "../../dto/IDialogInfo";
 import Image from "next/image";
 import Timestamp from "@/app/components/timestamp/timestamp";
 

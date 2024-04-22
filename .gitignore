@@ -483,3 +483,4 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+/client/app/telegram/assets/userAssets/K0tVMeshke
