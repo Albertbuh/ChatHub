@@ -1,5 +1,5 @@
 "use client";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { GetDialogs, GetMessages } from "../utils/getRequests";
 import Connector from "../utils/singnalR-connector";
 import { IDialogInfo } from "../models/dto/IDialogInfo";
@@ -27,9 +27,9 @@ export default function Home() {
         }
     };
 
-    const connectorInstance = Connector();
-    connectorInstance.setOnDialogsTLUpdateCallback(handleDialogsUpdate);
-    connectorInstance.setOnMessagesTLUpdateCallback(handleMessagesUpdate);
+    const connectorInstance = useRef(Connector());
+    connectorInstance.current.setOnDialogsTLUpdateCallback(handleDialogsUpdate);
+    connectorInstance.current.setOnMessagesTLUpdateCallback(handleMessagesUpdate);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -97,7 +97,7 @@ export default function Home() {
             <div className={styles.container}>
                 <List dialogs={dialogsUpdate} handleClick={handleListClick} />
                 <Chat
-                    messages={messages}
+                    messages={messages.toReversed()}
                     currentDialog={dialogsUpdate.find((d) => d.id == currentDialogId)}
                     onSendSubmit={handleSendSubmit}
                 />
