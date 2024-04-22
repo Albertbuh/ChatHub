@@ -2,9 +2,10 @@ import { IDialogInfo } from '@/app/models/dto/IDialogInfo';
 import ChatList from './chatList/chatList'
 import styles from './list.module.css'
 import UserInfo from './userInfo/userInfo'
+import { IDialogInfoVK } from '../dto/IDialogInfo';
 
 interface IListProps {
-    dialogs: IDialogInfo[];
+    dialogs: IDialogInfoVK[];
     handleClick: (id:number) => void;
 }
 

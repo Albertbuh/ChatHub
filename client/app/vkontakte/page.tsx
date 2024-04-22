@@ -27,14 +27,15 @@ export default function Home() {
         }
     };
 
-    const connectorInstance = Connector();
+    const connectorInstance = Connector.getInstance();
     connectorInstance.setOnDialogsVKUpdateCallback(handleDialogsUpdate);
     connectorInstance.setOnMessagesVKUpdateCallback(handleMessagesUpdate);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const updatedDialogs = await GetDialogsVK();
+                const updatedDialogs = await GetDialogsVK(0,100);
+                console.log(updatedDialogs);
                 setDialogsUpdate(updatedDialogs);
             } catch (error) {
                 console.error("Ошибка при получении диалогов:", error);
@@ -51,6 +52,8 @@ export default function Home() {
             }
 
             const newMessages = await GetMessagesVK(currentDialogId, 0, 50);
+            console.log(newMessages);
+
             setMessages(newMessages);
         };
 
@@ -63,7 +66,7 @@ export default function Home() {
 
     const handleSendSubmit = async (data: SendData) => {
         var response = await fetch(
-            `http://localhost:5041/api/v1.0/VK/peers/${currentDialogId}`,
+            `http://localhost:5041/api/v1.0/vk/peers/${currentDialogId}`,
             {
                 method: "POST",
                 headers: {
@@ -80,7 +83,7 @@ export default function Home() {
         }
         if (data.media) {
             await fetch(
-                `http://localhost:5041/api/v1.0/VK/peers/${currentDialogId}`,
+                `http://localhost:5041/api/v1.0/vk/peers/${currentDialogId}`,
                 {
                     method: "POST",
                     headers: {

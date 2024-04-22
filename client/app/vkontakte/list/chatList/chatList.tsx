@@ -7,11 +7,13 @@ import { FaMinus, FaPlus } from "react-icons/fa6";
 import { useState } from "react";
 import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
 import Image from "next/image";
+import { IDialogInfoVK } from "../../dto/IDialogInfo";
 
 interface IChatProps {
-    dialogs: IDialogInfo[];
+    dialogs: IDialogInfoVK[];
     handleClick: (id: number) => void;
 }
+
 
 const ChatList = ({ dialogs, handleClick }: IChatProps) => {
     const [searchFilter, setSearchFilter] = useState("");
@@ -36,8 +38,8 @@ const ChatList = ({ dialogs, handleClick }: IChatProps) => {
                     >
                         <Image
                             className={styles.avatarImg}
-                            src={`/assets/telegram/userAssets/${localStorage.getItem("tag")
-                                }/${dialog.id}/profile.jpeg`}
+                            
+                            src={dialog.photoUri}
                             width={"50"}
                             height={"50"}
                             alt={"aboba"}

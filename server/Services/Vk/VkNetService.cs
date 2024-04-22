@@ -22,6 +22,7 @@ namespace ChatHub.Services.Vk
         private List<User> Users = null!;
         private List<Group> Groups = null!;
         private long lastDialogId;
+        private bool ApiBreak = false;
         private ulong? pts;
         private ulong ts;
         ulong _applicationId;
@@ -43,6 +44,8 @@ namespace ChatHub.Services.Vk
 
         public async Task<VKResponse> GetDialogs(ulong offsetId, ulong limit)
         {
+            ApiBreak = true;
+
             if (!api.IsAuthorized)
                 return new VKResponse(StatusCodes.Status401Unauthorized, "Undefined user");
 
@@ -62,6 +65,8 @@ namespace ChatHub.Services.Vk
             }
             lastDialogId = list[0].Id;
             result.Data = list;
+            ApiBreak = false;
+
             return result;
 
         }
@@ -125,6 +130,8 @@ namespace ChatHub.Services.Vk
 
         public async Task<VKResponse> GetMessages(long chatId, int offsetId, int limit)
         {
+            ApiBreak = true;
+
             if (!api.IsAuthorized)
                 return new VKResponse(StatusCodes.Status401Unauthorized, "Undefined user");
 
@@ -167,6 +174,8 @@ namespace ChatHub.Services.Vk
                 messageList.Add(CreateMessageDto(message, user));
             }
             result.Data = messageList;
+            ApiBreak = false;
+
             return result;
 
         }
@@ -174,6 +183,8 @@ namespace ChatHub.Services.Vk
 
         public async Task<VKResponse> Login(string login, string password, string code)
         {
+            ApiBreak = true;
+
             var response = new VKResponse();
             await api!.AuthorizeAsync(new ApiAuthParams
             {
@@ -197,7 +208,9 @@ namespace ChatHub.Services.Vk
             response.StatusCode = 200;
             response.Message = $"User {api.UserId} was logged in";
             response.Data = CreatePeerDto(_mapper.Map<UserDTO>(user));
-            StartMessagesHandling();
+            //StartMessagesHandling();
+            ApiBreak = false;
+
             return response;
 
         }
@@ -222,6 +235,7 @@ namespace ChatHub.Services.Vk
 
         public async Task<VKResponse> SendMessage(string message, long peerId, string file)
         {
+            ApiBreak = true;
             var extension = Path.GetExtension(file);
             UploadServerInfo uploadServer = null!;
             if (extension == ".ogg")
@@ -241,6 +255,7 @@ namespace ChatHub.Services.Vk
                 Attachments = attachment,
                 RandomId = 0
             });
+            ApiBreak = false;
 
             return new VKResponse($"Message with id: {messageId} was sended");
         }
@@ -313,35 +328,39 @@ namespace ChatHub.Services.Vk
             {
                 try
                 {
-                    Thread.Sleep(500);
-                    LongPollHistoryResponse longPollResponse = api!.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams()
+                    if (!ApiBreak)
                     {
-                        Ts = ts,
-                        Pts = pts
-                    });
-                    pts = longPollResponse.NewPts;
-                    Console.WriteLine("Messages update");
-                    messageUpdate = false;
-                    for (int i = 0; i < longPollResponse.History.Count; i++)
-                    {
-                        switch (longPollResponse.History[i][0])
+                        Thread.Sleep(500);
+                        LongPollHistoryResponse longPollResponse = api!.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams()
                         {
-                            case 4:
-                                await UpdateConversations();
-                                await SendUpdatedConversations();
-                                Thread.Sleep(250);
-                                await SendUpdatedMessages();
-                                messageUpdate = true;
+                            Ts = ts,
+                            Pts = pts
+                        });
+                        pts = longPollResponse.NewPts;
+                        Console.WriteLine("Messages update");
+                        messageUpdate = false;
+                        for (int i = 0; i < longPollResponse.History.Count; i++)
+                        {
+                            switch (longPollResponse.History[i][0])
+                            {
+                                case 4:
+                                    await UpdateConversations();
+                                    await SendUpdatedConversations();
+                                    Thread.Sleep(250);
+                                    await SendUpdatedMessages();
+                                    messageUpdate = true;
+                                    break;
+                            }
+                            if (messageUpdate)
                                 break;
                         }
-                        if (messageUpdate)
-                            break;
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                 }
+
 
             }
         }

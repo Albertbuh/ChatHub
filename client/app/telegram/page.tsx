@@ -10,6 +10,7 @@ import styles from "./telegram.module.css";
 import Chat from "./chat/chat";
 import { IMessageInfo } from "./dto/IMessageInfo";
 import TLResponse from "./dto/TLResponse";
+const connectorInstance = Connector.getInstance();
 
 export default function Home() {
     const [dialogsUpdate, setDialogsUpdate] = useState<IDialogInfo[]>([]);
@@ -27,7 +28,7 @@ export default function Home() {
         }
     };
 
-    const connectorInstance = Connector();
+   
     connectorInstance.setOnDialogsTLUpdateCallback(handleDialogsUpdate);
     connectorInstance.setOnMessagesTLUpdateCallback(handleMessagesUpdate);
 

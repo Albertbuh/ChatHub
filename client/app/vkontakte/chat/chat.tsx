@@ -21,10 +21,12 @@ import {
 import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
 import Timestamp from "@/app/components/timestamp/timestamp";
 import { SendData } from "../page";
+import { IMessageInfoVK } from "../dto/IMessageInfo";
+import { IDialogInfoVK } from "../dto/IDialogInfo";
 
 interface ChatProps {
-    messages: IMessageInfo[];
-    currentDialog: IDialogInfo | undefined;
+    messages: IMessageInfoVK[];
+    currentDialog: IDialogInfoVK | undefined;
     onSendSubmit: (data: SendData) => void;
 }
 
@@ -105,7 +107,7 @@ function MessageSender({ onSubmit }: MessageSenderProps) {
 }
 
 interface MessageProps {
-    message: IMessageInfo;
+    message: IMessageInfoVK;
     dialogId: number;
 }
 function Message({ message: messageInfo, dialogId }: MessageProps) {
@@ -206,7 +208,7 @@ function MessageMedia({ mediaPath }: MediaProps) {
 }
 
 interface TopProps {
-    dialog: IDialogInfo | undefined;
+    dialog: IDialogInfoVK | undefined;
 }
 function Top({ dialog }: TopProps) {
     if (!dialog) {

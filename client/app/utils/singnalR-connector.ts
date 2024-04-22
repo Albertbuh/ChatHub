@@ -10,12 +10,15 @@ class Connector {
     static instance: Connector;
 
     constructor() {
+
+       
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(URL)
             .withAutomaticReconnect()
             .build();
         this.connection.start();
         this.registerEventHandlers();
+      
     }
 
     public setOnDialogsTLUpdateCallback(
@@ -45,6 +48,9 @@ class Connector {
 
     public resetOnMessagesTLUpdateCallback() {
         this.onMessagesTLUpdateCallback = null;
+        this.onDialogsTLUpdateCallback = null;
+        this.onMessagesVKUpdateCallback = null;
+        this.onDialogsVKUpdateCallback = null;
     }
 
     private registerEventHandlers() {
@@ -77,11 +83,16 @@ class Connector {
         });
     }
 
+    public  CloseConnection(){
+        this.connection.stop();
+    }
+
     public static getInstance(): Connector {
         if (!Connector.instance) {
+          
             Connector.instance = new Connector();
         }
         return Connector.instance;
     }
 }
-export default Connector.getInstance;
+export default Connector;

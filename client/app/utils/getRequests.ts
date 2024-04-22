@@ -61,10 +61,10 @@ export async function GetMessagesVK(dialogId: number, offset: number, limit: num
     }
 }
 
-export async function GetDialogsVK(): Promise<IDialogInfoVK[]> {
+export async function GetDialogsVK(offset: number, limit: number): Promise<IDialogInfoVK[]> {
     let dialogs = [];
     try {
-        const res = await fetch("http://localhost:5041/api/v1.0/vk/dialogs",{headers: {
+        const res = await fetch(`http://localhost:5041/api/v1.0/vk/dialogs?offsetId=${offset}&limit=${limit}`,{headers: {
             'Cache-Control': 'no-cache'
           }});
         if (!res.ok) {

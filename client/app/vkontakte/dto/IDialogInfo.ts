@@ -4,6 +4,6 @@ export interface IDialogInfoVK {
     id: number;
     title: string;
     mainUsername: string;
-    photoId: number;
+    photoUri: string;
     topMessage: IMessageInfoVK;
 }
