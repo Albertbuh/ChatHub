@@ -12,7 +12,7 @@ namespace ChatHub.HubR
             connectionIds.Add(Context.ConnectionId);
             foreach (var client in clients)
             {
-                var connection = Clients.Client(Context.ConnectionId);
+                var connection = Clients.Client(client);
                 var connectionContext = connection?.GetType().GetProperty("ConnectionContext")?.GetValue(connection) as HubConnectionContext;
                 connectionContext?.Abort();
 
