@@ -1,5 +1,5 @@
 import styles from './PasswordForm.module.css'
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 
 import { BsFillKeyFill } from "react-icons/bs";
@@ -42,13 +42,24 @@ const PasswordForm = ({ onPasswordSuccess }: PasswordFormProps) => {
         }
     }
 
+    const passwordInputRef = useRef<HTMLInputElement>(null);
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const togglePasswordVisibility = () => {
+        console.log('Show password')
+        setPasswordVisible(!passwordVisible);
+        if (passwordInputRef.current) {
+          passwordInputRef.current.type = passwordVisible ? "password" : "text";
+        }
+      };
+
     return (
         <div className={styles.wrapper} >
             <form action="" onSubmit={handleSubmit}>
                 <h1>Password</h1>
+
                 <div className={styles.inputBox}>
-                    <input type="text" value={PasswordCode} onChange={(e) => setPasswordCode(e.target.value)} placeholder='Password-code' required />
-                    <BsFillKeyFill  className={styles.icon} />
+                    <input type={passwordVisible ? "text" : "password" }  value={PasswordCode} onChange={(e) => setPasswordCode(e.target.value)} placeholder='Password-code' required ref={passwordInputRef}/>
+                    <BsFillKeyFill  className={styles.icon} onClick={togglePasswordVisibility} />
                 </div>
 
                 <div className={styles.rememberForgot}>

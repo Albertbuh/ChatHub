@@ -1,6 +1,7 @@
 import SideNav from './components/navbar/navbar';
 import "./globals.css";
 import { AuthStageProvider } from './telegram/contexts/AuthContext';
+import { ExpandContextProvider } from './components/navbar/expandContxt'
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -14,8 +15,10 @@ export default function RootLayout({ children, }: RootLayoutProps) {
         style={{ backgroundImage: `url(/backgrounds/2.jpg)` }}
       >
         <AuthStageProvider>
-          <SideNav/>
-          {children}
+          <ExpandContextProvider>
+            <SideNav />
+            {children}
+          </ExpandContextProvider>
         </AuthStageProvider>
 
       </body>
