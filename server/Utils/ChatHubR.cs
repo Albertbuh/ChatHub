@@ -1,21 +1,29 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using System.Collections.Concurrent;
 using VkNet.Model;
 
 namespace ChatHub.HubR
 {
     public class ChatHubR : Hub
     {
-        private readonly HashSet<string> connectionIds = new HashSet<string>();
+        private readonly ConcurrentDictionary<string, string> connectionIds = new ConcurrentDictionary<string, string>();
+        private object lockObject = new();
         public override async Task OnConnectedAsync()
         {
-            var clients = connectionIds.ToList();
-            connectionIds.Add(Context.ConnectionId);
-            foreach (var client in clients)
+            lock (lockObject)
             {
-                var connection = Clients.Client(client);
-                var connectionContext = connection?.GetType().GetProperty("ConnectionContext")?.GetValue(connection) as HubConnectionContext;
-                connectionContext?.Abort();
+                connectionIds.TryAdd(Context.ConnectionId, Context.ConnectionId);
+                foreach (var client in connectionIds)
+                {
+                    if (client.Key != Context.ConnectionId)
+                    {
+                        var connection = Clients.Client(client.Key);
+                        var connectionContext = connection?.GetType().GetProperty("ConnectionContext")?.GetValue(connection) as HubConnectionContext;
+                        connectionContext?.Abort();
+                    }
 
+
+                }
             }
             Console.WriteLine($"User: {Context.ConnectionId} connected");
             await base.OnConnectedAsync();
