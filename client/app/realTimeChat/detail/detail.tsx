@@ -2,9 +2,33 @@ import styles from './detail.module.css'
 
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { GoDownload } from "react-icons/go";
+import { useChatStore } from '../lib/chatStore';
+import { useUserStore } from '../lib/userStore';
+import { arrayRemove, arrayUnion, doc, updateDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 const Detail = () => {
     const avatarPath = './avatars/Hayasaka.jpg';
+
+    const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, changeBlock, resetChat } =
+        useChatStore();
+    const { currentUser } = useUserStore();
+
+    const handleBlock = async () => {
+        if (!user) return;
+
+        const userDocRef = doc(db, "users", currentUser.id);
+
+        try {
+            await updateDoc(userDocRef, {
+                blocked: isReceiverBlocked ? arrayRemove(user.id) : arrayUnion(user.id),
+            });
+            changeBlock();
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
 
     return (
         <div className={styles.detail}>
@@ -39,37 +63,37 @@ const Detail = () => {
                                 <img className={styles.img} src='https://a.storyblok.com/f/178900/1920x1080/37ae90580e/4ca025356f824c76c2c3132631be82d81640322663_main.jpg/m/filters:quality(95)format(webp)'></img>
                                 <span className={styles.span}> photo_MC_2023.png</span>
                             </div>
-                        <GoDownload className={styles.icon}  />
+                            <GoDownload className={styles.icon} />
                         </div>
                         <div className={styles.photoItem}>
                             <div className={styles.photoDetail}>
                                 <img className={styles.img} src='https://a.storyblok.com/f/178900/1920x1080/37ae90580e/4ca025356f824c76c2c3132631be82d81640322663_main.jpg/m/filters:quality(95)format(webp)'></img>
                                 <span className={styles.span}> photo_MC_2023.png</span>
                             </div>
-                        <GoDownload className={styles.icon} />
+                            <GoDownload className={styles.icon} />
                         </div>
                         <div className={styles.photoItem}>
                             <div className={styles.photoDetail}>
                                 <img className={styles.img} src='https://a.storyblok.com/f/178900/1920x1080/37ae90580e/4ca025356f824c76c2c3132631be82d81640322663_main.jpg/m/filters:quality(95)format(webp)'></img>
                                 <span className={styles.span}> photo_MC_2023.png</span>
                             </div>
-                        <GoDownload className={styles.icon}  />
+                            <GoDownload className={styles.icon} />
                         </div>
                         <div className={styles.photoItem}>
                             <div className={styles.photoDetail}>
                                 <img className={styles.img} src='https://a.storyblok.com/f/178900/1920x1080/37ae90580e/4ca025356f824c76c2c3132631be82d81640322663_main.jpg/m/filters:quality(95)format(webp)'></img>
                                 <span className={styles.span}> photo_MC_2023.png</span>
                             </div>
-                        <GoDownload className={styles.icon}  />
+                            <GoDownload className={styles.icon} />
                         </div>
                         <div className={styles.photoItem}>
                             <div className={styles.photoDetail}>
                                 <img className={styles.img} src='https://a.storyblok.com/f/178900/1920x1080/37ae90580e/4ca025356f824c76c2c3132631be82d81640322663_main.jpg/m/filters:quality(95)format(webp)'></img>
                                 <span className={styles.span}> photo_MC_2023.png</span>
                             </div>
-                        <GoDownload className={styles.icon} />
+                            <GoDownload className={styles.icon} />
                         </div>
-                        
+
                     </div>
                 </div>
 
@@ -79,7 +103,11 @@ const Detail = () => {
                         <IoIosArrowUp className={styles.imgI} />
                     </div>
                 </div>
-                <button className={styles.button}>Block User</button>
+                <button onClick={handleBlock} className={styles.button}>{isCurrentUserBlocked
+            ? "You are Blocked!"
+            : isReceiverBlocked
+            ? "User blocked"
+            : "Block User"}</button>
             </div>
         </div>
     )

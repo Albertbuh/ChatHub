@@ -6,6 +6,7 @@ namespace ChatHub.HubR
 {
     public class ChatHubR : Hub
     {
+
         private readonly ConcurrentDictionary<string, string> connectionIds = new ConcurrentDictionary<string, string>();
         private object lockObject = new();
         public override async Task OnConnectedAsync()
@@ -24,6 +25,7 @@ namespace ChatHub.HubR
 
 
                 }
+
             }
             Console.WriteLine($"User: {Context.ConnectionId} connected");
             await base.OnConnectedAsync();
@@ -34,7 +36,7 @@ namespace ChatHub.HubR
             await base.OnDisconnectedAsync(exception);
         }
 
-        public static async Task UpdateDialogsTL(IHubContext<ChatHubR> chatHub,HubEntity? dialogs)
+        public static async Task UpdateDialogsTL(IHubContext<ChatHubR> chatHub, HubEntity? dialogs)
         {
             await chatHub.Clients.All.SendAsync("updateDialogsTL", dialogs);
         }

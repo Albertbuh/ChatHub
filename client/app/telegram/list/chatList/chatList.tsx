@@ -7,6 +7,7 @@ import { FaMinus, FaPlus } from "react-icons/fa6";
 import { useState } from "react";
 import { IDialogInfo } from "../../dto/IDialogInfo";
 import Image from "next/image";
+import Timestamp from "@/app/components/timestamp/timestamp";
 
 interface IChatProps {
     dialogs: IDialogInfo[];
@@ -23,8 +24,8 @@ const ChatList = ({ dialogs, handleClick }: IChatProps) => {
 
     return (
         <div className={styles.chatList}>
-            <SearchBar onUpdate={handleSearchBarUpdate}/>
-            <ul>
+            <SearchBar onUpdate={handleSearchBarUpdate} />
+            <ul style={{width:"100%"}}>
                 {dialogs.filter((dialog) =>
                     dialog.mainUsername?.toLowerCase().includes(searchFilter) ||
                     dialog.title.toLowerCase().includes(searchFilter)
@@ -40,11 +41,17 @@ const ChatList = ({ dialogs, handleClick }: IChatProps) => {
                                 }/${dialog.id}/profile.jpeg`}
                             width={"50"}
                             height={"50"}
-                            alt={"aboba"}
+                            alt={""}
                         />
                         <div className={styles.texts}>
-                            <span className={styles.span}>{dialog.title}</span>
-                            <p className={styles.p}>{dialog.topMessage.message}</p>
+                            <span className={styles.title}>{dialog.title}</span>
+                            <p className={styles.p}>
+                                <span className={styles.sendername}>
+                                    {dialog.topMessage.sender.username}: 
+                                </span>&nbsp;
+                                {dialog.topMessage.message}
+                            </p>
+                            <Timestamp time={dialog.topMessage.date} className={styles.time}/>
                         </div>
                     </li>
                 ))}
@@ -54,16 +61,21 @@ const ChatList = ({ dialogs, handleClick }: IChatProps) => {
 };
 
 interface SearchBarProps {
-    onUpdate: (filter: string) => void; 
+    onUpdate: (filter: string) => void;
 }
-function SearchBar({onUpdate}: SearchBarProps) {
+function SearchBar({ onUpdate }: SearchBarProps) {
     const [addMode, setAddMode] = useState(false);
-    
+
     return (
         <div className={styles.search}>
             <div className={styles.searchBar}>
                 <IoIosSearch className={styles.img} />
-                <input onChange={(e) => onUpdate(e.target.value)} className={styles.input} type="text" placeholder="Search" />
+                <input
+                    onChange={(e) => onUpdate(e.target.value)}
+                    className={styles.input}
+                    type="text"
+                    placeholder="Search"
+                />
             </div>
             {addMode
                 ? (
