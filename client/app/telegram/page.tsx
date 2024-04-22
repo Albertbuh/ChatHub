@@ -27,9 +27,9 @@ export default function Home() {
         }
     };
 
-    const connectorInstance = useRef(Connector());
-    connectorInstance.current.setOnDialogsTLUpdateCallback(handleDialogsUpdate);
-    connectorInstance.current.setOnMessagesTLUpdateCallback(handleMessagesUpdate);
+    const [connector] = useState(Connector());
+    connector.setOnDialogsTLUpdateCallback(handleDialogsUpdate);
+    connector.setOnMessagesTLUpdateCallback(handleMessagesUpdate);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -59,6 +59,7 @@ export default function Home() {
 
     function handleListClick(id: number) {
         setCurrentDialogId(id);
+        setMessages([]);
     }
 
     const handleSendSubmit = async (data: SendData) => {
@@ -72,11 +73,12 @@ export default function Home() {
                 body: JSON.stringify(data),
             },
         );
-        if(response.ok) {
-            let message:TLResponse = await response.json();
+        if (response.ok) {
+            let message: TLResponse = await response.json();
             let sendedMessage = message.data as IMessageInfo;
-            if(data)
+            if (data) {
                 setMessages([sendedMessage, ...messages]);
+            }
         }
         if (data.media) {
             await fetch(
@@ -96,11 +98,11 @@ export default function Home() {
         return (
             <div className={styles.container}>
                 <List dialogs={dialogsUpdate} handleClick={handleListClick} />
-                <Chat
-                    messages={messages.toReversed()}
-                    currentDialog={dialogsUpdate.find((d) => d.id == currentDialogId)}
-                    onSendSubmit={handleSendSubmit}
-                />
+                    <Chat
+                        messages={messages.toReversed()}
+                        currentDialog={dialogsUpdate.find((d) => d.id == currentDialogId)}
+                        onSendSubmit={handleSendSubmit}
+                    />
             </div>
         );
     }
@@ -110,4 +112,3 @@ export interface SendData {
     message: string;
     media: File | null;
 }
-

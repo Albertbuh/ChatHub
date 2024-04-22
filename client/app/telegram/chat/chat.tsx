@@ -21,6 +21,7 @@ import {
 import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
 import Timestamp from "@/app/components/timestamp/timestamp";
 import { SendData } from "../page";
+import Image from "next/image";
 
 interface ChatProps {
     messages: IMessageInfo[];
@@ -29,29 +30,48 @@ interface ChatProps {
 }
 
 const Chat = ({ messages, currentDialog, onSendSubmit }: ChatProps) => {
-    const endRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        endRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [currentDialog]);
-
     return (
         <div className={styles.chat}>
             <Top dialog={currentDialog} />
-            <div className={styles.center}>
-                {messages.map((message) => (
-                    <Message
-                        key={message.id}
-                        message={message}
-                        dialogId={currentDialog!.id}
-                    />
-                ))}
-            </div>
+            <MessagesContainer messages={messages} currentDialog={currentDialog} />
             <MessageSender onSubmit={onSendSubmit} />
         </div>
     );
 };
 
+interface MessagesContainerProps {
+    messages: IMessageInfo[];
+    currentDialog: IDialogInfo | undefined;
+}
+function MessagesContainer(
+    { messages, currentDialog }: MessagesContainerProps,
+) {
+    if (!currentDialog) {
+        return null;
+    }
+
+    const messagesView = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (messagesView.current != null) {
+            messagesView.current.scrollTo({ top: 10000 });
+        }
+    }, [messages]);
+
+    return (
+        <div className={styles.center} ref={messagesView}>
+            {messages.length > 0
+                ? messages.map((message) => (
+                    <Message
+                        key={message.id}
+                        message={message}
+                        dialogId={currentDialog!.id}
+                    />
+                ))
+                : <h1 className={styles.suspense}>Loading...</h1>}
+        </div>
+    );
+}
 interface MessageSenderProps {
     onSubmit: (data: SendData) => void;
 }
@@ -130,11 +150,12 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
         };
 
         if (hasMedia) {
-            let isWeb = messageInfo.message.includes("TL.MessageMediaWebPage")
-            if (!isWeb)
+            let isWeb = messageInfo.message.includes("TL.MessageMediaWebPage");
+            if (!isWeb) {
                 getFilepath();
-            else
+            } else {
                 setMediaPath(message.trim());
+            }
         }
     }, []);
 
@@ -145,14 +166,15 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
                     <img
                         className={styles.avatarImg}
                         src={GetPathToProfilePhotoById(messageInfo.sender.id)}
-                        alt=""
+                        alt="/avatars/defaultProfile.png"
                     />
                 )
                 : null}
             <div className={styles.texts}>
+                <span className={styles.sendername}>{messageInfo.sender.username}</span>
                 {hasMedia ? <MessageMedia mediaPath={mediaPath} /> : null}
                 {message.trim() !== "" ? <p className={styles.p}>{message}</p> : null}
-                <Timestamp time={messageInfo.date} className={styles.span} />
+                <Timestamp time={messageInfo.date} className={styles.timestamp} />
             </div>
         </div>
     );
@@ -162,26 +184,32 @@ interface MediaProps {
     mediaPath: string;
 }
 function MessageMedia({ mediaPath }: MediaProps) {
-    if (mediaPath.includes("https"))
+    if (mediaPath.includes("https")) {
         return (
             <iframe
                 src={mediaPath}
             />
         );
-        
+    }
+
     const imageTypes = ["jpeg", "jpg", "png", "webp"];
     var ext = mediaPath.split(".").pop() ?? "";
     if (imageTypes.includes(ext)) {
         return (
-            <img
+            <Image
                 className={styles.img}
                 src={mediaPath}
+                alt="undefined media"
+                width={0}
+                height={0}
+                sizes="100vw"
             />
         );
     }
 
+    const videoTypes = ["mp4", "webm"];
     const [isMuted, setIsMuted] = useState(true);
-    if (ext === "mp4") {
+    if (videoTypes.includes(ext)) {
         return (
             <video
                 className={styles.img}
@@ -191,15 +219,13 @@ function MessageMedia({ mediaPath }: MediaProps) {
                 loop
                 onClick={() => setIsMuted(!isMuted)}
             >
-                <source src={mediaPath} type="video/mp4" />
+                <source src={mediaPath} type={`video/${ext}`} />
             </video>
         );
     }
 
     if (ext === "mp3" || ext === "ogg") {
-        return (
-        <audio controls src={mediaPath}></audio>
-        )
+        return <audio controls src={mediaPath}></audio>;
     }
 
     return <h1>Undefined media</h1>;
@@ -216,10 +242,12 @@ function Top({ dialog }: TopProps) {
     return (
         <div className={styles.top}>
             <div className={styles.user}>
-                <img
-                    className={styles.avatarImg}
+                <Image
                     src={GetPathToProfilePhotoById(dialog.id)}
+                    width={"60"}
+                    height={"60"}
                     alt=""
+                    className={styles.avatarImg}
                 />
                 <div className={styles.texts}>
                     <span className={styles.span}>{dialog.title}</span>

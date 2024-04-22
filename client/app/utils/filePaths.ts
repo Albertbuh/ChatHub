@@ -3,7 +3,7 @@ export function GetPathToProfilePhotoById(id: number): string {
         }/${id}/profile.jpeg`;
 }
 
-const types = ["jpeg", "jpg", "png", "pdf", "docx", "webp", "ogg", "mp4"];
+const types = ["jpeg", "jpg", "png", "pdf", "docx", "webm", "ogg", "mp4"];
 export function GetPathToMediaFile(
     chatId: number,
     messageId: number,
@@ -25,10 +25,11 @@ export async function GetPathToMediaFileWithoutExtension(
             if (response.ok) {
                 return url;
             }
-        }catch {}
+        } catch { }
         return "";
     });
     var results = await Promise.all(promises);
-    var result = results.find(result => result != "");
+    var result = results.find((result) => result != "");
     return result;
 }
+

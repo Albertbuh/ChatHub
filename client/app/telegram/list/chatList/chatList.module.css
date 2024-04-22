@@ -81,13 +81,40 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    position: relative;
+    width: 100%;
 }
 
 .chatList .item .texts .span {
     font-weight: 500;
 }
 
+.chatList .item .texts .title {
+    font-weight: 700;
+    font-size: 1.1em;
+    max-width: 80%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden
+}
+
 .chatList .item .texts .p {
+    max-width: 100%;
     font-size: 14px;
     font-weight: 300;
+    max-width: 20vw;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden
+}
+
+.chatList .item .texts .sendername {
+    font-weight: bold;
+}
+
+.chatList .item .texts .time {
+    position: absolute;
+    opacity: 0.8;
+    top: 2%;
+    right: 3%;
 }
