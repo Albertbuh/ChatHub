@@ -28,7 +28,7 @@ export default function Home() {
         }
     };
 
-    const [connector] = useState(Connector());
+    const [connector] = useState(Connector.getInstance());
     connector.setOnDialogsTLUpdateCallback(handleDialogsUpdate);
     connector.setOnMessagesTLUpdateCallback(handleMessagesUpdate);
 

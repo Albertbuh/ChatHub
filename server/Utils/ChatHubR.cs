@@ -7,18 +7,18 @@ namespace ChatHub.HubR
     public class ChatHubR : Hub
     {
 
-        private readonly ConcurrentDictionary<string, string> connectionIds = new ConcurrentDictionary<string, string>();
+        private readonly HashSet<string> connectionIds = new HashSet<string>();
         private object lockObject = new();
         public override async Task OnConnectedAsync()
         {
             lock (lockObject)
             {
-                connectionIds.TryAdd(Context.ConnectionId, Context.ConnectionId);
+                connectionIds.Add(Context.ConnectionId);
                 foreach (var client in connectionIds)
                 {
-                    if (client.Key != Context.ConnectionId)
+                    if (client != Context.ConnectionId)
                     {
-                        var connection = Clients.Client(client.Key);
+                        var connection = Clients.Client(client);
                         var connectionContext = connection?.GetType().GetProperty("ConnectionContext")?.GetValue(connection) as HubConnectionContext;
                         connectionContext?.Abort();
                     }

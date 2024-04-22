@@ -9,7 +9,7 @@ import styles from "./vk.module.css";
 import Chat from "./chat/chat";
 import { IDialogInfoVK } from "./dto/IDialogInfo";
 import { IMessageInfoVK } from "./dto/IMessageInfo";
-import VKResponse from "./dto/TLResponse";
+import VKResponse from "./dto/VKResponse";
 
 export default function Home() {
     const [dialogsUpdate, setDialogsUpdate] = useState<IDialogInfoVK[]>([]);
@@ -23,19 +23,19 @@ export default function Home() {
     const handleMessagesUpdate = (connectorEntity: ConnectorEntity) => {
         if (connectorEntity.id == currentDialogId) {
             let newMessages = connectorEntity.data as IMessageInfoVK[];
+            console.log(newMessages);
             setMessages(newMessages);
         }
     };
 
-    const connectorInstance = Connector.getInstance();
-    connectorInstance.setOnDialogsVKUpdateCallback(handleDialogsUpdate);
-    connectorInstance.setOnMessagesVKUpdateCallback(handleMessagesUpdate);
+    const [connector] = useState(Connector.getInstance());
+    connector.setOnDialogsVKUpdateCallback(handleDialogsUpdate);
+    connector.setOnMessagesVKUpdateCallback(handleMessagesUpdate);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const updatedDialogs = await GetDialogsVK(0,100);
-                console.log(updatedDialogs);
                 setDialogsUpdate(updatedDialogs);
             } catch (error) {
                 console.error("Ошибка при получении диалогов:", error);
@@ -50,7 +50,7 @@ export default function Home() {
             if (currentDialogId == 0) {
                 return;
             }
-
+            console.log(currentDialogId);
             const newMessages = await GetMessagesVK(currentDialogId, 0, 50);
             console.log(newMessages);
 
@@ -62,6 +62,7 @@ export default function Home() {
 
     function handleListClick(id: number) {
         setCurrentDialogId(id);
+        setMessages([]);
     }
 
     const handleSendSubmit = async (data: SendData) => {

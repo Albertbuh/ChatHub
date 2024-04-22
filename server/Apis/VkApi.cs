@@ -37,10 +37,10 @@ namespace ChatHub.Apis
 
         }
 
-        private static async Task<IResult> GetMessages(IVKService vkService, long chatId, int offsetId, int limit)
+        private static async Task<IResult> GetMessages(IVKService vkService, long chatId, int offset, int limit)
         {
 
-            var result = await vkService.GetMessages(chatId, offsetId, limit);
+            var result = await vkService.GetMessages(chatId, offset, limit);
             return TypedResults.Json(result);
 
         }
