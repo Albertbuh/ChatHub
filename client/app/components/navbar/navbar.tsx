@@ -132,13 +132,13 @@ export default function SideNav() {
             </ul>
             <ul className={`${styles.list} ${styles.flexColumn}`}>
                 
-                <li className={`${styles.listItem} ${getActiveClass('/')}`} onClick={() => auth.signOut()}>
+                <li className={styles.listItem} onClick={() => auth.signOut()}>
                     <Link href="/realTimeChat">
                         <CiLogout className={styles.listItemIcon} />
                         <span className={styles.linkName}> Logout</span>
                     </Link>
                 </li>
-                <li className={`${styles.listItem} ${getActiveClass('/')}`}>
+                <li className={`${styles.listItem} ${getActiveClass('/account')}`}>
                     <Link href="/realTimeChat">
                         <img className={styles.avatarImg} src={currentUser?.avatar  ||avatarPath} alt='' />
                         <span className={styles.linkName}> Your Name</span>
