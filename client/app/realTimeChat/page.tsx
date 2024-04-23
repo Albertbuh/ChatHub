@@ -41,7 +41,7 @@ export default function RealTimeChat() {
   if (isLoading) return <div className={`${styles.loading} ${styles.container}`}>Loading...</div>;
 
 
-  console.log("bckg: ", currentUser.background)
+  // console.log("bckg: ", currentUser.background)
   const containerStyles = {
 
     marginLeft: isExpanded ? '15%' : '4%',
