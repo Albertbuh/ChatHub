@@ -5,15 +5,23 @@ namespace ChatHub.HubR
     public class ChatHubR : Hub
     {
         private readonly HashSet<string> connectionIds = new HashSet<string>();
+        private object lockObject = new();
         public override async Task OnConnectedAsync()
         {
-            var clients = connectionIds.ToList();
-            connectionIds.Add(Context.ConnectionId);
-            foreach (var client in clients)
+            lock (lockObject)
             {
-                var connection = Clients.Client(Context.ConnectionId);
-                var connectionContext = connection?.GetType().GetProperty("ConnectionContext")?.GetValue(connection) as HubConnectionContext;
-                connectionContext?.Abort();
+                connectionIds.Add(Context.ConnectionId);
+                foreach (var client in connectionIds)
+                {
+                    if (client != Context.ConnectionId)
+                    {
+                        var connection = Clients.Client(client);
+                        var connectionContext = connection?.GetType().GetProperty("ConnectionContext")?.GetValue(connection) as HubConnectionContext;
+                        connectionContext?.Abort();
+                    }
+
+
+                }
 
             }
             Console.WriteLine($"User: {Context.ConnectionId} connected");
