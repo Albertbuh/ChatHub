@@ -156,7 +156,7 @@ namespace ChatHub.Services.Vk
             else if (attachment.Type == typeof(Video))
             {
                 var video = (Video)attachment.Instance;
-                mediaDto.MediaUrl = video.UploadUrl?.ToString();
+                mediaDto.MediaUrl = video.Player.AbsoluteUri;
                 mediaDto.Type = "Video";
             }else
             {
@@ -202,13 +202,13 @@ namespace ChatHub.Services.Vk
 
                     user.Id = groupVk.Id;
                     user.PhotoUri = groupVk?.Photo100?.AbsoluteUri.ToString() ?? " ";
-                    user.ScreenName = groupVk?.ScreenName;
+                    user.ScreenName = groupVk?.Name;
                 }
                 else
                 {
                     user.Id = userVk.Id;
                     user.PhotoUri = userVk.Photo100?.AbsoluteUri?.ToString() ?? " ";
-                    user.ScreenName = userVk.ScreenName ?? " ";
+                    user.ScreenName = userVk.FirstName ?? " ";
                 }
 
                 messageList.Add(CreateMessageDto(message, user));
@@ -242,13 +242,13 @@ namespace ChatHub.Services.Vk
                     }
                     return code;
                 }
-            });
+            }) ;
 
             User? user = api.Users.Get(new[] { api.UserId!.Value }, ProfileFields.Photo100 | ProfileFields.ScreenName).FirstOrDefault();
             response.StatusCode = 200;
             response.Message = $"User {api.UserId} was logged in";
             response.Data = CreatePeerDto(_mapper.Map<UserDTO>(user));
-            StartMessagesHandling();
+            //StartMessagesHandling();
             ApiBreak = false;
 
             return response;

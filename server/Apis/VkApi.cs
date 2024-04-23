@@ -16,6 +16,8 @@ namespace ChatHub.Apis
             return app;
         }
 
+        static int count = 0;
+
         private static async Task<IResult> Login(IVKService vkService, string login, string password, string code = "")
         {
             var result = await vkService.Login(login, password, code);
@@ -39,7 +41,7 @@ namespace ChatHub.Apis
 
         private static async Task<IResult> GetMessages(IVKService vkService, long chatId, int offset, int limit)
         {
-
+            count++;
             var result = await vkService.GetMessages(chatId, offset, limit);
             return TypedResults.Json(result);
 

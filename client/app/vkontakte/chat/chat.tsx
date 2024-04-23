@@ -161,7 +161,12 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
             }
         }
     }, []);
-    console.log(messageInfo.sender.photoUrl);
+    console.log(messageInfo);
+
+
+    console.log(messageInfo.media);
+if (messageInfo.media)
+    console.log(messageInfo.media.mediaUrl);
     return (
         <div className={`${styles.message} ${isOwn ? styles.messageOwn : ""}`}>
             {!isOwn
@@ -175,7 +180,7 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
                 : null}
             <div className={styles.texts}>
                 <span className={styles.sendername}>{messageInfo.sender.username}</span>
-                {hasMedia ? <MessageMedia mediaPath={mediaPath} /> : null}
+                {hasMedia ? <MessageMedia mediaPath={messageInfo.media.mediaUrl} /> : null}
                 {message.trim() !== "" ? <p className={styles.p}>{message}</p> : null}
                 <Timestamp time={messageInfo.date} className={styles.timestamp} />
             </div>
@@ -187,7 +192,12 @@ interface MediaProps {
     mediaPath: string;
 }
 function MessageMedia({ mediaPath }: MediaProps) {
+    console.log("SADASDASDSA");
     if (mediaPath.includes("https")) {
+        console.log("SADASDASDSA");
+        console.log(mediaPath);
+        console.log("SADASDASDSA");
+
         return (
             <iframe
                 src={mediaPath}
