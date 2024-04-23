@@ -16,7 +16,9 @@ import { ExpandContext } from "../components/navbar/expandContxt";
 
 const user = false
 
+
 export default function RealTimeChat() {
+  const bg2 = "/backgrounds/2.jpg"
   const { isExpanded } = useContext(ExpandContext);
 
   const { currentUser, isLoading, fetchUserInfo } = useUserStore();
@@ -38,7 +40,10 @@ export default function RealTimeChat() {
   if (isLoading) return <div className={`${styles.loading} ${styles.container}`}>Loading...</div>;
 
 
+  console.log("bckg: ", currentUser.background)
   const containerStyles = {
+    // backgroundImage: `url(${currentUser.background || bg2})`, // ВОТ ТУТ Я ХОЧУ ИЗМЕНИТЬ ФОН ВНЕШНЕГО Layout 
+
     marginLeft: isExpanded ? '15%' : '4%',
   };
 

@@ -65,6 +65,8 @@ export default function SideNav() {
         return pathname === path ? styles.listItemActive : '';
     };
 
+    
+
     return (
         <nav className={`${styles.sidebar} ${sidebarActive ? styles.active : ''}`}>
             <div className={styles.logoMenu}>

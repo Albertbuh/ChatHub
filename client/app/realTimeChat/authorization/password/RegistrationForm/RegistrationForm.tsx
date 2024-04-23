@@ -51,6 +51,7 @@ const RegistrationForm = () => {
             const res = await createUserWithEmailAndPassword(auth, email.toString(), password.toString());
 
             const imgUrl = avatar.file ? await upload(avatar.file) : "/Nesterenkov.jpg";
+            
 
             await setDoc(doc(db, "users", res.user.uid), {
                 username,
@@ -58,7 +59,7 @@ const RegistrationForm = () => {
                 avatar: imgUrl,
                 id: res.user.uid,
                 blocked: [],
-                background:"2.jpg"
+                background:"/backgrounds/2.jpg"
             });
 
             await setDoc(doc(db, "userchats", res.user.uid), {

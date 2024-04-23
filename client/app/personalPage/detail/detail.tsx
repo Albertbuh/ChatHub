@@ -3,29 +3,37 @@ import styles from './detail.module.css'
 import { IoIosArrowUp, IoIosArrowDown } from "react-icons/io";
 import { GoDownload } from "react-icons/go";
 import { useUserStore } from '@/app/realTimeChat/lib/userStore';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
+import BackgroundContext from '@/app/BackGroundContext';
 
 
 const imagePaths = ['/backgrounds/1.jpg', '/backgrounds/2.jpg',
     '/backgrounds/3.jpg', '/backgrounds/4.jpg', '/backgrounds/5.jpg'
 ];
 
+
 interface DetailProps {
     backgroundImage: string;
     setBackgroundImage: React.Dispatch<React.SetStateAction<string>>;
-  }
+}
 
 const Detail = () => {
     const avatarPath = './avatars/Hayasaka.jpg';
 
     const { currentUser } = useUserStore();
-    const [backgroundImage, setBackgroundImage] = useState('');
+    const { changeBackgroundNumber } = useContext(BackgroundContext);
 
     const handleBlock = async () => {
     };
 
-    const handleDownloadClick = (image) => {
-        setBackgroundImage(image);
+    const handleDownloadClick = (imageNumber: number) => {
+        changeBackgroundNumber(imageNumber);
+    };
+
+    const [isOpen, setIsOpen] = useState(false);
+
+    const toggleDropdown = () => {
+        setIsOpen(!isOpen);
     };
 
     return (
@@ -50,10 +58,11 @@ const Detail = () => {
                     </div>
                 </div>
 
-                <div className={styles.option}>
-                    <div className={styles.title}>
+                <div className={`${styles.option} ${isOpen ? styles.open : ''}`}>
+                    <div className={styles.title} onClick={toggleDropdown}>
                         <span className={styles.span}>Background photos</span>
-                        <IoIosArrowDown className={styles.imgI} />
+                        {isOpen ? <IoIosArrowUp className={styles.imgI} /> : <IoIosArrowDown className={styles.imgI} />}
+                        {/* <IoIosArrowDown className={styles.imgI} /> */}
                     </div>
                     <div className={styles.photos}>
                         {imagePaths.map((photo, index) => (
@@ -62,7 +71,7 @@ const Detail = () => {
                                     <img className={styles.img} src={photo} alt={`photo_${index + 1}`} />
                                     <span className={styles.span}>{`photo_${index + 1}.jpg`}</span>
                                 </div>
-                                <GoDownload className={styles.icon} onClick={() => handleDownloadClick(photo)} />
+                                <GoDownload className={styles.icon} onClick={() => handleDownloadClick(index + 1)} />
                             </div>
                         ))}
 

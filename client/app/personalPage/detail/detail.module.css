@@ -1,6 +1,5 @@
 .detail {
-  width: 20vw;
-  
+  width: 95vw;
 }
 
 .detail .user {
@@ -47,10 +46,30 @@
 }
 
 .detail .info .option .photos {
+  /* display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px; */
+  transform: scaleY(0);
+  transform-origin: top;
+
+  overflow: hidden;
+  transition: transform 0.3s ease-out;
+}
+
+
+.detail .info .option.open .photos {
   display: flex;
   flex-direction: column;
   gap: 20px;
   margin-top: 20px;
+
+  transform: scaleY(1);
+  transition: transform 0.3s ease-in;
+}
+
+.detail .info .option{
+  height: auto;
 }
 
 .detail .info .option .photos .photoItem {
