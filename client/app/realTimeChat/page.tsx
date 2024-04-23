@@ -12,6 +12,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./lib/firebase";
 import { useChatStore } from "./lib/chatStore";
 import { ExpandContext } from "../components/navbar/expandContxt";
+import Stub from "./stub/page";
 
 
 const user = false
@@ -42,7 +43,6 @@ export default function RealTimeChat() {
 
   console.log("bckg: ", currentUser.background)
   const containerStyles = {
-    // backgroundImage: `url(${currentUser.background || bg2})`, // ВОТ ТУТ Я ХОЧУ ИЗМЕНИТЬ ФОН ВНЕШНЕГО Layout 
 
     marginLeft: isExpanded ? '15%' : '4%',
   };
@@ -54,8 +54,16 @@ export default function RealTimeChat() {
         currentUser ? (
           <>
             <List />
-            {chatId && <Chat />}
-            {chatId && <Detail />}
+            {/* {chatId && <Chat />}
+            {chatId && <Detail />} */}
+            {chatId ? (
+              <>
+                <Chat />
+                <Detail />
+              </>
+            ) : (
+              <Stub />
+            )}
           </>
         ) : (
           <LoginPage />

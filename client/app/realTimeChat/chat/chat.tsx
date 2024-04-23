@@ -53,7 +53,7 @@ const Chat = () => {
 
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: "smooth" })
-    }, []);
+    }, [endRef, chat]);
 
     useEffect(() => {
         if (chatId) {
@@ -69,7 +69,7 @@ const Chat = () => {
             };
         }
     }, [chatId]);
-    // }, ["2wUZHGpbCahR6WdAxGdF"]);
+   
 
     console.log(chat)
 
