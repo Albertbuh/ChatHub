@@ -21,13 +21,16 @@ const Detail = () => {
     const avatarPath = './avatars/Hayasaka.jpg';
 
     const { currentUser } = useUserStore();
-    const { changeBackgroundNumber } = useContext(BackgroundContext);
+    const { updateBackground } = useContext(BackgroundContext);
 
     const handleBlock = async () => {
     };
 
     const handleDownloadClick = (imageNumber: number) => {
-        changeBackgroundNumber(imageNumber);
+        const newBg = imagePaths[imageNumber - 1];
+        // changeBackgroundNumber(imageNumber);
+        // localStorage.setItem('selectedBg', newBg);
+        updateBackground(newBg);
     };
 
     const [isOpen, setIsOpen] = useState(false);
@@ -62,7 +65,6 @@ const Detail = () => {
                     <div className={styles.title} onClick={toggleDropdown}>
                         <span className={styles.span}>Background photos</span>
                         {isOpen ? <IoIosArrowUp className={styles.imgI} /> : <IoIosArrowDown className={styles.imgI} />}
-                        {/* <IoIosArrowDown className={styles.imgI} /> */}
                     </div>
                     <div className={styles.photos}>
                         {imagePaths.map((photo, index) => (

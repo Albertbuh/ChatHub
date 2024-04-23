@@ -8,12 +8,14 @@ interface BackgroundContextData {
   background: string;
 //   changeBackground: (newBackground: string) => void;
   changeBackgroundNumber: (imageNumber: number) => void;
+  updateBackground: (newBackground: string) => void;
 }
 
 const BackgroundContext = createContext<BackgroundContextData>({
   background: '',
 //   changeBackground: () => {},
   changeBackgroundNumber: () => {},
+  updateBackground: () => {},
 });
 
 const bg2 = "/backgrounds/2.jpg"
@@ -31,8 +33,13 @@ export const BackgroundProvider: React.FC<React.PropsWithChildren<{}>> = ({ chil
     setBackground(newBackground);
   };
 
+  const updateBackground = (newBackground: string) => {
+    setBackground(newBackground);
+    localStorage.setItem('selectedBg', newBackground);
+  };
+
   return (
-    <BackgroundContext.Provider value={{ background, changeBackgroundNumber }}>
+    <BackgroundContext.Provider value={{ background, changeBackgroundNumber, updateBackground }}>
       {children}
     </BackgroundContext.Provider>
   );

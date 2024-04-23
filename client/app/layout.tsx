@@ -8,7 +8,7 @@ import SideNav from './components/navbar/navbar';
 import "./globals.css";
 import { AuthStageProvider } from './telegram/contexts/AuthContext';
 import { ExpandContextProvider } from './components/navbar/expandContxt'
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import BackgroundContext, { BackgroundProvider } from './BackGroundContext';
 
 
@@ -16,14 +16,34 @@ interface RootLayoutProps {
   children: React.ReactNode;
 }
 
+const bg2 = "/backgrounds/2.jpg"
+
+
 function RootLayoutInner({ children }: RootLayoutProps) {
-  const { background } = useContext(BackgroundContext);
+  // const storedBg = localStorage.getItem('selectedBg');
+  // const [background, setBackground] = useState(storedBg || bg2);
+  // const { background } = useContext(BackgroundContext);
+
+  const { background, updateBackground } = useContext(BackgroundContext);
+
+  const storedBg = localStorage.getItem('selectedBg');
+  const [localBackground, setLocalBackground] = useState(storedBg || bg2);
+
+  useEffect(() => {
+    setLocalBackground(background);
+  }, [background]);
+
+  useEffect(() => {
+    if (storedBg) {
+      updateBackground(storedBg);
+    }
+  }, [storedBg, updateBackground]);
 
   console.log("bckg current: ", background)
 
   return (
     <html lang="en">
-      <body style={{ backgroundImage: `url(${background})` }}>
+      <body style={{ backgroundImage: `url(${localBackground})` }}>
         <AuthStageProvider>
           <ExpandContextProvider>
             <SideNav />
