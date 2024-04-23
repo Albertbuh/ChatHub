@@ -59,7 +59,7 @@ function MessagesContainer(
             messagesView.current.scrollTo({ top: 10000 });
         }
     }, [messages]);
-
+   
     return (
         <div className={styles.center} ref={messagesView}>
             {messages.length > 0
@@ -69,6 +69,7 @@ function MessagesContainer(
                         message={message}
                         dialogId={currentDialog!.id}
                     />
+                    
                 ))
                 : <h1 className={styles.suspense}>Loading...</h1>}
         </div>
@@ -160,15 +161,15 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
             }
         }
     }, []);
-    console.log(messageInfo.sender.photoUri);
+    console.log(messageInfo.sender.photoUrl);
     return (
         <div className={`${styles.message} ${isOwn ? styles.messageOwn : ""}`}>
             {!isOwn
                 ? (
                     <img
                         className={styles.avatarImg}
-                        src={messageInfo.sender.photoUri}
-                        alt={messageInfo.sender.photoUri}
+                        src={messageInfo.sender.photoUrl}
+                        alt={''}
                     />
                 )
                 : null}

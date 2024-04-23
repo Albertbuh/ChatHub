@@ -3,6 +3,7 @@ import ChatList from './chatList/chatList'
 import styles from './list.module.css'
 import UserInfo from './userInfo/userInfo'
 import { IDialogInfoVK } from '../dto/IDialogInfo';
+import { IPeerInfoVK } from '../dto/IPeerInfo';
 
 interface IListProps {
     dialogs: IDialogInfoVK[];
@@ -12,7 +13,7 @@ interface IListProps {
 const List = ({dialogs, handleClick}: IListProps) =>{
     return(
         <div className={styles.list}>
-            <UserInfo/>
+            <UserInfo   />
             <ChatList dialogs={dialogs} handleClick={handleClick}/>
         </div>
     )

@@ -99,7 +99,7 @@ export default function Home() {
     if (dialogsUpdate && dialogsUpdate.length > 0) {
         return (
             <div className={styles.container}>
-                <List dialogs={dialogsUpdate} handleClick={handleListClick} />
+                <List dialogs={dialogsUpdate} handleClick={handleListClick}  />
                 <Chat
                     messages={messages}
                     currentDialog={dialogsUpdate.find((d) => d.id == currentDialogId)}

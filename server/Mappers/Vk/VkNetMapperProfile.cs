@@ -23,7 +23,7 @@ public class VkNetMapperProfile : Profile
     private void CreateMapUserUserDTO()
     {
         CreateMap<User, UserDTO>()
-            .ForMember(dest => dest.ScreenName, opt => opt.MapFrom(u => u.ScreenName))
+            .ForMember(dest => dest.ScreenName, opt => opt.MapFrom(u => u.FirstName))
             .ForMember(dest => dest.Id, opt => opt.MapFrom(u => u.Id))
             .ForMember(dest => dest.PhotoUri, opt => opt.MapFrom(u=>u.Photo100.AbsoluteUri));
     }
@@ -31,7 +31,7 @@ public class VkNetMapperProfile : Profile
     private void CreateMapGroupUserDTO()
     {
         CreateMap<Group, UserDTO>()
-            .ForMember(dest => dest.ScreenName, opt => opt.MapFrom(u => u.ScreenName))
+            .ForMember(dest => dest.ScreenName, opt => opt.MapFrom(u => u.Name))
             .ForMember(dest => dest.Id, opt => opt.MapFrom(u => u.Id))
             .ForMember(dest => dest.PhotoUri, opt => opt.MapFrom(u => u.Photo100.AbsoluteUri));
     }

@@ -3,6 +3,7 @@ using ChatHub.Models.Vk;
 using ChatHub.Models.Vk.DTO;
 using Microsoft.AspNetCore.SignalR;
 using System.Net.Http.Headers;
+using System.Net.Mail;
 using System.Text;
 using VkNet;
 using VkNet.AudioBypassService.Extensions;
@@ -126,7 +127,7 @@ namespace ChatHub.Services.Vk
 
         private VkPeerDTO? CreatePeerDto(UserDTO user)
             => _mapper.Map<VkPeerDTO>(user);
-        
+
 
         public async Task<VKResponse> GetMessages(long chatId, int offsetId, int limit)
         {
@@ -142,6 +143,7 @@ namespace ChatHub.Services.Vk
                 Count = limit,
                 Offset = offsetId,
                 PeerId = chatId
+
             });
 
             var messageList = new List<VkMessageDTO>(limit);
@@ -155,6 +157,31 @@ namespace ChatHub.Services.Vk
             {
                 var userVk = chatUsers?.FirstOrDefault(x => x.Id == message.FromId);
                 var user = new UserDTO();
+                var attachaments = message.Attachments;
+                if (attachaments.Count >= 1)
+                {
+                    var attachment = attachaments[0];
+                    if (attachment.Type == typeof(Document))
+                    {
+                        var document = (Document)attachment.Instance;
+                        string fileUrl = document.Uri;
+
+                    }
+                    else
+                    if (attachment.Type == typeof(Photo))
+                    {
+                        var photo = (Photo)attachment.Instance;
+                        string fileUrl = photo.Sizes[0].Url.ToString();
+                    }
+                    else if (attachment.Type == typeof(Video))
+                    {
+                        var video = (Video)attachment.Instance;
+                        string fileUrl = video.UploadUrl.ToString();
+                    }
+
+                }
+
+
 
                 if (userVk is null)
                 {
@@ -204,11 +231,11 @@ namespace ChatHub.Services.Vk
                 }
             });
 
-            User? user = api.Users.Get(new[] { api.UserId!.Value }, ProfileFields.Photo100 | ProfileFields.ScreenName ).FirstOrDefault();
+            User? user = api.Users.Get(new[] { api.UserId!.Value }, ProfileFields.Photo100 | ProfileFields.ScreenName).FirstOrDefault();
             response.StatusCode = 200;
             response.Message = $"User {api.UserId} was logged in";
             response.Data = CreatePeerDto(_mapper.Map<UserDTO>(user));
-            //StartMessagesHandling();
+            StartMessagesHandling();
             ApiBreak = false;
 
             return response;
@@ -222,7 +249,7 @@ namespace ChatHub.Services.Vk
             return new VKResponse($"User {id} logout");
         }
 
-       
+
 
         private void StartMessagesHandling()
         {
@@ -280,7 +307,7 @@ namespace ChatHub.Services.Vk
 
         private async Task SendUpdatedConversations()
         {
-            var dialogs = await GetDialogs(0,200);
+            var dialogs = await GetDialogs(0, 200);
             await ChatHubR.UpdateDialogsVK(
             _chatHub,
                 new HubEntity { Id = api.UserId ?? 0, Data = dialogs.Data }
@@ -316,9 +343,9 @@ namespace ChatHub.Services.Vk
                 .Select(chat => Math.Abs(chat.Conversation.Peer.Id).ToString())
                 .ToList();
             if (userIds != null)
-            Users = (await api!.Users.GetAsync(userIds, ProfileFields.Photo100 | ProfileFields.ScreenName | ProfileFields.FirstName | ProfileFields.LastName )).ToList();
+                Users = (await api!.Users.GetAsync(userIds, ProfileFields.Photo100 | ProfileFields.ScreenName | ProfileFields.FirstName | ProfileFields.LastName)).ToList();
             if (groupIds != null)
-            Groups = (await api.Groups.GetByIdAsync(groupIds, null, GroupsFields.All)).ToList();
+                Groups = (await api.Groups.GetByIdAsync(groupIds, null, GroupsFields.All)).ToList();
         }
 
         private async void LongPollEventLoop()

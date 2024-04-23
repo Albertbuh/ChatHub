@@ -2,6 +2,11 @@ import styles from './userInfo.module.css'
 
 import { IoIosMore } from "react-icons/io";
 import { CiVideoOn, CiEdit } from "react-icons/ci";
+import { IPeerInfoVK } from '../../dto/IPeerInfo';
+
+interface IUserProps {
+   user: IPeerInfoVK
+}
 
 const UserInfo = () => {
     const avatarPath = `/assets/telegram/userAssets/${localStorage.getItem('tag')}/${localStorage.getItem('id')}/profile.jpeg`;
