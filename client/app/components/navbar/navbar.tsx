@@ -65,6 +65,8 @@ export default function SideNav() {
         return pathname === path ? styles.listItemActive : '';
     };
 
+    
+
     return (
         <nav className={`${styles.sidebar} ${sidebarActive ? styles.active : ''}`}>
             <div className={styles.logoMenu}>
@@ -133,7 +135,6 @@ export default function SideNav() {
                         <BsChatSquareHeart className={styles.listItemIcon} />
                         <span className={styles.linkName}> Real Time Chat</span>
                     </Link>
-                    {/* <RealTimeChat isExpanded={isExpanded} /> */}
                 </li>
 
 
@@ -147,7 +148,7 @@ export default function SideNav() {
                     </Link>
                 </li>
                 <li className={`${styles.listItem} ${getActiveClass('/account')}`}>
-                    <Link href="/realTimeChat">
+                    <Link href="/personalPage">
                         <img className={styles.avatarImg} src={currentUser?.avatar || avatarPath} alt='' />
                         <span className={styles.linkName}> Your Name</span>
                     </Link>

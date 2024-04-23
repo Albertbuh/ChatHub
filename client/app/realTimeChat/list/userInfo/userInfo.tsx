@@ -18,7 +18,7 @@ const UserInfo = () => {
             </div>
             <div className={styles.icons}>
                 <IoIosMore className={styles.imgI}/>
-                <CiVideoOn className={styles.imgI}/>
+                <CiVideoOn className={styles.imgI}/>    
                 <CiEdit className={styles.imgI}/>
             </div>
         </div>
