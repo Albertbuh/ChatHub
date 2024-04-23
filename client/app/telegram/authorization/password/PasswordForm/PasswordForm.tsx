@@ -27,7 +27,14 @@ const PasswordForm = ({ onPasswordSuccess }: PasswordFormProps) => {
             }
 
             const data = await response.json();
-
+            console.log(data);
+            if("id" in data) 
+                localStorage.setItem("id", data.id);
+            if("username" in data)
+                localStorage.setItem("username", data.name);
+            if("photoId" in data)
+                localStorage.setItem("photoId", data.photoId);
+            
             // Вызов функции обратного вызова
             onPasswordSuccess();
         } catch (error) {

@@ -26,7 +26,6 @@ export async function GetDialogs(): Promise<IDialogInfo[]> {
         const res = await fetch("http://localhost:5041/api/v1.0/telegram/dialogs",{headers: {
             'Cache-Control': 'no-cache'
           }});
-          console.log(res);
         if (!res.ok) {
             throw new Error("Unable to get telegram dialogs data");
         }

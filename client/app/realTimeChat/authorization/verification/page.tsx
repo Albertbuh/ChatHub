@@ -12,8 +12,6 @@ export default function VerificationPage() {
 
     
   const handleVerificationSuccess = () => {
-    console.log('Verification success');
-    console.log('New auth stage:', 'password');
     setAuthStage('password');
     navigate('/telegram/authorization/password');
   };

@@ -4,6 +4,7 @@ public struct PeerDTO
 {
     public long Id { get; set; }
     public string Username { get; set; }
+    public string? Tag { get; set; }
     public long PhotoId { get; set; }
 
     public PeerDTO(long id, string name, long photoId)

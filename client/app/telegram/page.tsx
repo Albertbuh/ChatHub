@@ -1,20 +1,36 @@
 "use client";
-import React, { Suspense, useEffect, useState } from "react";
-import { GetDialogs } from "../utils/getRequests";
-import Connector from "../utils/singnalR-connector"
+import { GetDialogs, GetMessages } from "../utils/getRequests";
+import Connector from "../utils/singnalR-connector";
+import React, { useEffect, useState } from "react";
 import { IDialogInfo } from "../models/dto/IDialogInfo";
-import MessengerBase from "./messenger/messengerBase";
 import { ConnectorEntity } from "../models/connectorEntity";
+import List from "./list/list";
+
+import styles from "./telegram.module.css";
+import Chat from "./chat/chat";
+import { IMessageInfo } from "../models/dto/IMessageInfo";
+import TLResponse from "../models/dto/TLResponse";
 
 export default function Home() {
     const [dialogsUpdate, setDialogsUpdate] = useState<IDialogInfo[]>([]);
-    
+    const [messages, setMessages] = useState<IMessageInfo[]>([]);
+    const [currentDialogId, setCurrentDialogId] = useState(0);
+
     const handleDialogsUpdate = (connectorEntity: ConnectorEntity) => {
         setDialogsUpdate(connectorEntity.data as IDialogInfo[]);
     };
-    
-    const connectorInstance = Connector();
-    connectorInstance.setOnDialogsTLUpdateCallback(handleDialogsUpdate);
+
+    const handleMessagesUpdate = (connectorEntity: ConnectorEntity) => {
+        if (connectorEntity.id == currentDialogId) {
+            let newMessages = connectorEntity.data as IMessageInfo[];
+            setMessages(newMessages);
+        }
+    };
+
+    const [connector] = useState(Connector());
+    connector.setOnDialogsTLUpdateCallback(handleDialogsUpdate);
+    connector.setOnMessagesTLUpdateCallback(handleMessagesUpdate);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -28,7 +44,71 @@ export default function Home() {
         fetchData();
     }, []);
 
-    if (dialogsUpdate.length > 0) {
-        return <MessengerBase dialogs={dialogsUpdate} />;
+    useEffect(() => {
+        const UpdateMessages = async () => {
+            if (currentDialogId == 0) {
+                return;
+            }
+
+            const newMessages = await GetMessages(currentDialogId, 0, 50);
+            setMessages(newMessages);
+        };
+
+        UpdateMessages();
+    }, [currentDialogId]);
+
+    function handleListClick(id: number) {
+        setCurrentDialogId(id);
+        setMessages([]);
     }
+
+    const handleSendSubmit = async (data: SendData) => {
+        var response = await fetch(
+            `http://localhost:5041/api/v1.0/telegram/peers/${currentDialogId}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            },
+        );
+        if (response.ok) {
+            let message: TLResponse = await response.json();
+            let sendedMessage = message.data as IMessageInfo;
+            if (data) {
+                setMessages([sendedMessage, ...messages]);
+            }
+        }
+        if (data.media) {
+            await fetch(
+                `http://localhost:5041/api/v1.0/telegram/peers/${currentDialogId}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    body: JSON.stringify(data.media),
+                },
+            );
+        }
+    };
+
+    if (dialogsUpdate && dialogsUpdate.length > 0) {
+        return (
+            <div className={styles.container}>
+                <List dialogs={dialogsUpdate} handleClick={handleListClick} />
+                    <Chat
+                        messages={messages.toReversed()}
+                        currentDialog={dialogsUpdate.find((d) => d.id == currentDialogId)}
+                        onSendSubmit={handleSendSubmit}
+                    />
+            </div>
+        );
+    }
+}
+
+export interface SendData {
+    message: string;
+    media: File | null;
 }

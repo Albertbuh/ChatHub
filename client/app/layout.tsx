@@ -1,8 +1,5 @@
 "use client"
-
 import bg from './telegram/assets/background.jpg'
-
-
 
 import SideNav from './components/navbar/navbar';
 import "./globals.css";
@@ -11,19 +8,13 @@ import { ExpandContextProvider } from './components/navbar/expandContxt'
 import { useContext, useEffect, useState } from 'react'
 import BackgroundContext, { BackgroundProvider } from './BackGroundContext';
 
-
 interface RootLayoutProps {
   children: React.ReactNode;
 }
 
-const bg2 = "/backgrounds/2.jpg"
 
 
 function RootLayoutInner({ children }: RootLayoutProps) {
-  // const storedBg = localStorage.getItem('selectedBg');
-  // const [background, setBackground] = useState(storedBg || bg2);
-  // const { background } = useContext(BackgroundContext);
-
   const { background, updateBackground } = useContext(BackgroundContext);
 
   const storedBg = localStorage.getItem('selectedBg');

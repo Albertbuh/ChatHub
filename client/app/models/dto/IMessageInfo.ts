@@ -4,5 +4,5 @@ export interface IMessageInfo {
     id: number;
     message: string;
     date: string;
-    sender: IPeerInfo | null;
+    sender: IPeerInfo;
 }
