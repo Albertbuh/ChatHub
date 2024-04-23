@@ -18,9 +18,6 @@ export default function LoginPage() {
   const { setAuthStage } = useContext(AuthStageContext);
   
   const handleLoginSuccess = () => {
-
-    console.log('Login success');
-    console.log('New auth stage:', 'verification');
     setAuthStage('verification');
     navigate('/telegram/authorization/verification');
   };

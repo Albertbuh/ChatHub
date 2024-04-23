@@ -1,5 +1,5 @@
 export default function Timestamp({time, className}: TimestampProps) {
-    return <p className={className}>{formatDate(time)}</p>;
+    return <span className={className}>{formatDate(time)}</span>;
 }
 
 function formatDate(value: string): string {

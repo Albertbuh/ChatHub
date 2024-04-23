@@ -35,7 +35,6 @@ class Connector {
 
     private registerEventHandlers() {
         this.connection.on("updateDialogsTL", (connectorEntity: ConnectorEntity) => {
-            console.log(`${JSON.stringify(connectorEntity, null, 2)}`);
 
             if (this.onDialogsTLUpdateCallback) {
                 this.onDialogsTLUpdateCallback(connectorEntity);
@@ -43,7 +42,6 @@ class Connector {
         });
 
         this.connection.on("updateMessagesTl", (connectorEntity: ConnectorEntity) => {
-            console.log(`${JSON.stringify(connectorEntity, null, 2)}`);
 
             if (this.onMessagesTLUpdateCallback) {
                 this.onMessagesTLUpdateCallback(connectorEntity);
