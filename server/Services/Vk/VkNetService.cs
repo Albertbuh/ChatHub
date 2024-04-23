@@ -2,8 +2,8 @@ using ChatHub.HubR;
 using ChatHub.Models.Vk;
 using ChatHub.Models.Vk.DTO;
 using Microsoft.AspNetCore.SignalR;
+using server.Models.Vk.DTO;
 using System.Net.Http.Headers;
-using System.Net.Mail;
 using System.Text;
 using VkNet;
 using VkNet.AudioBypassService.Extensions;
@@ -120,6 +120,13 @@ namespace ChatHub.Services.Vk
         private VkMessageDTO CreateMessageDto(Message message, UserDTO user)
         {
             VkMessageDTO messageDTO = _mapper.Map<VkMessageDTO>(message);
+            var attachaments = message.Attachments;
+            if (attachaments.Count >= 1)
+            {
+                var attachment = attachaments[0];
+                messageDTO.Media = CreateMediaDTO(attachment);
+
+            }
             messageDTO.Sender = CreatePeerDto(user);
 
             return messageDTO;
@@ -128,6 +135,37 @@ namespace ChatHub.Services.Vk
         private VkPeerDTO? CreatePeerDto(UserDTO user)
             => _mapper.Map<VkPeerDTO>(user);
 
+
+        private VkMediaDTO CreateMediaDTO(Attachment attachment)
+        {
+            var mediaDto = new VkMediaDTO(null!, null!);
+            if (attachment.Type == typeof(Document))
+            {
+                var document = (Document)attachment.Instance;
+                mediaDto.MediaUrl = document.Uri;
+                mediaDto.Type = "Doc";
+
+
+            }
+            else if (attachment.Type == typeof(Photo))
+            {
+                var photo = (Photo)attachment.Instance;
+                mediaDto.MediaUrl = photo.Sizes[0].Url.ToString();
+                mediaDto.Type = "Photo";
+            }
+            else if (attachment.Type == typeof(Video))
+            {
+                var video = (Video)attachment.Instance;
+                mediaDto.MediaUrl = video.UploadUrl?.ToString();
+                mediaDto.Type = "Video";
+            }else
+            {
+                mediaDto.MediaUrl = null;
+                mediaDto.Type = "Undefined";
+            }
+
+            return mediaDto;
+        }
 
         public async Task<VKResponse> GetMessages(long chatId, int offsetId, int limit)
         {
@@ -157,32 +195,7 @@ namespace ChatHub.Services.Vk
             {
                 var userVk = chatUsers?.FirstOrDefault(x => x.Id == message.FromId);
                 var user = new UserDTO();
-                var attachaments = message.Attachments;
-                if (attachaments.Count >= 1)
-                {
-                    var attachment = attachaments[0];
-                    if (attachment.Type == typeof(Document))
-                    {
-                        var document = (Document)attachment.Instance;
-                        string fileUrl = document.Uri;
-
-                    }
-                    else
-                    if (attachment.Type == typeof(Photo))
-                    {
-                        var photo = (Photo)attachment.Instance;
-                        string fileUrl = photo.Sizes[0].Url.ToString();
-                    }
-                    else if (attachment.Type == typeof(Video))
-                    {
-                        var video = (Video)attachment.Instance;
-                        string fileUrl = video.UploadUrl.ToString();
-                    }
-
-                }
-
-
-
+               
                 if (userVk is null)
                 {
                     var groupVk = chatGroups?.FirstOrDefault(x => x.Id == Math.Abs(message.FromId!.Value)) ?? new Group();

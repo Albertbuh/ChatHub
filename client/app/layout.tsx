@@ -12,7 +12,7 @@ export default function RootLayout({ children, }: RootLayoutProps) {
   return (
     <html lang="en">
       <body
-        style={{ backgroundImage: `url(/backgrounds/2.jpg)` }}
+        style={{ backgroundImage: `` }}
       >
         <AuthStageProvider>
           <ExpandContextProvider>
