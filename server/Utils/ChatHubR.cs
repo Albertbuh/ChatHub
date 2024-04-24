@@ -1,11 +1,16 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using System.Collections.Concurrent;
+using VkNet.Model;
 
 namespace ChatHub.HubR
 {
     public class ChatHubR : Hub
     {
-        private readonly HashSet<string> connectionIds = new HashSet<string>();
-        private object lockObject = new();
+
+
+        private static readonly HashSet<string> connectionIds = new HashSet<string>();
+        private static object lockObject = new();
+
         public override async Task OnConnectedAsync()
         {
             lock (lockObject)

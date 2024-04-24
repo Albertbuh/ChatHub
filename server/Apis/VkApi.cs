@@ -16,9 +16,11 @@ namespace ChatHub.Apis
             return app;
         }
 
-        private static async Task<IResult> Login(IVKService vkService, string login, string password)
+        static int count = 0;
+
+        private static async Task<IResult> Login(IVKService vkService, string login, string password, string code = "")
         {
-            var result = await vkService.Login(login, password);
+            var result = await vkService.Login(login, password, code);
             return TypedResults.Json(result);
         }
 
@@ -29,29 +31,33 @@ namespace ChatHub.Apis
 
         }
 
-        private static async Task<IResult> SendMessage(IVKService vkService, string message, long peerId)
+        private static async Task<IResult> SendMessage(IVKService vkService, long chatId, string message = "", string file = "")
         {
-            var result = await vkService.SendMessage(message, peerId);
+            var result = await vkService.SendMessage(message, chatId, file);
             return TypedResults.Json(result);
 
 
         }
 
-        private static async Task<IResult> GetMessages(IVKService vkService, long chatId, int offsetId, int limit)
+        private static async Task<IResult> GetMessages(IVKService vkService, long chatId, int offset, int limit)
         {
+            count++;
+            Console.WriteLine("Started");
 
-            var result = await vkService.GetMessages(chatId, offsetId, limit);
+            var result = await vkService.GetMessages(chatId, offset, limit);
+            Console.WriteLine("Success");
             return TypedResults.Json(result);
 
         }
 
         private static async Task<IResult> GetDialogs(IVKService vkService, ulong offsetId, ulong limit)
         {
+            Console.WriteLine("Started");
+
             var result = await vkService.GetDialogs(offsetId, limit);
-            if (result.Data is List<DialogDTO> dialogs)
-                return TypedResults.Ok(dialogs);
-            else
-                return TypedResults.Json(result);
+            Console.WriteLine("Success");
+
+            return TypedResults.Json(result);
 
         }
     }

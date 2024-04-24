@@ -12,13 +12,13 @@ import {
 } from "react-icons/ci";
 import { BsEmojiNeutral } from "react-icons/bs";
 import { useEffect, useRef, useState } from "react";
-import { IMessageInfo } from "@/app/models/dto/IMessageInfo";
+import { IMessageInfo } from "../dto/IMessageInfo";
 import {
     GetPathToMediaFile,
     GetPathToMediaFileWithoutExtension,
     GetPathToProfilePhotoById,
 } from "@/app/utils/filePaths";
-import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
+import { IDialogInfo } from "../dto/IDialogInfo";
 import Timestamp from "@/app/components/timestamp/timestamp";
 import { SendData } from "../page";
 import Image from "next/image";
