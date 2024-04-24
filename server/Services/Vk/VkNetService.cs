@@ -30,7 +30,7 @@ namespace ChatHub.Services.Vk
         private ulong ts;
         string lastLogin = "";
         string lastPassword = "";
-        ulong _applicationId ;
+        ulong _applicationId;
         bool buffer = false;
         public VkNetService(
             ILogger<VkNetService> logger,
@@ -46,10 +46,6 @@ namespace ChatHub.Services.Vk
               .Debug()
               .WriteTo
               .Console()
-              .WriteTo
-              .File("log.txt",
-          rollingInterval: RollingInterval.Day,
-          rollOnFileSizeLimit: true)
            .CreateLogger();
             // Контейнер для инверсии зависимостей
             var services = new ServiceCollection();
@@ -256,7 +252,7 @@ namespace ChatHub.Services.Vk
                     user.ScreenName = userVk.FirstName ?? " ";
                 }
 
-                messageList.Add(CreateMessageDto(message, user,false));
+                messageList.Add(CreateMessageDto(message, user, false));
             }
             result.Data = messageList;
             ApiBreak = false;
@@ -291,7 +287,7 @@ namespace ChatHub.Services.Vk
                     {
                         if (code == "")
                         {
-                           
+
                             throw new ArgumentException("Enter autentification code");
                         }
                         return code;
@@ -315,7 +311,7 @@ namespace ChatHub.Services.Vk
             }
             Console.WriteLine(api.Token);
             ApiBreak = false;
-           
+
             return response;
 
         }
@@ -365,7 +361,8 @@ namespace ChatHub.Services.Vk
                     Attachments = attachment,
                     RandomId = 0
                 });
-            }else
+            }
+            else
             {
                 var messageId = await api!.Messages.SendAsync(new MessagesSendParams
                 {
