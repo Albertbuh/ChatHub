@@ -52,6 +52,7 @@ export default function Home() {
             }
             console.log(currentDialogId);
             const newMessages = await GetMessagesVK(currentDialogId, 0, 50);
+            // const newMessages = await GetDialogsVK(0,100);
             console.log(newMessages);
 
             setMessages(newMessages);

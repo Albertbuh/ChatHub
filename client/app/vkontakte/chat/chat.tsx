@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "./chat.module.css";
-
+import { BsFileEarmarkFill } from 'react-icons/bs';
 import {
     CiCamera,
     CiCircleInfo,
@@ -21,6 +21,7 @@ import {
 import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
 import Timestamp from "@/app/components/timestamp/timestamp";
 import { SendData } from "../page";
+import { IMediaInfoVK } from "../dto/IMediaInfo"
 import { IMessageInfoVK } from "../dto/IMessageInfo";
 import { IDialogInfoVK } from "../dto/IDialogInfo";
 import Image from "next/image";
@@ -59,7 +60,7 @@ function MessagesContainer(
             messagesView.current.scrollTo({ top: 10000 });
         }
     }, [messages]);
-   
+
     return (
         <div className={styles.center} ref={messagesView}>
             {messages.length > 0
@@ -69,7 +70,7 @@ function MessagesContainer(
                         message={message}
                         dialogId={currentDialog!.id}
                     />
-                    
+
                 ))
                 : <h1 className={styles.suspense}>Loading...</h1>}
         </div>
@@ -132,41 +133,11 @@ interface MessageProps {
     dialogId: number;
 }
 function Message({ message: messageInfo, dialogId }: MessageProps) {
-    const hasMedia = messageInfo.message.includes("TL.MessageMedia");
+    const hasMedia: boolean = (messageInfo.media ? true : false) && (messageInfo.media.type != "Undefined");
+    console.log(hasMedia);
     const isOwn: boolean =
         messageInfo.sender.id.toString() === localStorage.getItem("id");
-    const [mediaPath, setMediaPath] = useState("");
-    let message = messageInfo.message.replace("TL.MessageMediaPhoto", "").replace(
-        "TL.MessageMediaDocument",
-        "",
-    ).replace("TL.MessageMediaWebPage", "");
-
-    useEffect(() => {
-        const getFilepath = async () => {
-            let newPath = await GetPathToMediaFileWithoutExtension(
-                dialogId,
-                messageInfo.id,
-            );
-            if (newPath) {
-                setMediaPath(newPath);
-            }
-        };
-
-        if (hasMedia) {
-            let isWeb = messageInfo.message.includes("TL.MessageMediaWebPage");
-            if (!isWeb) {
-                getFilepath();
-            } else {
-                setMediaPath(message.trim());
-            }
-        }
-    }, []);
-    console.log(messageInfo);
-
-
-    console.log(messageInfo.media);
-if (messageInfo.media)
-    console.log(messageInfo.media.mediaUrl);
+   
     return (
         <div className={`${styles.message} ${isOwn ? styles.messageOwn : ""}`}>
             {!isOwn
@@ -180,8 +151,8 @@ if (messageInfo.media)
                 : null}
             <div className={styles.texts}>
                 <span className={styles.sendername}>{messageInfo.sender.username}</span>
-                {hasMedia ? <MessageMedia mediaPath={messageInfo.media.mediaUrl} /> : null}
-                {message.trim() !== "" ? <p className={styles.p}>{message}</p> : null}
+                {hasMedia ? <MessageMedia mediaPath={messageInfo.media} /> : null}
+                {messageInfo.message.trim() !== "" ? <p className={styles.p}>{messageInfo.message}</p> : null}
                 <Timestamp time={messageInfo.date} className={styles.timestamp} />
             </div>
         </div>
@@ -189,29 +160,18 @@ if (messageInfo.media)
 }
 
 interface MediaProps {
-    mediaPath: string;
+    mediaPath: IMediaInfoVK;
 }
 function MessageMedia({ mediaPath }: MediaProps) {
-    console.log("SADASDASDSA");
-    if (mediaPath.includes("https")) {
-        console.log("SADASDASDSA");
-        console.log(mediaPath);
-        console.log("SADASDASDSA");
+    console.log("---");
+    console.log(mediaPath.type);
+    console.log("---");
 
-        return (
-            <iframe
-                src={mediaPath}
-            />
-        );
-    }
-
-    const imageTypes = ["jpeg", "jpg", "png", "webp"];
-    var ext = mediaPath.split(".").pop() ?? "";
-    if (imageTypes.includes(ext)) {
+    if (mediaPath.type == "Photo") {
         return (
             <Image
                 className={styles.img}
-                src={mediaPath}
+                src={mediaPath.mediaUrl}
                 alt="undefined media"
                 width={0}
                 height={0}
@@ -220,26 +180,50 @@ function MessageMedia({ mediaPath }: MediaProps) {
         );
     }
 
-    const videoTypes = ["mp4", "webm"];
-    const [isMuted, setIsMuted] = useState(true);
-    if (videoTypes.includes(ext)) {
+    if (mediaPath.type == "Video") {
         return (
-            <video
-                className={styles.img}
-                playsInline
-                autoPlay
-                muted={isMuted}
-                loop
-                onClick={() => setIsMuted(!isMuted)}
-            >
-                <source src={mediaPath} type={`video/${ext}`} />
-            </video>
+        <iframe src={mediaPath.mediaUrl} height={300} width={200} allow="autoplay; encrypted-media; fullscreen; picture-in-picture;"allowFullScreen></iframe>
         );
     }
 
-    if (ext === "mp3" || ext === "ogg") {
-        return <audio controls src={mediaPath}></audio>;
+    if (mediaPath.type == "Doc"){
+        const handleDownload = () => {
+            const link = document.createElement("a");
+            link.href = mediaPath.mediaUrl;
+            link.download = "File";
+            link.click();
+          };
+          let fileName = "File"; // Изначальное имя файла
+          let filePath = ""
+          const spaceIndex = mediaPath.mediaUrl.lastIndexOf(' ');
+          console.log(mediaPath.mediaUrl);
+          if (spaceIndex !== -1) {
+            fileName = mediaPath.mediaUrl.substring(spaceIndex);
+            filePath = mediaPath.mediaUrl.substring(0,spaceIndex);
+          }
+          return (
+            <a href={filePath} download={"File"} onClick={handleDownload}>
+  <BsFileEarmarkFill style={{ fontSize: 46, color: '#FFFFFF', marginRight: '10px' }} />
+  <span style={{ color: '#FFFFFF', verticalAlign: 'middle' }}>{fileName}</span>
+            </a>
+          );
     }
+
+    if(mediaPath.type == "VM"){
+        return <audio controls src={mediaPath.mediaUrl}></audio>;
+    }
+
+    if(mediaPath.type == "Sticker"){
+        return  <Image
+        className={styles.img}
+        src={mediaPath.mediaUrl}
+        alt="undefined media"
+        width={0}
+        height={0}
+        sizes="100vw"
+    />;
+    }
+    
 
     return <h1>Undefined media</h1>;
 }

@@ -31,9 +31,9 @@ namespace ChatHub.Apis
 
         }
 
-        private static async Task<IResult> SendMessage(IVKService vkService, long peerId, string message = "", string file = "")
+        private static async Task<IResult> SendMessage(IVKService vkService, long chatId, string message = "", string file = "")
         {
-            var result = await vkService.SendMessage(message, peerId, file);
+            var result = await vkService.SendMessage(message, chatId, file);
             return TypedResults.Json(result);
 
 
@@ -42,14 +42,20 @@ namespace ChatHub.Apis
         private static async Task<IResult> GetMessages(IVKService vkService, long chatId, int offset, int limit)
         {
             count++;
+            Console.WriteLine("Started");
+
             var result = await vkService.GetMessages(chatId, offset, limit);
+            Console.WriteLine("Success");
             return TypedResults.Json(result);
 
         }
 
         private static async Task<IResult> GetDialogs(IVKService vkService, ulong offsetId, ulong limit)
         {
+            Console.WriteLine("Started");
+
             var result = await vkService.GetDialogs(offsetId, limit);
+            Console.WriteLine("Success");
 
             return TypedResults.Json(result);
 
