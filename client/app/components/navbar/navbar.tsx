@@ -65,6 +65,16 @@ export default function SideNav() {
         return pathname === path ? styles.listItemActive : '';
     };
 
+    const storedTgAuthStage = localStorage.getItem('storedTgAuthStage');
+    const [localTgAuthStage, setLocalTgAuthStage] = useState(storedTgAuthStage || "login");
+
+    const storedVkAuthStage = localStorage.getItem('storedVkAuthStage');
+    const [localVkAuthStage, setLocalVkAuthStage] = useState(storedVkAuthStage || "login");
+
+    console.log("tg", localTgAuthStage);
+    console.log("vk", localVkAuthStage);
+
+
     return (
         <nav className={`${styles.sidebar} ${sidebarActive ? styles.active : ''}`}>
             <div className={styles.logoMenu}>
@@ -81,25 +91,32 @@ export default function SideNav() {
                 </li>
 
                 <li className={`${styles.listItem} ${getActiveClass(`/telegram/authorization/${authStage}`)} ${getActiveClass(`/telegram`)}`}>
-                    {authStage === 'login' && (
+                    {/* {authStage === 'login' && ( */}
+                    {localTgAuthStage === 'login' && (
+
                         <Link href='/telegram/authorization/login'>
                             <LiaTelegram className={styles.listItemIcon} />
                             <span className={styles.linkName}>Telegram Login</span>
                         </Link>
                     )}
-                    {authStage === 'verification' && (
+                    {/* {authStage === 'verification' && ( */}
+                    {localTgAuthStage === 'verification' && (
                         <Link href="/telegram/authorization/verification">
                             <LiaTelegram className={styles.listItemIcon} />
                             <span className={styles.linkName}>Telegram Verification</span>
                         </Link>
                     )}
-                    {authStage === 'password' && (
+                    {/* {authStage === 'password' && ( */}
+                    {localTgAuthStage === 'password' && (
+
                         <Link href="/telegram/authorization/password">
                             <LiaTelegram className={styles.listItemIcon} />
                             <span className={styles.linkName}>Telegram Password</span>
                         </Link>
                     )}
-                    {authStage === 'telegramLogged' && (
+                    {/* {authStage === 'telegramLogged' && ( */}
+                    {localTgAuthStage === 'telegramLogged' && (
+
                         <Link href="/telegram">
                             <LiaTelegram className={styles.listItemIcon} />
                             <span className={styles.linkName}>Telegram Dialogs</span>
@@ -107,25 +124,35 @@ export default function SideNav() {
                     )}
                 </li>
 
-                <li className={`${styles.listItem} ${getActiveClass('/vkontakte')}`}>
-                    <Link href="/vkontakte">
+                <li className={`${styles.listItem}  ${getActiveClass(`/vkontakte/authorization/${authStage}`)} ${getActiveClass(`/vkontakte`)}`}>
+                    {/* <Link href="/vkontakte">
                         <SlSocialVkontakte className={styles.listItemIcon} />
                         <span className={styles.linkName}>VK</span>
-                    </Link>
-                </li>
-
-                <li className={`${styles.listItem} ${getActiveClass('/vkontakte')}`}>
-                    <Link href="/vkontakte">
-                        <SlSocialVkontakte className={styles.listItemIcon} />
-                        <span className={styles.linkName}>VK Login</span>
-                    </Link>
-                </li>
-
-                <li className={`${styles.listItem} ${getActiveClass('/vkontakte')}`}>
-                    <Link href="/vkontakte">
-                        <SlSocialVkontakte className={styles.listItemIcon} />
-                        <span className={styles.linkName}>VK Verification</span>
-                    </Link>
+                    </Link> */}
+                    {localVkAuthStage === 'login' && (
+                        <Link href='/vkontakte/authorization/login'>
+                            <SlSocialVkontakte className={styles.listItemIcon} />
+                            <span className={styles.linkName}>VK Login</span>
+                        </Link>
+                    )}
+                    {localVkAuthStage === 'verification' && (
+                        <Link href="/vkontakte/authorization/verification">
+                            <SlSocialVkontakte className={styles.listItemIcon} />
+                            <span className={styles.linkName}>VK Verification</span>
+                        </Link>
+                    )}
+                    {localVkAuthStage === 'password' && (
+                        <Link href="/vkontakte/authorization/password">
+                            <SlSocialVkontakte className={styles.listItemIcon} />
+                            <span className={styles.linkName}>VK Password</span>
+                        </Link>
+                    )}
+                    {localVkAuthStage === 'vkLogged' && (
+                        <Link href="/vkontakte">
+                            <SlSocialVkontakte className={styles.listItemIcon} />
+                            <span className={styles.linkName}>VK Dialogs</span>
+                        </Link>
+                    )}
                 </li>
 
                 <li className={`${styles.listItem} ${getActiveClass('/realTimeChat')}`}>
@@ -133,7 +160,6 @@ export default function SideNav() {
                         <BsChatSquareHeart className={styles.listItemIcon} />
                         <span className={styles.linkName}> Real Time Chat</span>
                     </Link>
-                    {/* <RealTimeChat isExpanded={isExpanded} /> */}
                 </li>
 
 
@@ -147,7 +173,7 @@ export default function SideNav() {
                     </Link>
                 </li>
                 <li className={`${styles.listItem} ${getActiveClass('/account')}`}>
-                    <Link href="/realTimeChat">
+                    <Link href="/personalPage">
                         <img className={styles.avatarImg} src={currentUser?.avatar || avatarPath} alt='' />
                         <span className={styles.linkName}> Your Name</span>
                     </Link>
