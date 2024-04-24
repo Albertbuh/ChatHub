@@ -37,6 +37,8 @@ const PasswordForm = ({ onPasswordSuccess }: PasswordFormProps) => {
             
             // Вызов функции обратного вызова
             onPasswordSuccess();
+            localStorage.setItem("storedTgAuthStage", "telegramLogged")
+            
         } catch (error) {
             console.log(error);
         }

@@ -53,15 +53,13 @@ const Chat = () => {
 
     useEffect(() => {
         endRef.current?.scrollIntoView({ behavior: "smooth" })
-    }, []);
+    }, [endRef, chat]);
 
     useEffect(() => {
         if (chatId) {
             const unSub = onSnapshot(doc(db, "chats", chatId), (res) => {
                 setChat(res.data() as Chat);
-                // });
-                // const unSub = onSnapshot(doc(db, "chats", chatId), (res) => {
-                // const unSub = onSnapshot(doc(db, "chats", "2wUZHGpbCahR6WdAxGdF"), (res) => {
+
 
                 setChat(res.data() as Chat);
             });
@@ -71,15 +69,15 @@ const Chat = () => {
             };
         }
     }, [chatId]);
-    // }, ["2wUZHGpbCahR6WdAxGdF"]);
+   
 
     console.log(chat)
 
-
-    const handleEmoji = (e: { emoji: string }) => {
-        setText((prev) => prev + e.emoji);
-        setOpen(false);
-    };
+    // Not working for this moment
+    // const handleEmoji = (e: { emoji: string }) => {
+    //     setText((prev) => prev + e.emoji);
+    //     setOpen(false);
+    // };
 
     const handleImg = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -89,7 +87,7 @@ const Chat = () => {
             });
         }
     };
-
+    
 
     const handleSend = async () => {
         if (text === "") return;
@@ -234,6 +232,12 @@ const Chat = () => {
                             : "Type a message..."
                     }
                     onChange={(e) => setText(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleSend();
+                        }
+                      }}
+
                     disabled={isCurrentUserBlocked || isReceiverBlocked}
                 />
                 <div className={styles.emoji}>

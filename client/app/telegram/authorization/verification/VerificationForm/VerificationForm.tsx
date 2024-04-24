@@ -33,8 +33,10 @@ const VerificationForm = ({ onVerificationSuccess }: VerificationFormProps) => {
             if (data.statusCode === 200 && data.message === "Enter your password") {
                 // Вызов функции обратного вызова
                 onVerificationSuccess();
+                localStorage.setItem("storedTgAuthStage", "password");
             } else {
                 console.log("Password not required", data);
+                localStorage.setItem("storedTgAuthStage", "telegramLogged");
                 navigate('/telegram');
             }
         } catch (error) {

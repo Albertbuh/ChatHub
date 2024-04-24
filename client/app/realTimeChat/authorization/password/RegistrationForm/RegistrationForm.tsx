@@ -5,7 +5,7 @@ import { useRef, useState } from 'react';
 import { toast } from 'react-toastify';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '@/app/realTimeChat/lib/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, query, setDoc, where } from 'firebase/firestore';
 import upload from '@/app/realTimeChat/lib/upload';
 import Link from 'next/link';
 
@@ -38,19 +38,20 @@ const RegistrationForm = () => {
 
         const { username, email, password } = Object.fromEntries(formData);
 
-        // VALIDATE UNIQUE USERNAME
-        // const usersRef = collection(db, "users");
-        // const q = query(usersRef, where("username", "==", username));
-        // const querySnapshot = await getDocs(q);
+        //VALIDATE UNIQUE USERNAME
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("username", "==", username));
+        const querySnapshot = await getDocs(q);
 
-        // if (!querySnapshot.empty) {
-        //   return toast.warn("Select another username");
-        // }
+        if (!querySnapshot.empty) {
+          return toast.warn("Select another username");
+        }
 
         try {
             const res = await createUserWithEmailAndPassword(auth, email.toString(), password.toString());
 
             const imgUrl = avatar.file ? await upload(avatar.file) : "/Nesterenkov.jpg";
+            
 
             await setDoc(doc(db, "users", res.user.uid), {
                 username,
@@ -58,6 +59,7 @@ const RegistrationForm = () => {
                 avatar: imgUrl,
                 id: res.user.uid,
                 blocked: [],
+                background:"/backgrounds/2.jpg"
             });
 
             await setDoc(doc(db, "userchats", res.user.uid), {

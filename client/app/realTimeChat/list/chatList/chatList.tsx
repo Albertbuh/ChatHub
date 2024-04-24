@@ -24,6 +24,7 @@ interface User {
     username: string;
     avatar?: string;
     blocked: string[];
+    background: string;
 }
 
 interface ChatWithUser extends Chat {

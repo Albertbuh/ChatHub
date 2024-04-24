@@ -1,29 +1,23 @@
 "use client"
 
 import { useContext, useEffect } from "react";
-import LoginPage from "./authorization/login/page";
-import Chat from "./chat/chat";
-import Detail from "./detail/detail";
-import { useUserStore } from "./lib/userStore";
-import List from "./list/list";
 
-import styles from './realTimeChat.module.css'
+import styles from './personalPage.module.css'
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./lib/firebase";
-import { useChatStore } from "./lib/chatStore";
 import { ExpandContext } from "../components/navbar/expandContxt";
-import Stub from "./stub/page";
+import { auth } from "../realTimeChat/lib/firebase";
+import { useUserStore } from "../realTimeChat/lib/userStore";
+import LoginPage from "../realTimeChat/authorization/login/page";
+import Detail from "./detail/detail";
 
 
 const user = false
 
-
-export default function RealTimeChat() {
-  const bg2 = "/backgrounds/2.jpg"
+export default function personalPage() {
   const { isExpanded } = useContext(ExpandContext);
 
   const { currentUser, isLoading, fetchUserInfo } = useUserStore();
-  const { chatId } = useChatStore();
+  
 
   useEffect(() => {
 
@@ -41,9 +35,7 @@ export default function RealTimeChat() {
   if (isLoading) return <div className={`${styles.loading} ${styles.container}`}>Loading...</div>;
 
 
-  // console.log("bckg: ", currentUser.background)
   const containerStyles = {
-
     marginLeft: isExpanded ? '15%' : '4%',
   };
 
@@ -53,17 +45,7 @@ export default function RealTimeChat() {
       {
         currentUser ? (
           <>
-            <List />
-            {/* {chatId && <Chat />}
-            {chatId && <Detail />} */}
-            {chatId ? (
-              <>
-                <Chat />
-                <Detail />
-              </>
-            ) : (
-              <Stub />
-            )}
+            <Detail/>
           </>
         ) : (
           <LoginPage />
