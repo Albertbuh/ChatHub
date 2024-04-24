@@ -1,6 +1,6 @@
 import styles from "./LoginForm.module.css";
-import { BsFillTelephoneFill } from "react-icons/bs";
-import { useState } from "react";
+import { BsFillKeyFill, BsFillTelephoneFill } from "react-icons/bs";
+import { useRef, useState } from "react";
 import { dir } from "console";
 
 interface LoginFormProps {
@@ -28,13 +28,16 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
                 throw new Error("Unable to login");
             }
 
+            
             const responseData = await response.json();
 
+            //TODO: Some logic for correct verification answer ???
             if (responseData.statusCode === 200 && responseData.message === "Send verification code") {
                 onLoginSuccess();
-                localStorage.setItem("storedTgAuthStage", "verification");
-                console.log("telegram setted store: verification :", localStorage.getItem("storedTgAuthStage"))
+                localStorage.setItem("storedVkAuthStage", "verification");
+                console.log("vk setted store: verification :", localStorage.getItem("storedVkAuthStage"))
             }
+
             if (responseData.statusCode === 200 && responseData.data != null) {
                 let data = responseData.data as UserData;
                 localStorage.setItem("id", data.id.toString());
@@ -42,6 +45,7 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
                 localStorage.setItem("tag", data.tag);
                 localStorage.setItem("photoId", data.photoId.toString());
                 onLoginSuccess();
+                localStorage.setItem("storedVkAuthStage", "verification")
             } else {
                 console.log("Unexpected response from server:", responseData);
             }
@@ -57,6 +61,19 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
         photoId: number;
     }
 
+    const [PasswordCode, setPasswordCode] = useState('');
+
+
+    const passwordInputRef = useRef<HTMLInputElement>(null);
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const togglePasswordVisibility = () => {
+        console.log('Show password')
+        setPasswordVisible(!passwordVisible);
+        if (passwordInputRef.current) {
+          passwordInputRef.current.type = passwordVisible ? "password" : "text";
+        }
+      };
+
     return (
         <div className={styles.wrapper}>
             <form action="" onSubmit={handleSubmit}>
@@ -71,6 +88,13 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
                     />
                     <BsFillTelephoneFill className={styles.icon} />
                 </div>
+
+                <div className={styles.inputBox}>
+                    <input type={passwordVisible ? "text" : "password" }  value={PasswordCode} onChange={(e) => setPasswordCode(e.target.value)} placeholder='Password-code' required ref={passwordInputRef}/>
+                    <BsFillKeyFill  className={styles.icon} onClick={togglePasswordVisibility} />
+                </div>
+
+
                 <div className={styles.rememberForgot}>
                     <label>
                         <input type="checkbox" />Remember me

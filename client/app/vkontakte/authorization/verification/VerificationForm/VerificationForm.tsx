@@ -30,15 +30,12 @@ const VerificationForm = ({ onVerificationSuccess }: VerificationFormProps) => {
             const data = await response.json();
 
 
-            if (data.statusCode === 200 && data.message === "Enter your password") {
                 // Вызов функции обратного вызова
                 onVerificationSuccess();
-                localStorage.setItem("storedTgAuthStage", "password");
-            } else {
+            
                 console.log("Password not required", data);
-                localStorage.setItem("storedTgAuthStage", "telegramLogged");
-                navigate('/telegram');
-            }
+                localStorage.setItem("storedVkAuthStage", "vkLogged");
+                navigate('/vkontakte');
         } catch (error) {
             console.log(error);
         }
