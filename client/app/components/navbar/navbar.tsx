@@ -100,15 +100,14 @@ export default function SideNav() {
                         </Link>
                     )}
                     {/* {authStage === 'verification' && ( */}
-                    {localTgAuthStage === 'verifiaction' && (
-
+                    {localTgAuthStage === 'verification' && (
                         <Link href="/telegram/authorization/verification">
                             <LiaTelegram className={styles.listItemIcon} />
                             <span className={styles.linkName}>Telegram Verification</span>
                         </Link>
                     )}
                     {/* {authStage === 'password' && ( */}
-                    {localTgAuthStage === 'login' && (
+                    {localTgAuthStage === 'password' && (
 
                         <Link href="/telegram/authorization/password">
                             <LiaTelegram className={styles.listItemIcon} />
@@ -116,7 +115,7 @@ export default function SideNav() {
                         </Link>
                     )}
                     {/* {authStage === 'telegramLogged' && ( */}
-                    {localTgAuthStage === 'login' && (
+                    {localTgAuthStage === 'telegramLogged' && (
 
                         <Link href="/telegram">
                             <LiaTelegram className={styles.listItemIcon} />
@@ -148,7 +147,7 @@ export default function SideNav() {
                             <span className={styles.linkName}>VK Password</span>
                         </Link>
                     )}
-                    {localVkAuthStage === 'telegramLogged' && (
+                    {localVkAuthStage === 'vkLogged' && (
                         <Link href="/vkontakte">
                             <SlSocialVkontakte className={styles.listItemIcon} />
                             <span className={styles.linkName}>VK Dialogs</span>

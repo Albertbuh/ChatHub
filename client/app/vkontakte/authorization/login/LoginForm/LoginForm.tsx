@@ -28,7 +28,16 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
                 throw new Error("Unable to login");
             }
 
+            
             const responseData = await response.json();
+
+            //TODO: Some logic for correct verification answer ???
+            if (responseData.statusCode === 200 && responseData.message === "Send verification code") {
+                onLoginSuccess();
+                localStorage.setItem("storedVkAuthStage", "verification");
+                console.log("vk setted store: verification :", localStorage.getItem("storedVkAuthStage"))
+            }
+
             if (responseData.statusCode === 200 && responseData.data != null) {
                 let data = responseData.data as UserData;
                 localStorage.setItem("id", data.id.toString());

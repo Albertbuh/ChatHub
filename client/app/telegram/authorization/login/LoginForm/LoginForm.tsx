@@ -29,6 +29,12 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
             }
 
             const responseData = await response.json();
+
+            if (responseData.statusCode === 200 && responseData.message === "Send verification code") {
+                onLoginSuccess();
+                localStorage.setItem("storedTgAuthStage", "verification");
+                console.log("telegram setted store: verification :", localStorage.getItem("storedTgAuthStage"))
+            }
             if (responseData.statusCode === 200 && responseData.data != null) {
                 let data = responseData.data as UserData;
                 localStorage.setItem("id", data.id.toString());
@@ -36,7 +42,6 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
                 localStorage.setItem("tag", data.tag);
                 localStorage.setItem("photoId", data.photoId.toString());
                 onLoginSuccess();
-                localStorage.setItem("storedTgAuthStage", "verification")
             } else {
                 console.log("Unexpected response from server:", responseData);
             }
