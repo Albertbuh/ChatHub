@@ -23,7 +23,7 @@ export default function SideNav() {
     const avatarPath = '/avatars/Hayasaka.jpg';
     const { currentUser } = useUserStore();
 
-    let container = null;
+    let container:HTMLElement|null = null;
     if (typeof window !== 'undefined') {
         container = document.getElementById('container');
     }
@@ -84,7 +84,7 @@ export default function SideNav() {
             <ul className={styles.list}>
 
                 <li className={`${styles.listItem} ${getActiveClass('/')}`}>
-                    <Link href="/">
+                    <Link href="/personalPage">
                         <AiOutlineHome className={styles.listItemIcon} />
                         <span className={styles.linkName}> Home</span>
                     </Link>

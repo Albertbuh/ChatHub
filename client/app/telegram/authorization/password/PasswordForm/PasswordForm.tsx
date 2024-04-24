@@ -35,9 +35,9 @@ const PasswordForm = ({ onPasswordSuccess }: PasswordFormProps) => {
             if("photoId" in data)
                 localStorage.setItem("photoId", data.photoId);
             
+            localStorage.setItem("storedTgAuthStage", "telegramLogged")
             // Вызов функции обратного вызова
             onPasswordSuccess();
-            localStorage.setItem("storedTgAuthStage", "telegramLogged")
             
         } catch (error) {
             console.log(error);

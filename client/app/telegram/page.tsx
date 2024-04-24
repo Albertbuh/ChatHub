@@ -1,7 +1,13 @@
 "use client";
+import React, {
+    Suspense,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import { GetDialogs, GetMessages } from "../utils/getRequests";
 import Connector from "../utils/singnalR-connector";
-import React, { useEffect, useState } from "react";
 import { IDialogInfo } from "../models/dto/IDialogInfo";
 import { ConnectorEntity } from "../models/connectorEntity";
 import List from "./list/list";
@@ -10,11 +16,13 @@ import styles from "./telegram.module.css";
 import Chat from "./chat/chat";
 import { IMessageInfo } from "../models/dto/IMessageInfo";
 import TLResponse from "../models/dto/TLResponse";
+import { ExpandContext } from "../components/navbar/expandContxt";
 
 export default function Home() {
     const [dialogsUpdate, setDialogsUpdate] = useState<IDialogInfo[]>([]);
     const [messages, setMessages] = useState<IMessageInfo[]>([]);
     const [currentDialogId, setCurrentDialogId] = useState(0);
+    const { isExpanded } = useContext(ExpandContext);
 
     const handleDialogsUpdate = (connectorEntity: ConnectorEntity) => {
         setDialogsUpdate(connectorEntity.data as IDialogInfo[]);
@@ -80,29 +88,20 @@ export default function Home() {
                 setMessages([sendedMessage, ...messages]);
             }
         }
-        if (data.media) {
-            await fetch(
-                `http://localhost:5041/api/v1.0/telegram/peers/${currentDialogId}`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                    body: JSON.stringify(data.media),
-                },
-            );
-        }
     };
 
     if (dialogsUpdate && dialogsUpdate.length > 0) {
         return (
-            <div className={styles.container}>
+            <div
+                className={styles.container}
+                style={{ marginLeft: isExpanded ? "15%" : "4%" }}
+            >
                 <List dialogs={dialogsUpdate} handleClick={handleListClick} />
-                    <Chat
-                        messages={messages.toReversed()}
-                        currentDialog={dialogsUpdate.find((d) => d.id == currentDialogId)}
-                        onSendSubmit={handleSendSubmit}
-                    />
+                <Chat
+                    messages={messages.toReversed()}
+                    currentDialog={dialogsUpdate.find((d) => d.id == currentDialogId)}
+                    onSendSubmit={handleSendSubmit}
+                />
             </div>
         );
     }
@@ -110,5 +109,5 @@ export default function Home() {
 
 export interface SendData {
     message: string;
-    media: File | null;
+    mediaFilepath: string;
 }

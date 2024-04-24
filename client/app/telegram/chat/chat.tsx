@@ -14,7 +14,6 @@ import { BsEmojiNeutral } from "react-icons/bs";
 import { useEffect, useRef, useState } from "react";
 import { IMessageInfo } from "@/app/models/dto/IMessageInfo";
 import {
-    GetPathToMediaFile,
     GetPathToMediaFileWithoutExtension,
     GetPathToProfilePhotoById,
 } from "@/app/utils/filePaths";
@@ -22,6 +21,7 @@ import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
 import Timestamp from "@/app/components/timestamp/timestamp";
 import { SendData } from "../page";
 import Image from "next/image";
+import { setPriority } from "os";
 
 interface ChatProps {
     messages: IMessageInfo[];
@@ -77,50 +77,74 @@ interface MessageSenderProps {
 }
 function MessageSender({ onSubmit }: MessageSenderProps) {
     const [message, setMessage] = useState("");
-    const [media, setMedia] = useState<File | null>(null);
+    const [media, setMedia] = useState("");
+    const [isMediaFieldVisible, setIsMediaFieldVisible] = useState(false);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        onSubmit({ message, media });
+        onSubmit({ message, mediaFilepath: media});
         setMessage("");
+        setMedia("");
     };
 
     function handleImageClick() {
-        var input = document.createElement("input");
-        input.type = "file";
-        input.onchange = () => {
-            var files = input.files;
-            if (files) {
-                setMedia(files[0]);
-            }
-        };
-        input.click();
+        setIsMediaFieldVisible(!isMediaFieldVisible);
     }
 
     return (
-        <form action="" className={styles.bottom} onSubmit={handleSubmit}>
-            <div className={styles.icons}>
-                <CiImageOn className={styles.imgI} onClick={handleImageClick} />
-                <CiCamera className={styles.imgI} />
-                <CiMicrophoneOn className={styles.imgI} />
-            </div>
-            <input
-                className={styles.input}
-                value={message}
-                type="text"
-                placeholder="Type a message..."
-                onChange={(e) => setMessage(e.target.value)}
-            />
-            <div className={styles.emoji}>
-                <BsEmojiNeutral className={styles.imgI} />
-            </div>
-            <button
-                type="submit"
-                className={styles.sendButton}
+        <>
+            <form action="" className={styles.bottom} onSubmit={handleSubmit}>
+                <div className={styles.icons}>
+                    <CiImageOn className={styles.imgI} onClick={handleImageClick} />
+                    <CiCamera className={styles.imgI} />
+                    <CiMicrophoneOn className={styles.imgI} />
+                </div>
+                <input
+                    className={styles.input}
+                    value={message}
+                    type="text"
+                    placeholder="Type a message..."
+                    onChange={(e) => setMessage(e.target.value)}
+                />
+                <div className={styles.emoji}>
+                    <BsEmojiNeutral className={styles.imgI} />
+                </div>
+                <button
+                    type="submit"
+                    className={styles.sendButton}
+                >
+                    Send
+                </button>
+            </form>
+            <div
+                className={styles.mediaField}
+                style={{ opacity: isMediaFieldVisible ? "100" : "0" }}
             >
-                Send
-            </button>
-        </form>
+                <input
+                    className={styles.input}
+                    name="media"
+                    value={media}
+                    type="text"
+                    placeholder="path to media..."
+                    onChange={(e) => setMedia(e.target.value)}
+                />
+                <button
+                    onClick={() => {
+                        setIsMediaFieldVisible(false);
+                    }}
+                >
+                    Ok
+                </button>
+                <button
+                    onClick={() => {
+                        setIsMediaFieldVisible(false);
+                        setMedia("");
+                    }}
+                >
+                    Cancel
+                </button>
+            </div>
+        </>
     );
 }
 
@@ -137,6 +161,9 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
         "TL.MessageMediaDocument",
         "",
     ).replace("TL.MessageMediaWebPage", "");
+    const [profilePath, setProfilePath] = useState(
+        GetPathToProfilePhotoById(messageInfo.sender.id),
+    );
 
     useEffect(() => {
         const getFilepath = async () => {
@@ -146,6 +173,8 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
             );
             if (newPath) {
                 setMediaPath(newPath);
+            } else {
+                setMediaPath("/avatars/noImage.png");
             }
         };
 
@@ -165,13 +194,16 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
                 ? (
                     <img
                         className={styles.avatarImg}
-                        src={GetPathToProfilePhotoById(messageInfo.sender.id)}
-                        alt="/avatars/defaultProfile.png"
+                        src={profilePath}
+                        onError={() => setProfilePath("/avatars/defaultProfile.jpeg")}
+                        alt=""
                     />
                 )
                 : null}
             <div className={styles.texts}>
-                <span className={styles.sendername}>{messageInfo.sender.username}</span>
+                <span className={styles.sendername}>
+                    {!isOwn ? messageInfo.sender.username : ""}
+                </span>
                 {hasMedia ? <MessageMedia mediaPath={mediaPath} /> : null}
                 {message.trim() !== "" ? <p className={styles.p}>{message}</p> : null}
                 <Timestamp time={messageInfo.date} className={styles.timestamp} />
@@ -196,10 +228,10 @@ function MessageMedia({ mediaPath }: MediaProps) {
     var ext = mediaPath.split(".").pop() ?? "";
     if (imageTypes.includes(ext)) {
         return (
-            <Image
+            <img
                 className={styles.img}
                 src={mediaPath}
-                alt="undefined media"
+                alt=""
                 width={0}
                 height={0}
                 sizes="100vw"
@@ -239,15 +271,23 @@ function Top({ dialog }: TopProps) {
         return null;
     }
 
+    const [profilePath, setProfilePath] = useState(
+        GetPathToProfilePhotoById(dialog.id),
+    );
+    useEffect(() => {
+        setProfilePath(GetPathToProfilePhotoById(dialog.id));
+    }, [dialog]);
+
     return (
         <div className={styles.top}>
             <div className={styles.user}>
                 <Image
-                    src={GetPathToProfilePhotoById(dialog.id)}
+                    src={profilePath}
                     width={"60"}
                     height={"60"}
                     alt=""
                     className={styles.avatarImg}
+                    onError={() => setProfilePath("/avatars/defaultProfile.jpeg")}
                 />
                 <div className={styles.texts}>
                     <span className={styles.span}>{dialog.title}</span>

@@ -394,7 +394,6 @@ public class WClientTLService : ITLService
         }
         if (isUpdated)
         {
-            _logger.LogInformation("send updates");
             await SendUpdatedMessages();
             await UpdateDialogs();
             await SendUpdatedDialogs();

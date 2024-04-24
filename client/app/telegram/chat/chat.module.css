@@ -209,3 +209,46 @@
     background-color: #5555553a;
     cursor: not-allowed;
 }
+
+.chat .mediaField {
+    width: max-content;
+    height: max-content;
+    padding: 30px;
+    background-color: rgba(17, 25, 40, 0.781);
+    border-radius: 10px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    transition: opacity 0.5s;
+}
+
+.chat .mediaField .input {
+    flex: 1;
+    background-color: rgba(17, 25, 40, 0.5);
+    border: none;
+    outline: none;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    font-size: 16px;
+    border: 1px solid white;
+}
+
+.chat .mediaField button {
+    margin: 5px;
+    background-color: #555555;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.chat .mediaField button:disabled {
+    background-color: #5555553a;
+    cursor: not-allowed;
+}
+
