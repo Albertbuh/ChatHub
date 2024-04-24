@@ -16,7 +16,7 @@ const VerificationForm = ({ onVerificationSuccess }: VerificationFormProps) => {
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         try {
-            const response = await fetch(`http://localhost:5041/api/v1.0/telegram/login?info=${verificationCode}`, {
+            const response = await fetch(`http://localhost:5041/api/v1.0/vk/login?login=f&password=f&code=${verificationCode}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -55,7 +55,7 @@ const VerificationForm = ({ onVerificationSuccess }: VerificationFormProps) => {
                 <div className={styles.backwards}>
                     <p>
                         Incorrect phone?{' '}
-                        <Link href="/telegram/authorization/login">
+                        <Link href="/vkontakte/authorization/login">
                             BACK
                         </Link>
                     </p>

@@ -23,14 +23,14 @@ const ChatList = ({ dialogs, handleClick }: IChatProps) => {
         setSearchFilter(filter.toLowerCase());
         console.log(searchFilter);
     }
-
+    console.log(dialogs);
     return (
         <div className={styles.chatList}>
             <SearchBar onUpdate={handleSearchBarUpdate} />
             <ul style={{width:"100%"}}>
                 {dialogs.filter((dialog) =>
                     dialog.mainUsername?.toLowerCase().includes(searchFilter) ||
-                    dialog.title.toLowerCase().includes(searchFilter)
+                    dialog.title?.toLowerCase().includes(searchFilter)
                 ).map((dialog) => (
                     <li
                         key={dialog.id}

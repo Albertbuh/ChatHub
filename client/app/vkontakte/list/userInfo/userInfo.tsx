@@ -9,13 +9,12 @@ interface IUserProps {
 }
 
 const UserInfo = () => {
-    const avatarPath = `/assets/telegram/userAssets/${localStorage.getItem('tag')}/${localStorage.getItem('id')}/profile.jpeg`;
-
+    const url = localStorage.getItem("photoUrlVk") ? localStorage.getItem("photoUrlVk") : null;
     return (
         <div className={styles.userInfo}>
             <div className={styles.user}>
-                <img className={styles.img} src={avatarPath} alt='' />
-                <h2>{localStorage.getItem("username")}</h2>
+                <img className={styles.img} src={url!} alt='' />
+                <h2>{localStorage.getItem("usernameVk")}</h2>
             </div>
             <div className={styles.icons}>
                 <IoIosMore className={styles.imgI}/>

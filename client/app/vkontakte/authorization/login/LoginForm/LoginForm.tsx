@@ -9,13 +9,15 @@ interface LoginFormProps {
 
 const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
     const [phoneNumber, setPhoneNumber] = useState("");
+    const [password, setPassword] = useState("");
+
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
         try {
             const response = await fetch(
-                `http://localhost:5041/api/v1.0/telegram/login?info=${phoneNumber}`,
+                `http://localhost:5041/api/v1.0/vk/login?login=${phoneNumber}&password=${PasswordCode}`,
                 {
                     method: "POST",
                     headers: {
@@ -31,19 +33,20 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
             
             const responseData = await response.json();
 
+            console.log(responseData);
             //TODO: Some logic for correct verification answer ???
-            if (responseData.statusCode === 200 && responseData.message === "Send verification code") {
+            if (responseData.statusCode === 200 && responseData.message === "Enter autentification code") {
                 onLoginSuccess();
                 localStorage.setItem("storedVkAuthStage", "verification");
                 console.log("vk setted store: verification :", localStorage.getItem("storedVkAuthStage"))
             }
-
+            
             if (responseData.statusCode === 200 && responseData.data != null) {
                 let data = responseData.data as UserData;
-                localStorage.setItem("id", data.id.toString());
-                localStorage.setItem("username", data.username);
-                localStorage.setItem("tag", data.tag);
-                localStorage.setItem("photoId", data.photoId.toString());
+                localStorage.setItem("idVk", data.id.toString());
+                localStorage.setItem("usernameVk", data.username);
+                localStorage.setItem("tagVk", data.tag);
+                localStorage.setItem("photoUrlVk", data.photoUrl);
                 onLoginSuccess();
                 localStorage.setItem("storedVkAuthStage", "verification")
             } else {
@@ -58,7 +61,7 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
         id: number;
         username: string;
         tag: string;
-        photoId: number;
+        photoUrl: string;
     }
 
     const [PasswordCode, setPasswordCode] = useState('');
@@ -82,7 +85,7 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
                     <input
                         type="text"
                         value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        onChange={(e) => {setPhoneNumber(e.target.value);}}
                         placeholder="Phone-Number"
                         required
                     />
@@ -106,7 +109,7 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
 
                 <div className={styles.registerLink}>
                     <p>
-                        Don&apos;t have Telegram account? <a href="#">Registration</a>
+                        Don&apos;t have VK account? <a href="#">Registration</a>
                     </p>
                 </div>
             </form>

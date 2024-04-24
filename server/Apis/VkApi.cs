@@ -1,10 +1,14 @@
-﻿using ChatHub.Models.Telegram.DTO;
+﻿using ChatHub.Models.Vk;
+using ChatHub.Models.Telegram.DTO;
+using ChatHub.Models.Vk;
 using ChatHub.Services.Vk;
+using server.Models.Vk;
 
 namespace ChatHub.Apis
 {
     public static class VkApi
     {
+        static bool lastRequest = false;
         public static IEndpointRouteBuilder MapVkApi(this RouteGroupBuilder app)
         {
             app.MapPost("/login", Login);
@@ -31,9 +35,9 @@ namespace ChatHub.Apis
 
         }
 
-        private static async Task<IResult> SendMessage(IVKService vkService, long chatId, string message = "", string file = "")
+        private static async Task<IResult> SendMessage(IVKService vkService, long chatId, VKChatRequest chatRequest)
         {
-            var result = await vkService.SendMessage(message, chatId, file);
+            var result = await vkService.SendMessage(chatRequest.Message, chatId, chatRequest.MediaFilepath);
             return TypedResults.Json(result);
 
 
@@ -53,11 +57,17 @@ namespace ChatHub.Apis
         private static async Task<IResult> GetDialogs(IVKService vkService, ulong offsetId, ulong limit)
         {
             Console.WriteLine("Started");
-
-            var result = await vkService.GetDialogs(offsetId, limit);
+            VKResponse result;
+            while (lastRequest)
+            {
+            }
+                lastRequest = true;
+                result = await vkService.GetDialogs(offsetId, limit);
+                lastRequest = false;
             Console.WriteLine("Success");
 
             return TypedResults.Json(result);
+
 
         }
     }

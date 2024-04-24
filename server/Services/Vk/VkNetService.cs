@@ -28,7 +28,10 @@ namespace ChatHub.Services.Vk
         private bool ApiBreak = false;
         private ulong? pts;
         private ulong ts;
-        ulong _applicationId;
+        string lastLogin = "";
+        string lastPassword = "";
+        ulong _applicationId ;
+        bool buffer = false;
         public VkNetService(
             ILogger<VkNetService> logger,
             IMapper mapper,
@@ -40,7 +43,7 @@ namespace ChatHub.Services.Vk
             _mapper = mapper;
             Serilog.Log.Logger = new LoggerConfiguration()
               .MinimumLevel
-              .Verbose()
+              .Debug()
               .WriteTo
               .Console()
               .WriteTo
@@ -55,7 +58,7 @@ namespace ChatHub.Services.Vk
             services.AddLogging(builder =>
             {
                 builder.ClearProviders();
-                builder.SetMinimumLevel(LogLevel.Trace);
+                builder.SetMinimumLevel(LogLevel.Debug);
                 builder.AddSerilog(dispose: true);
             });
             services.AddAudioBypass();
@@ -67,6 +70,8 @@ namespace ChatHub.Services.Vk
 
         public async Task<VKResponse> GetDialogs(ulong offsetId, ulong limit)
         {
+            buffer = true;
+
             ApiBreak = true;
 
             if (!api.IsAuthorized)
@@ -96,7 +101,6 @@ namespace ChatHub.Services.Vk
 
         private VkDialogDTO CreateConversationDTO(ConversationAndLastMessage conversation)
         {
-
 
             var id = conversation.Conversation.Peer.Id;
             string name = "Undefined";
@@ -204,6 +208,8 @@ namespace ChatHub.Services.Vk
 
         public async Task<VKResponse> GetMessages(long chatId, int offsetId, int limit)
         {
+            buffer = true;
+
             ApiBreak = true;
 
             if (!api.IsAuthorized)
@@ -213,6 +219,7 @@ namespace ChatHub.Services.Vk
 
 
 
+            Thread.Sleep(2000);
 
             var messages = await api.Messages.GetHistoryAsync(new MessagesGetHistoryParams()
             {
@@ -262,36 +269,53 @@ namespace ChatHub.Services.Vk
 
         public async Task<VKResponse> Login(string login, string password, string code)
         {
+            buffer = true;
+
             ApiBreak = true;
-
-            var response = new VKResponse();
-            await api!.AuthorizeAsync(new ApiAuthParams
+            if (lastPassword != "" && lastLogin != "")
             {
-                ApplicationId = _applicationId,
-                //Login = login,
-                //Password = password,
-                AccessToken = "vk1.a.l1pjFy0OdCeJN5ltDveqMYfpRqUeWQXKjuz0uVTdH927GvBXDoizJPAhcVs5fDE6liU9XT86x1bYpLyHVsJmEEJoRD1N6L9x6xLSV1O_SEU5B20BZoxQwSNXCGpa9j5Bdj9ARS0cJSj4NRA-kpz4DylbiW3babYYMNcqbA-jEizyhHpj-azoc4cw6nHRziDV",
-
-                Settings = Settings.All,
-                TwoFactorAuthorization = () =>
+                login = lastLogin;
+                password = lastPassword;
+            }
+            var response = new VKResponse();
+            try
+            {
+                await api!.AuthorizeAsync(new ApiAuthParams
                 {
-                    if (code == "")
+                    ApplicationId = _applicationId,
+                    //Login = login,
+                    //Password = password,
+                    AccessToken = "vk1.a.l1pjFy0OdCeJN5ltDveqMYfpRqUeWQXKjuz0uVTdH927GvBXDoizJPAhcVs5fDE6liU9XT86x1bYpLyHVsJmEEJoRD1N6L9x6xLSV1O_SEU5B20BZoxQwSNXCGpa9j5Bdj9ARS0cJSj4NRA-kpz4DylbiW3babYYMNcqbA-jEizyhHpj-azoc4cw6nHRziDV",
+                    Settings = Settings.All,
+                    TwoFactorAuthorization = () =>
                     {
-                        response.StatusCode = 301;
-                        response.Message = "Enter autentification code";
-                        throw new ArgumentException("Enter autentification code");
+                        if (code == "")
+                        {
+                           
+                            throw new ArgumentException("Enter autentification code");
+                        }
+                        return code;
                     }
-                    return code;
-                }
-            });
+                });
 
-            User? user = api.Users.Get(new[] { api.UserId!.Value }, ProfileFields.Photo100 | ProfileFields.ScreenName).FirstOrDefault();
-            response.StatusCode = 200;
-            response.Message = $"User {api.UserId} was logged in";
-            response.Data = CreatePeerDto(_mapper.Map<UserDTO>(user));
-            //StartMessagesHandling();
+                User? user = api.Users.Get(new[] { api.UserId!.Value }, ProfileFields.Photo100 | ProfileFields.ScreenName).FirstOrDefault();
+                response.StatusCode = 200;
+                response.Message = $"User {api.UserId} was logged in";
+                response.Data = CreatePeerDto(_mapper.Map<UserDTO>(user));
+                StartMessagesHandling();
+                lastLogin = "";
+                lastPassword = "";
+            }
+            catch (ArgumentException ex)
+            {
+                lastLogin = login;
+                lastPassword = password;
+                response.StatusCode = 200;
+                response.Message = "Enter autentification code";
+            }
+            Console.WriteLine(api.Token);
             ApiBreak = false;
-
+           
             return response;
 
         }
@@ -316,9 +340,12 @@ namespace ChatHub.Services.Vk
 
         public async Task<VKResponse> SendMessage(string message, long peerId, string file)
         {
+            buffer = true;
             ApiBreak = true;
             if (file != "")
             {
+                Thread.Sleep(2000);
+
                 var extension = Path.GetExtension(file);
                 UploadServerInfo uploadServer = null!;
                 if (extension == ".ogg")
@@ -383,9 +410,9 @@ namespace ChatHub.Services.Vk
         private async Task SendUpdatedMessages()
         {
             var dialogs = await GetMessages(lastDialogId, 0, 50);
-            await ChatHubR.UpdateDialogsVK(
+            await ChatHubR.UpdateMessagesVK(
             _chatHub,
-                new HubEntity { Id = api.UserId ?? 0, Data = dialogs.Data }
+                new HubEntity { Id = lastDialogId, Data = dialogs.Data }
             );
             _logger.Log(LogLevel.Information, "Updated dialogs were sended");
         }
@@ -407,6 +434,7 @@ namespace ChatHub.Services.Vk
                 .Where(chat => chat.Conversation.Peer.Type == ConversationPeerType.Group)
                 .Select(chat => Math.Abs(chat.Conversation.Peer.Id).ToString())
                 .ToList();
+            Thread.Sleep(2000);
             if (userIds != null)
                 Users = (await api!.Users.GetAsync(userIds, ProfileFields.Photo100 | ProfileFields.ScreenName | ProfileFields.FirstName | ProfileFields.LastName)).ToList();
             if (groupIds != null)
@@ -422,7 +450,13 @@ namespace ChatHub.Services.Vk
                 {
                     if (!ApiBreak)
                     {
-                        Thread.Sleep(500);
+
+                        if (buffer)
+                        {
+                            Thread.Sleep(2000);
+                            buffer = false;
+                        }
+                        Thread.Sleep(4000);
                         LongPollHistoryResponse longPollResponse = api!.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams()
                         {
                             Ts = ts,
@@ -430,6 +464,7 @@ namespace ChatHub.Services.Vk
                         });
                         pts = longPollResponse.NewPts;
                         Console.WriteLine("Messages update");
+                        Console.WriteLine(api.Status);
                         messageUpdate = false;
                         for (int i = 0; i < longPollResponse.History.Count; i++)
                         {
@@ -437,8 +472,9 @@ namespace ChatHub.Services.Vk
                             {
                                 case 4:
                                     await UpdateConversations();
+                                    Thread.Sleep(2000);
                                     await SendUpdatedConversations();
-                                    Thread.Sleep(250);
+                                    Thread.Sleep(2000);
                                     await SendUpdatedMessages();
                                     messageUpdate = true;
                                     break;
