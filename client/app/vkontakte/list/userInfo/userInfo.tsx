@@ -9,12 +9,12 @@ interface IUserProps {
 }
 
 const UserInfo = () => {
-    const url = localStorage.getItem("photoUrlVk") ? localStorage.getItem("photoUrlVk") : null;
+    const url = localStorage.getItem("vk_photoUrl") ? localStorage.getItem("vk_photoUrl") : null;
     return (
         <div className={styles.userInfo}>
             <div className={styles.user}>
                 <img className={styles.img} src={url!} alt='' />
-                <h2>{localStorage.getItem("usernameVk")}</h2>
+                <h2>{localStorage.getItem("vk_username")}</h2>
             </div>
             <div className={styles.icons}>
                 <IoIosMore className={styles.imgI}/>

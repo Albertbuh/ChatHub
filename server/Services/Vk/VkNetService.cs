@@ -47,10 +47,8 @@ namespace ChatHub.Services.Vk
               .WriteTo
               .Console()
            .CreateLogger();
-            // Контейнер для инверсии зависимостей
             var services = new ServiceCollection();
 
-            // Регистрация логгера
             services.AddLogging(builder =>
             {
                 builder.ClearProviders();
@@ -257,6 +255,7 @@ namespace ChatHub.Services.Vk
             result.Data = messageList;
             ApiBreak = false;
 
+            messageList.Reverse();
 
             return result;
 
@@ -279,9 +278,8 @@ namespace ChatHub.Services.Vk
                 await api!.AuthorizeAsync(new ApiAuthParams
                 {
                     ApplicationId = _applicationId,
-                    //Login = login,
-                    //Password = password,
-                    AccessToken = "vk1.a.l1pjFy0OdCeJN5ltDveqMYfpRqUeWQXKjuz0uVTdH927GvBXDoizJPAhcVs5fDE6liU9XT86x1bYpLyHVsJmEEJoRD1N6L9x6xLSV1O_SEU5B20BZoxQwSNXCGpa9j5Bdj9ARS0cJSj4NRA-kpz4DylbiW3babYYMNcqbA-jEizyhHpj-azoc4cw6nHRziDV",
+                    Login = login,
+                    Password = password,
                     Settings = Settings.All,
                     TwoFactorAuthorization = () =>
                     {
@@ -338,6 +336,8 @@ namespace ChatHub.Services.Vk
         {
             buffer = true;
             ApiBreak = true;
+            VkMessageDTO messageDto = new();
+            UserDTO user = new UserDTO();
             if (file != "")
             {
                 Thread.Sleep(2000);
@@ -354,6 +354,7 @@ namespace ChatHub.Services.Vk
                 {
                 api.Docs.Save(   response, title ?? Guid.NewGuid().ToString())[0].Instance
                 };
+                Thread.Sleep(2000);
                 var messageId = await api!.Messages.SendAsync(new MessagesSendParams
                 {
                     PeerId = peerId,
@@ -361,6 +362,15 @@ namespace ChatHub.Services.Vk
                     Attachments = attachment,
                     RandomId = 0
                 });
+                Thread.Sleep(2000);
+
+                User? sender = api.Users.Get(new[] { api.UserId!.Value }, ProfileFields.Photo100 | ProfileFields.ScreenName).FirstOrDefault();
+
+                messageDto.Sender = CreatePeerDto(_mapper.Map<UserDTO>(sender));
+                messageDto.Message = message;
+                messageDto.Id = messageId;
+                messageDto.Date = DateTime.Now;
+                messageDto.Media = new VkMediaDTO("Doc", response);
             }
             else
             {
@@ -370,10 +380,18 @@ namespace ChatHub.Services.Vk
                     Message = message,
                     RandomId = 0
                 });
+                User? sender = api.Users.Get(new[] { api.UserId!.Value }, ProfileFields.Photo100 | ProfileFields.ScreenName).FirstOrDefault();
+
+                messageDto.Sender = CreatePeerDto(_mapper.Map<UserDTO>(sender));
+                messageDto.Message = message;
+                messageDto.Id = messageId;
+                messageDto.Date = DateTime.Now;
+                messageDto.Media = null;
             }
             ApiBreak = false;
-
-            return new VKResponse($"Message was sended");
+            var result = new VKResponse(200, $"Message was sended");
+            result.Data = messageDto;
+            return result;
         }
         private byte[] GetBytes(string filePath) => File.ReadAllBytes(filePath);
 

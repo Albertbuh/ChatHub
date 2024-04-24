@@ -10,6 +10,7 @@ public class VkNetMapperProfile : Profile
         CreateMapMessageDTO();
         CreateMapUserUserDTO();
         CreateMapGroupUserDTO();
+        CreateMapVkUserVkPeerDTO();
     }
 
 
@@ -18,6 +19,13 @@ public class VkNetMapperProfile : Profile
         CreateMap<UserDTO, VkPeerDTO>()
             .ForMember(dest => dest.Username, opt => opt.MapFrom(u => u.ScreenName))
             .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(u => u.PhotoUri));
+    }
+
+    private void CreateMapVkUserVkPeerDTO()
+    {
+        CreateMap<User, VkPeerDTO>()
+            .ForMember(dest => dest.Username, opt => opt.MapFrom(u => u.FirstName))
+            .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(u => u.Photo100.AbsoluteUri));
     }
 
     private void CreateMapUserUserDTO()

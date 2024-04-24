@@ -18,12 +18,15 @@ export default function Home() {
 
     const handleDialogsUpdate = (connectorEntity: ConnectorEntity) => {
         setDialogsUpdate(connectorEntity.data as IDialogInfoVK[]);
+        console.log("dialogs");
+
     };
 
     const handleMessagesUpdate = (connectorEntity: ConnectorEntity) => {
         if (connectorEntity.id == currentDialogId) {
             let newMessages = connectorEntity.data as IMessageInfoVK[];
             console.log(newMessages);
+            console.log("messages");
             setMessages(newMessages);
         }
     };
@@ -67,35 +70,24 @@ export default function Home() {
     }
 
     const handleSendSubmit = async (data: SendData) => {
-        var response = await fetch(
-            `http://localhost:5041/api/v1.0/vk/peers/${currentDialogId}`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-            },
-        );
-        if(response.ok) {
-            let message:VKResponse = await response.json();
-            let sendedMessage = message.data as IMessageInfoVK;
-            if(data)
-                setMessages([sendedMessage, ...messages]);
-        }
-        if (data.media) {
-            await fetch(
-                `http://localhost:5041/api/v1.0/vk/peers/${currentDialogId}`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                    body: JSON.stringify(data.media),
-                },
-            );
-        }
-    };
+      var response = await fetch(
+          `http://localhost:5041/api/v1.0/vk/peers/${currentDialogId}`,
+          {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+          },
+      );
+      if (response.ok) {
+          let message: VKResponse = await response.json();
+          let sendedMessage = message.data as IMessageInfoVK;
+          if (data) {
+              setMessages([sendedMessage, ...messages]);
+          }
+      }
+  };
 
     if (dialogsUpdate && dialogsUpdate.length > 0) {
         return (
@@ -112,7 +104,7 @@ export default function Home() {
 }
 
 export interface SendData {
-    message: string;
-    media: File | null;
+  message: string;
+  mediaFilepath: string;
 }
 

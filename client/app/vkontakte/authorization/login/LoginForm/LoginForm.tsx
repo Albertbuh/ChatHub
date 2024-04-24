@@ -43,10 +43,11 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
             
             if (responseData.statusCode === 200 && responseData.data != null) {
                 let data = responseData.data as UserData;
-                localStorage.setItem("idVk", data.id.toString());
-                localStorage.setItem("usernameVk", data.username);
-                localStorage.setItem("tagVk", data.tag);
-                localStorage.setItem("photoUrlVk", data.photoUrl);
+                localStorage.setItem("vk_id", data.id.toString());
+                localStorage.setItem("vk_username", data.username);
+                localStorage.setItem("vk_tag", data.tag);
+                localStorage.setItem("vk_photoUrl", data.photoUrl);
+                localStorage.setItem("storedVkAuthStage", "verification")
                 onLoginSuccess();
                 localStorage.setItem("storedVkAuthStage", "verification")
             } else {
