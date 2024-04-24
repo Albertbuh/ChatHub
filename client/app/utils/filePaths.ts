@@ -3,7 +3,7 @@ export function GetPathToProfilePhotoById(id: number): string {
         }/${id}/profile.jpeg`;
 }
 
-const types = ["jpeg", "jpg", "png", "pdf", "docx", "webm", "ogg", "mp4"];
+const types = ["jpeg", "jpg", "webm", "webp", "ogg", "mp4"];
 export function GetPathToMediaFile(
     chatId: number,
     messageId: number,

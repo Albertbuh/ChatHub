@@ -64,8 +64,6 @@ interface SearchBarProps {
     onUpdate: (filter: string) => void;
 }
 function SearchBar({ onUpdate }: SearchBarProps) {
-    const [addMode, setAddMode] = useState(false);
-
     return (
         <div className={styles.search}>
             <div className={styles.searchBar}>
@@ -77,19 +75,6 @@ function SearchBar({ onUpdate }: SearchBarProps) {
                     placeholder="Search"
                 />
             </div>
-            {addMode
-                ? (
-                    <FaMinus
-                        className={`${styles.minus} ${styles.add}`}
-                        onClick={() => setAddMode((prev) => !prev)}
-                    />
-                )
-                : (
-                    <FaPlus
-                        className={styles.add}
-                        onClick={() => setAddMode((prev) => !prev)}
-                    />
-                )}
         </div>
     );
 }

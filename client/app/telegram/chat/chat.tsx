@@ -171,7 +171,7 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
                 )
                 : null}
             <div className={styles.texts}>
-                <span className={styles.sendername}>{messageInfo.sender.username}</span>
+                <span className={styles.sendername}>{!isOwn ? messageInfo.sender.username : ""}</span>
                 {hasMedia ? <MessageMedia mediaPath={mediaPath} /> : null}
                 {message.trim() !== "" ? <p className={styles.p}>{message}</p> : null}
                 <Timestamp time={messageInfo.date} className={styles.timestamp} />

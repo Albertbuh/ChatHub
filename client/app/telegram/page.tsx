@@ -1,7 +1,7 @@
 "use client";
+import React, { Suspense, useContext, useEffect, useRef, useState } from "react";
 import { GetDialogs, GetMessages } from "../utils/getRequests";
 import Connector from "../utils/singnalR-connector";
-import React, { useEffect, useState } from "react";
 import { IDialogInfo } from "../models/dto/IDialogInfo";
 import { ConnectorEntity } from "../models/connectorEntity";
 import List from "./list/list";
@@ -10,11 +10,13 @@ import styles from "./telegram.module.css";
 import Chat from "./chat/chat";
 import { IMessageInfo } from "../models/dto/IMessageInfo";
 import TLResponse from "../models/dto/TLResponse";
+import { ExpandContext } from "../components/navbar/expandContxt";
 
 export default function Home() {
     const [dialogsUpdate, setDialogsUpdate] = useState<IDialogInfo[]>([]);
     const [messages, setMessages] = useState<IMessageInfo[]>([]);
     const [currentDialogId, setCurrentDialogId] = useState(0);
+    const {isExpanded} = useContext(ExpandContext);
 
     const handleDialogsUpdate = (connectorEntity: ConnectorEntity) => {
         setDialogsUpdate(connectorEntity.data as IDialogInfo[]);
@@ -96,7 +98,7 @@ export default function Home() {
 
     if (dialogsUpdate && dialogsUpdate.length > 0) {
         return (
-            <div className={styles.container}>
+            <div className={styles.container} style={{marginLeft: isExpanded ? '15%':'4%'}}>
                 <List dialogs={dialogsUpdate} handleClick={handleListClick} />
                     <Chat
                         messages={messages.toReversed()}

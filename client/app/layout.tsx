@@ -1,5 +1,4 @@
 "use client"
-import bg from './telegram/assets/background.jpg'
 import bg2 from '../public/backgrounds/1.jpg';
 
 import SideNav from './components/navbar/navbar';
