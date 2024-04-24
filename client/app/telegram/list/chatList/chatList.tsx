@@ -8,6 +8,7 @@ import { useState } from "react";
 import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
 import Image from "next/image";
 import Timestamp from "@/app/components/timestamp/timestamp";
+import { GetPathToProfilePhotoById } from "@/app/utils/filePaths";
 
 interface IChatProps {
     dialogs: IDialogInfo[];
@@ -21,7 +22,6 @@ const ChatList = ({ dialogs, handleClick }: IChatProps) => {
         setSearchFilter(filter.toLowerCase());
         console.log(searchFilter);
     }
-
     return (
         <div className={styles.chatList}>
             <SearchBar onUpdate={handleSearchBarUpdate} />
@@ -37,8 +37,7 @@ const ChatList = ({ dialogs, handleClick }: IChatProps) => {
                     >
                         <Image
                             className={styles.avatarImg}
-                            src={`/assets/telegram/userAssets/${localStorage.getItem("tag")
-                                }/${dialog.id}/profile.jpeg`}
+                            src={GetPathToProfilePhotoById(dialog.id)}
                             width={"50"}
                             height={"50"}
                             alt={""}

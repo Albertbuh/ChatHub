@@ -1,5 +1,11 @@
 "use client";
-import React, { Suspense, useContext, useEffect, useRef, useState } from "react";
+import React, {
+    Suspense,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import { GetDialogs, GetMessages } from "../utils/getRequests";
 import Connector from "../utils/singnalR-connector";
 import { IDialogInfo } from "../models/dto/IDialogInfo";
@@ -16,7 +22,7 @@ export default function Home() {
     const [dialogsUpdate, setDialogsUpdate] = useState<IDialogInfo[]>([]);
     const [messages, setMessages] = useState<IMessageInfo[]>([]);
     const [currentDialogId, setCurrentDialogId] = useState(0);
-    const {isExpanded} = useContext(ExpandContext);
+    const { isExpanded } = useContext(ExpandContext);
 
     const handleDialogsUpdate = (connectorEntity: ConnectorEntity) => {
         setDialogsUpdate(connectorEntity.data as IDialogInfo[]);
@@ -98,13 +104,16 @@ export default function Home() {
 
     if (dialogsUpdate && dialogsUpdate.length > 0) {
         return (
-            <div className={styles.container} style={{marginLeft: isExpanded ? '15%':'4%'}}>
+            <div
+                className={styles.container}
+                style={{ marginLeft: isExpanded ? "15%" : "4%" }}
+            >
                 <List dialogs={dialogsUpdate} handleClick={handleListClick} />
-                    <Chat
-                        messages={messages.toReversed()}
-                        currentDialog={dialogsUpdate.find((d) => d.id == currentDialogId)}
-                        onSendSubmit={handleSendSubmit}
-                    />
+                <Chat
+                    messages={messages.toReversed()}
+                    currentDialog={dialogsUpdate.find((d) => d.id == currentDialogId)}
+                    onSendSubmit={handleSendSubmit}
+                />
             </div>
         );
     }

@@ -14,7 +14,6 @@ import { BsEmojiNeutral } from "react-icons/bs";
 import { useEffect, useRef, useState } from "react";
 import { IMessageInfo } from "@/app/models/dto/IMessageInfo";
 import {
-    GetPathToMediaFile,
     GetPathToMediaFileWithoutExtension,
     GetPathToProfilePhotoById,
 } from "@/app/utils/filePaths";
@@ -22,6 +21,7 @@ import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
 import Timestamp from "@/app/components/timestamp/timestamp";
 import { SendData } from "../page";
 import Image from "next/image";
+import { setPriority } from "os";
 
 interface ChatProps {
     messages: IMessageInfo[];
@@ -137,6 +137,8 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
         "TL.MessageMediaDocument",
         "",
     ).replace("TL.MessageMediaWebPage", "");
+    const [profilePath, setProfilePath] = useState(GetPathToProfilePhotoById(messageInfo.sender.id));
+
 
     useEffect(() => {
         const getFilepath = async () => {
@@ -146,6 +148,9 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
             );
             if (newPath) {
                 setMediaPath(newPath);
+            }
+            else {
+                setMediaPath('/avatars/noImage.png');
             }
         };
 
@@ -165,8 +170,9 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
                 ? (
                     <img
                         className={styles.avatarImg}
-                        src={GetPathToProfilePhotoById(messageInfo.sender.id)}
-                        alt="/avatars/defaultProfile.png"
+                        src={profilePath}
+                        onError={() => setProfilePath("/avatars/defaultProfile.jpeg")}
+                        alt=""
                     />
                 )
                 : null}
@@ -199,7 +205,7 @@ function MessageMedia({ mediaPath }: MediaProps) {
             <Image
                 className={styles.img}
                 src={mediaPath}
-                alt="undefined media"
+                alt=""
                 width={0}
                 height={0}
                 sizes="100vw"
@@ -239,15 +245,17 @@ function Top({ dialog }: TopProps) {
         return null;
     }
 
+    const [profilePath, setProfilePath] = useState(GetPathToProfilePhotoById(dialog.id));
     return (
         <div className={styles.top}>
             <div className={styles.user}>
                 <Image
-                    src={GetPathToProfilePhotoById(dialog.id)}
+                    src={profilePath}
                     width={"60"}
                     height={"60"}
                     alt=""
                     className={styles.avatarImg}
+                    onError={() => setProfilePath("/avatars/defaultProfile.jpeg")}
                 />
                 <div className={styles.texts}>
                     <span className={styles.span}>{dialog.title}</span>

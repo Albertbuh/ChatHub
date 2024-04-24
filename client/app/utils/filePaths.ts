@@ -16,7 +16,7 @@ export function GetPathToMediaFile(
 export async function GetPathToMediaFileWithoutExtension(
     chatId: number,
     messageId: number,
-) {
+):Promise<string> {
     const promises = types.map(async (type) => {
         const url = `/assets/telegram/userAssets/${localStorage.getItem("tag")
             }/${chatId}/${messageId}.${type}`;
@@ -30,6 +30,6 @@ export async function GetPathToMediaFileWithoutExtension(
     });
     var results = await Promise.all(promises);
     var result = results.find((result) => result != "");
-    return result;
+    return result ?? "";
 }
 
