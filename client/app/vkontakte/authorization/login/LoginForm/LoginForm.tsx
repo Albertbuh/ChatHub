@@ -40,12 +40,12 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
 
             if (responseData.statusCode === 200 && responseData.data != null) {
                 let data = responseData.data as UserData;
-                localStorage.setItem("id", data.id.toString());
-                localStorage.setItem("username", data.username);
-                localStorage.setItem("tag", data.tag);
-                localStorage.setItem("photoId", data.photoId.toString());
-                onLoginSuccess();
+                localStorage.setItem("vk_id", data.id.toString());
+                localStorage.setItem("vk_username", data.username);
+                localStorage.setItem("vk_tag", data.tag);
+                localStorage.setItem("vk_photoId", data.photoId.toString());
                 localStorage.setItem("storedVkAuthStage", "verification")
+                onLoginSuccess();
             } else {
                 console.log("Unexpected response from server:", responseData);
             }

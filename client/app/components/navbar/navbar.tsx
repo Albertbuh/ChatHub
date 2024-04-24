@@ -65,15 +65,8 @@ export default function SideNav() {
         return pathname === path ? styles.listItemActive : '';
     };
 
-    const storedTgAuthStage = localStorage.getItem('storedTgAuthStage');
-    const [localTgAuthStage, setLocalTgAuthStage] = useState(storedTgAuthStage || "login");
-
-    const storedVkAuthStage = localStorage.getItem('storedVkAuthStage');
-    const [localVkAuthStage, setLocalVkAuthStage] = useState(storedVkAuthStage || "login");
-
-    console.log("tg", localTgAuthStage);
-    console.log("vk", localVkAuthStage);
-
+    const [localTgAuthStage] = useState(localStorage.getItem('storedTgAuthStage') || "login");
+    const [localVkAuthStage] = useState(localStorage.getItem('storedVkAuthStage') || "login");
 
     return (
         <nav className={`${styles.sidebar} ${sidebarActive ? styles.active : ''}`}>

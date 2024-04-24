@@ -27,17 +27,23 @@ const VerificationForm = ({ onVerificationSuccess }: VerificationFormProps) => {
                 throw new Error("Unable to verificate");
             }
 
-            const data = await response.json();
+            const responseData = await response.json();
 
 
-            if (data.statusCode === 200 && data.message === "Enter your password") {
+            if (responseData.statusCode === 200 && responseData.data == null) {
                 // Вызов функции обратного вызова
                 onVerificationSuccess();
                 localStorage.setItem("storedTgAuthStage", "password");
-            } else {
-                console.log("Password not required", data);
+            } else if (responseData.statusCode === 200 && responseData.data != null) {
+                let data = responseData.data as UserData;
+                localStorage.setItem("telegram_id", data.id.toString());
+                localStorage.setItem("telegram_username", data.username);
+                localStorage.setItem("telegram_tag", data.tag);
+                localStorage.setItem("telegram_photoId", data.photoId.toString());
                 localStorage.setItem("storedTgAuthStage", "telegramLogged");
                 navigate('/telegram');
+            } else {
+                console.log("Unexpected response from server:", responseData);
             }
         } catch (error) {
             console.log(error);
@@ -67,5 +73,12 @@ const VerificationForm = ({ onVerificationSuccess }: VerificationFormProps) => {
         </div>
     )
 }
+
+interface UserData {
+        id: number;
+        username: string;
+        tag: string;
+        photoId: number;
+    }
 
 export default VerificationForm;
