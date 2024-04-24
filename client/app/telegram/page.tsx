@@ -88,18 +88,6 @@ export default function Home() {
                 setMessages([sendedMessage, ...messages]);
             }
         }
-        if (data.media) {
-            await fetch(
-                `http://localhost:5041/api/v1.0/telegram/peers/${currentDialogId}`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                    body: JSON.stringify(data.media),
-                },
-            );
-        }
     };
 
     if (dialogsUpdate && dialogsUpdate.length > 0) {
@@ -121,5 +109,5 @@ export default function Home() {
 
 export interface SendData {
     message: string;
-    media: File | null;
+    mediaFilepath: string;
 }
