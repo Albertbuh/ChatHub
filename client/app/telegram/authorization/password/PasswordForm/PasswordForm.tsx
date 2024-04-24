@@ -1,6 +1,6 @@
-import styles from './PasswordForm.module.css'
-import { useRef, useState } from 'react';
-import Link from 'next/link';
+import styles from "./PasswordForm.module.css";
+import { useRef, useState } from "react";
+import Link from "next/link";
 
 import { BsFillKeyFill } from "react-icons/bs";
 
@@ -9,36 +9,37 @@ interface PasswordFormProps {
 }
 
 const PasswordForm = ({ onPasswordSuccess }: PasswordFormProps) => {
-    const [PasswordCode, setPasswordCode] = useState('');
-
+    const [PasswordCode, setPasswordCode] = useState("");
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         try {
-            const response = await fetch(`http://localhost:5041/api/v1.0/telegram/login?info=${PasswordCode}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
+            const response = await fetch(
+                `http://localhost:5041/api/v1.0/telegram/login?info=${PasswordCode}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
                 },
-            });
+            );
 
             if (!response.ok) {
                 throw new Error("Unable to login with password");
             }
 
-            const data = await response.json();
-            console.log(data);
-            if("id" in data) 
-                localStorage.setItem("id", data.id);
-            if("username" in data)
-                localStorage.setItem("username", data.name);
-            if("photoId" in data)
-                localStorage.setItem("photoId", data.photoId);
-            
-            localStorage.setItem("storedTgAuthStage", "telegramLogged")
-            // Вызов функции обратного вызова
-            onPasswordSuccess();
-            
+            const responseData = await response.json();
+            if (responseData.statusCode === 200 && responseData.data != null) {
+                let data = responseData.data as UserData;
+                localStorage.setItem("telegram_id", data.id.toString());
+                localStorage.setItem("telegram_username", data.username);
+                localStorage.setItem("telegram_tag", data.tag);
+                localStorage.setItem("telegram_photoId", data.photoId.toString());
+                localStorage.setItem("storedTgAuthStage", "telegramLogged");
+                onPasswordSuccess();
+            } else {
+                console.log("Unexpected response from server:", responseData);
+            }
         } catch (error) {
             console.log(error);
         }
@@ -47,25 +48,37 @@ const PasswordForm = ({ onPasswordSuccess }: PasswordFormProps) => {
     const passwordInputRef = useRef<HTMLInputElement>(null);
     const [passwordVisible, setPasswordVisible] = useState(false);
     const togglePasswordVisibility = () => {
-        console.log('Show password')
+        console.log("Show password");
         setPasswordVisible(!passwordVisible);
         if (passwordInputRef.current) {
-          passwordInputRef.current.type = passwordVisible ? "password" : "text";
+            passwordInputRef.current.type = passwordVisible ? "password" : "text";
         }
-      };
+    };
 
     return (
-        <div className={styles.wrapper} >
+        <div className={styles.wrapper}>
             <form action="" onSubmit={handleSubmit}>
                 <h1>Password</h1>
 
                 <div className={styles.inputBox}>
-                    <input type={passwordVisible ? "text" : "password" }  value={PasswordCode} onChange={(e) => setPasswordCode(e.target.value)} placeholder='Password-code' required ref={passwordInputRef}/>
-                    <BsFillKeyFill  className={styles.icon} onClick={togglePasswordVisibility} />
+                    <input
+                        type={passwordVisible ? "text" : "password"}
+                        value={PasswordCode}
+                        onChange={(e) => setPasswordCode(e.target.value)}
+                        placeholder="Password-code"
+                        required
+                        ref={passwordInputRef}
+                    />
+                    <BsFillKeyFill
+                        className={styles.icon}
+                        onClick={togglePasswordVisibility}
+                    />
                 </div>
 
                 <div className={styles.rememberForgot}>
-                    <label><input type="checkbox" />Remember me</label>
+                    <label>
+                        <input type="checkbox" />Remember me
+                    </label>
                     <a href="#">Forgot password?</a>
                 </div>
 
@@ -73,7 +86,7 @@ const PasswordForm = ({ onPasswordSuccess }: PasswordFormProps) => {
 
                 <div className={styles.backwards}>
                     <p>
-                        Incorrect phone?{' '}
+                        Incorrect phone?{" "}
                         <Link href="/telegram/authorization/login">
                             LOGIN
                         </Link>
@@ -81,7 +94,16 @@ const PasswordForm = ({ onPasswordSuccess }: PasswordFormProps) => {
                 </div>
             </form>
         </div>
-    )
-}
+    );
+};
+
+
+interface UserData {
+        id: number;
+        username: string;
+        tag: string;
+        photoId: number;
+    }
 
 export default PasswordForm;
+

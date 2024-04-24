@@ -37,10 +37,10 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
             }
             if (responseData.statusCode === 200 && responseData.data != null) {
                 let data = responseData.data as UserData;
-                localStorage.setItem("id", data.id.toString());
-                localStorage.setItem("username", data.username);
-                localStorage.setItem("tag", data.tag);
-                localStorage.setItem("photoId", data.photoId.toString());
+                localStorage.setItem("telegram_id", data.id.toString());
+                localStorage.setItem("telegram_username", data.username);
+                localStorage.setItem("telegram_tag", data.tag);
+                localStorage.setItem("telegram_photoId", data.photoId.toString());
                 onLoginSuccess();
             } else {
                 console.log("Unexpected response from server:", responseData);

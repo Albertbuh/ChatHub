@@ -4,7 +4,7 @@ import styles from "./chatList.module.css";
 
 import { IoIosSearch } from "react-icons/io";
 import { FaMinus, FaPlus } from "react-icons/fa6";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
 import Image from "next/image";
 import Timestamp from "@/app/components/timestamp/timestamp";
@@ -35,13 +35,15 @@ const ChatList = ({ dialogs, handleClick }: IChatProps) => {
                         className={styles.item}
                         onClick={() => handleClick(dialog.id)}
                     >
+                        <Suspense fallback={<p>loading...</p>}>
                         <Image
                             className={styles.avatarImg}
-                            src={GetPathToProfilePhotoById(dialog.id)}
+                            src={GetPathToProfilePhotoById(dialog.id, "telegram_tag")}
                             width={"50"}
                             height={"50"}
                             alt={""}
                         />
+                        </Suspense>
                         <div className={styles.texts}>
                             <span className={styles.title}>{dialog.title}</span>
                             <p className={styles.p}>

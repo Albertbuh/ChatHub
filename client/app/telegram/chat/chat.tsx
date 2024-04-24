@@ -155,14 +155,14 @@ interface MessageProps {
 function Message({ message: messageInfo, dialogId }: MessageProps) {
     const hasMedia = messageInfo.message.includes("TL.MessageMedia");
     const isOwn: boolean =
-        messageInfo.sender.id.toString() === localStorage.getItem("id");
+        messageInfo.sender.id.toString() === localStorage.getItem("telegram_id");
     const [mediaPath, setMediaPath] = useState("");
     let message = messageInfo.message.replace("TL.MessageMediaPhoto", "").replace(
         "TL.MessageMediaDocument",
         "",
     ).replace("TL.MessageMediaWebPage", "");
     const [profilePath, setProfilePath] = useState(
-        GetPathToProfilePhotoById(messageInfo.sender.id),
+        GetPathToProfilePhotoById(messageInfo.sender.id, 'telegram_tag'),
     );
 
     useEffect(() => {
@@ -170,6 +170,7 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
             let newPath = await GetPathToMediaFileWithoutExtension(
                 dialogId,
                 messageInfo.id,
+                'telegram_tag'
             );
             if (newPath) {
                 setMediaPath(newPath);
@@ -272,10 +273,10 @@ function Top({ dialog }: TopProps) {
     }
 
     const [profilePath, setProfilePath] = useState(
-        GetPathToProfilePhotoById(dialog.id),
+        GetPathToProfilePhotoById(dialog.id, 'telegram_tag'),
     );
     useEffect(() => {
-        setProfilePath(GetPathToProfilePhotoById(dialog.id));
+        setProfilePath(GetPathToProfilePhotoById(dialog.id, 'telegram_tag'));
     }, [dialog]);
 
     return (

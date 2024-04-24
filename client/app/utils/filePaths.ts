@@ -1,5 +1,5 @@
-export function GetPathToProfilePhotoById(id: number): string {
-    return `/assets/telegram/userAssets/${localStorage.getItem("tag")
+export function GetPathToProfilePhotoById(id: number, tag: string): string {
+    return `/assets/telegram/userAssets/${localStorage.getItem(tag)
         }/${id}/profile.jpeg`;
 }
 
@@ -8,17 +8,19 @@ export function GetPathToMediaFile(
     chatId: number,
     messageId: number,
     type: string,
+    tag: string
 ): string {
-    return `/assets/telegram/userAssets/${localStorage.getItem("tag")
+    return `/assets/telegram/userAssets/${localStorage.getItem(tag)
         }/${chatId}/${messageId}.${type}`;
 }
 
 export async function GetPathToMediaFileWithoutExtension(
     chatId: number,
     messageId: number,
+    tag: string
 ):Promise<string> {
     const promises = types.map(async (type) => {
-        const url = `/assets/telegram/userAssets/${localStorage.getItem("tag")
+        const url = `/assets/telegram/userAssets/${localStorage.getItem(tag)
             }/${chatId}/${messageId}.${type}`;
         try {
             const response = await fetch(url);

@@ -1,6 +1,10 @@
 import { IMessageInfo } from "../models/dto/IMessageInfo";
 import { IDialogInfo } from '../models/dto/IDialogInfo';
 
+export async function logoutRequest(messenger: string) {
+    await fetch(`http://localhost:5041/api/v1.0/${messenger}/logout`);
+}
+
 export async function GetMessages(dialogId: number, offset: number, limit: number): Promise<IMessageInfo[]> {
     const url = "http://localhost:5041/api/v1.0/telegram/peers";
     let messages = [];

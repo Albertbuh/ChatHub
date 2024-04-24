@@ -5,6 +5,9 @@ import { GoDownload } from "react-icons/go";
 import { useUserStore } from '@/app/realTimeChat/lib/userStore';
 import { useContext, useState } from 'react';
 import BackgroundContext from '@/app/BackGroundContext';
+import { logoutRequest } from '@/app/utils/getRequests';
+import { navigate } from '@/app/realTimeChat/authorization/login/actions';
+import { redirect } from 'next/dist/server/api-utils';
 
 
 const imagePaths = ['/backgrounds/1.jpg', '/backgrounds/2.jpg',
@@ -23,13 +26,14 @@ const Detail = () => {
     const { currentUser } = useUserStore();
     const { updateBackground } = useContext(BackgroundContext);
 
-    const handleBlock = async () => {
+    const handleLogout = async () => {
+        localStorage.clear();
+        await logoutRequest("telegram");
+        await logoutRequest("vk");
     };
 
     const handleDownloadClick = (imageNumber: number) => {
         const newBg = imagePaths[imageNumber - 1];
-        // changeBackgroundNumber(imageNumber);
-        // localStorage.setItem('selectedBg', newBg);
         updateBackground(newBg);
     };
 
@@ -80,7 +84,7 @@ const Detail = () => {
                     </div>
                 </div>
 
-                <button onClick={handleBlock} className={styles.button}>Logout All</button>
+                <button onClick={handleLogout} className={styles.button}>Logout All</button>
             </div>
         </div>
     )
