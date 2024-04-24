@@ -202,7 +202,7 @@ function MessageMedia({ mediaPath }: MediaProps) {
     var ext = mediaPath.split(".").pop() ?? "";
     if (imageTypes.includes(ext)) {
         return (
-            <Image
+            <img
                 className={styles.img}
                 src={mediaPath}
                 alt=""
@@ -246,6 +246,10 @@ function Top({ dialog }: TopProps) {
     }
 
     const [profilePath, setProfilePath] = useState(GetPathToProfilePhotoById(dialog.id));
+    useEffect(() => {
+       setProfilePath(GetPathToProfilePhotoById(dialog.id)); 
+    }, [dialog]);
+    
     return (
         <div className={styles.top}>
             <div className={styles.user}>
