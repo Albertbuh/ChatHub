@@ -2,6 +2,7 @@ import styles from "./LoginForm.module.css";
 import { BsFillKeyFill, BsFillTelephoneFill } from "react-icons/bs";
 import { useRef, useState } from "react";
 import { dir } from "console";
+import { navigate } from "../actions";
 
 interface LoginFormProps {
     onLoginSuccess: () => void;
@@ -47,9 +48,10 @@ const LoginForm = ({ onLoginSuccess }: LoginFormProps) => {
                 localStorage.setItem("vk_username", data.username);
                 localStorage.setItem("vk_tag", data.tag);
                 localStorage.setItem("vk_photoUrl", data.photoUrl);
-                localStorage.setItem("storedVkAuthStage", "verification")
-                onLoginSuccess();
-                localStorage.setItem("storedVkAuthStage", "verification")
+                localStorage.setItem("storedVkAuthStage", "vkLogged")
+                
+                navigate('/vkontakte');
+                // localStorage.setItem("storedVkAuthStage", "verification")
             } else {
                 console.log("Unexpected response from server:", responseData);
             }

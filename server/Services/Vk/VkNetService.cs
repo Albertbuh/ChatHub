@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.SignalR;
 using NLog.Fluent;
 using Serilog;
 using server.Models.Vk.DTO;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using VkNet;
@@ -106,7 +108,7 @@ namespace ChatHub.Services.Vk
                     var participant = Users.FirstOrDefault(u => u.Id == id);
                     var senderU = Users.FirstOrDefault(u => u.Id == conversation.LastMessage.FromId);
                     user = _mapper.Map<UserDTO>(senderU);
-                    dialogDto.MainUsername = participant?.ScreenName ?? " ";
+                    dialogDto.MainUsername = participant?.FirstName ?? " ";
                     if (participant != null)
                     {
                         name = $"{participant.FirstName} {participant.LastName}";
@@ -123,7 +125,7 @@ namespace ChatHub.Services.Vk
                 case ConversationPeerType.Group:
                     var group = Groups.FirstOrDefault(f => f.Id == Math.Abs(id));
                     dialogDto.PhotoUri = group?.Photo100.AbsoluteUri.ToString() ?? " ";
-                    dialogDto.MainUsername = group?.ScreenName ?? " ";
+                    dialogDto.MainUsername = group?.Name ?? " ";
                     var senderG = Groups.FirstOrDefault(u => u.Id == conversation.LastMessage.FromId);
                     user = _mapper.Map<UserDTO>(senderG);
                     name = group?.Name ?? "";
@@ -278,8 +280,9 @@ namespace ChatHub.Services.Vk
                 await api!.AuthorizeAsync(new ApiAuthParams
                 {
                     ApplicationId = _applicationId,
-                    Login = login,
-                    Password = password,
+                    //Login = login,
+                    //Password = password,
+                    AccessToken = "vk1.a.l1pjFy0OdCeJN5ltDveqMYfpRqUeWQXKjuz0uVTdH927GvBXDoizJPAhcVs5fDE6liU9XT86x1bYpLyHVsJmEEJoRD1N6L9x6xLSV1O_SEU5B20BZoxQwSNXCGpa9j5Bdj9ARS0cJSj4NRA-kpz4DylbiW3babYYMNcqbA-jEizyhHpj-azoc4cw6nHRziDV",
                     Settings = Settings.All,
                     TwoFactorAuthorization = () =>
                     {
@@ -445,6 +448,15 @@ namespace ChatHub.Services.Vk
                 .Select(chat => chat.Conversation.Peer.Id)
                 .ToList();
 
+            var lastMessageUserIds = _conversation.Items
+                .Where(chat => chat.Conversation.Peer.Type == ConversationPeerType.User)
+                .Select(chat => chat.LastMessage.FromId)
+                .Select(id => id!.Value)
+                .ToList();
+
+            userIds.AddRange(lastMessageUserIds);
+            userIds = userIds.Distinct().ToList();
+
             var groupIds = _conversation.Items
                 .Where(chat => chat.Conversation.Peer.Type == ConversationPeerType.Group)
                 .Select(chat => Math.Abs(chat.Conversation.Peer.Id).ToString())
@@ -471,7 +483,7 @@ namespace ChatHub.Services.Vk
                             Thread.Sleep(2000);
                             buffer = false;
                         }
-                        Thread.Sleep(4000);
+                        Thread.Sleep(3000);
                         LongPollHistoryResponse longPollResponse = api!.Messages.GetLongPollHistory(new MessagesGetLongPollHistoryParams()
                         {
                             Ts = ts,
@@ -488,9 +500,10 @@ namespace ChatHub.Services.Vk
                                 case 4:
                                     await UpdateConversations();
                                     Thread.Sleep(2000);
-                                    await SendUpdatedConversations();
-                                    Thread.Sleep(2000);
                                     await SendUpdatedMessages();
+                                    Thread.Sleep(2000);
+                                    await SendUpdatedConversations();
+
                                     messageUpdate = true;
                                     break;
                             }

@@ -27,9 +27,13 @@ const VerificationForm = ({ onVerificationSuccess }: VerificationFormProps) => {
                 throw new Error("Unable to verificate");
             }
 
-            const data = await response.json();
+            const responseData = await response.json();
 
-
+                let data = responseData.data as UserData;
+                localStorage.setItem("vk_id", data.id.toString());
+                localStorage.setItem("vk_username", data.username);
+                localStorage.setItem("vk_tag", data.tag);
+                localStorage.setItem("vk_photoUrl", data.photoUrl);
                 // Вызов функции обратного вызова
                 onVerificationSuccess();
             
@@ -64,5 +68,10 @@ const VerificationForm = ({ onVerificationSuccess }: VerificationFormProps) => {
         </div>
     )
 }
-
+interface UserData {
+    id: number;
+    username: string;
+    tag: string;
+    photoUrl: string;
+}
 export default VerificationForm;
