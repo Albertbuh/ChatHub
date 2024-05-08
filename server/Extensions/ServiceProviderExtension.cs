@@ -1,7 +1,7 @@
 using ChatHub.Services.Telegram;
 using ChatHub.Services.Vk;
 using Microsoft.AspNetCore.SignalR;
-using ChatHub.HubR;
+using ChatHub.Utils.Hub;
 
 namespace ChatHub.Extensions;
 
@@ -23,7 +23,7 @@ public static class ServiceProviderExtensions
         }
 
         services.AddSingleton<IVKService, VkNetService>(
-            _ => new VkNetService(_.GetRequiredService<ILogger<VkNetService>>(), _.GetRequiredService<IMapper>(), appId)
+            _ => new VkNetService(_.GetRequiredService<ILogger<VkNetService>>(), _.GetRequiredService<IMapper>(), _.GetRequiredService<IHubContext<VkHubR>>(), appId)
             );
     }
 
@@ -51,7 +51,7 @@ public static class ServiceProviderExtensions
         }
 
         services.AddSingleton<ITLService, WClientTLService>(
-            _ => new WClientTLService(_.GetRequiredService<ILogger<WClientTLService>>(), _.GetRequiredService<IMapper>(), _.GetRequiredService<IHubContext<ChatHubR>>(), apiId, apiHash)
+            _ => new WClientTLService(_.GetRequiredService<ILogger<WClientTLService>>(), _.GetRequiredService<IMapper>(), _.GetRequiredService<IHubContext<TelegramHubR>>(), apiId, apiHash)
         );
 
 

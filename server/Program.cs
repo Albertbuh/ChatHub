@@ -1,7 +1,7 @@
 using ChatHub.Api;
 using ChatHub.Extensions;
 using ChatHub.Apis;
-using ChatHub.HubR;
+using ChatHub.Utils.Hub;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,7 +54,8 @@ else if (app.Environment.IsProduction())
     );
 }
 
-app.MapHub<ChatHubR>("/chat");
+app.MapHub<TelegramHubR>("/hub/telegram");
+app.MapHub<VkHubR>("/hub/vkontakte");
 
 app.MapGroup("/api/v1.0/telegram").WithTags("Telegram api").MapTelegramApi();
 app.MapGroup("/api/v1.0/vk").WithTags("Vk api").MapVkApi();

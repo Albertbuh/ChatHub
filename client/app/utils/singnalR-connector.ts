@@ -1,59 +1,59 @@
 import * as signalR from "@microsoft/signalr";
 import { ConnectorEntity } from "../models/connectorEntity";
-const URL = process.env.HUB_ADDRESS ?? "http://localhost:5041/chat";
-
+const URL = process.env.HUB_ADDRESS ?? "http://localhost:5041/hub"; 
 class Connector {
     private connection: signalR.HubConnection;
-    private onDialogsTLUpdateCallback: ((connectorEntity: ConnectorEntity) => void) | null = null;
-    private onMessagesTLUpdateCallback: ((connectorEntity: ConnectorEntity) => void) | null = null;
+    private onDialogsUpdateCallback: ((connectorEntity: ConnectorEntity) => void) | null = null;
+    private onMessagesUpdateCallback: ((connectorEntity: ConnectorEntity) => void) | null = null;
     static instance: Connector;
 
-    constructor() {
+    constructor(messengerName: string) {
         this.connection = new signalR.HubConnectionBuilder()
-            .withUrl(URL)
+            .withUrl(`${URL}/${messengerName}`)
             .withAutomaticReconnect()
             .build();
         this.connection.start();
         this.registerEventHandlers();
+      
     }
 
-    public setOnDialogsTLUpdateCallback(
+    public setOnDialogsUpdateCallback(
         callback: (connectorEntity: ConnectorEntity) => void,
     ) {
-        this.onDialogsTLUpdateCallback = callback;
+        this.onDialogsUpdateCallback = callback;
     }
 
-    public setOnMessagesTLUpdateCallback(
+    public setOnMessagesUpdateCallback(
         callback: (connectorEntity: ConnectorEntity) => void,
     ) {
-        this.onMessagesTLUpdateCallback = callback;
+        this.onMessagesUpdateCallback = callback;
     }
+
 
     public resetOnMessagesTLUpdateCallback() {
-        this.onMessagesTLUpdateCallback = null;
+        this.onMessagesUpdateCallback = null;
+        this.onDialogsUpdateCallback = null;
     }
 
     private registerEventHandlers() {
-        this.connection.on("updateDialogsTL", (connectorEntity: ConnectorEntity) => {
+        this.connection.on("updateDialogs", (connectorEntity: ConnectorEntity) => {
 
-            if (this.onDialogsTLUpdateCallback) {
-                this.onDialogsTLUpdateCallback(connectorEntity);
+            if (this.onDialogsUpdateCallback) {
+                this.onDialogsUpdateCallback(connectorEntity);
             }
         });
 
-        this.connection.on("updateMessagesTl", (connectorEntity: ConnectorEntity) => {
+        this.connection.on("updateMessages", (connectorEntity: ConnectorEntity) => {
 
-            if (this.onMessagesTLUpdateCallback) {
-                this.onMessagesTLUpdateCallback(connectorEntity);
+            if (this.onMessagesUpdateCallback) {
+                this.onMessagesUpdateCallback(connectorEntity);
             }
         });
     }
 
-    public static getInstance(): Connector {
-        if (!Connector.instance) {
-            Connector.instance = new Connector();
-        }
-        return Connector.instance;
+    public  CloseConnection(){
+        this.connection.stop();
     }
 }
-export default Connector.getInstance;
+
+export default Connector;

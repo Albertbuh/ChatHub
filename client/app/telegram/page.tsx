@@ -35,9 +35,9 @@ export default function Home() {
         }
     };
 
-    const [connector] = useState(Connector());
-    connector.setOnDialogsTLUpdateCallback(handleDialogsUpdate);
-    connector.setOnMessagesTLUpdateCallback(handleMessagesUpdate);
+    const [connector] = useState(new Connector('telegram'));
+    connector.setOnDialogsUpdateCallback(handleDialogsUpdate);
+    connector.setOnMessagesUpdateCallback(handleMessagesUpdate);
 
     useEffect(() => {
         const fetchData = async () => {

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace ChatHub.HubR
+namespace ChatHub.Utils.Hub
 {
-    public class ChatHubR : Hub
+    public class ChatHubR : Microsoft.AspNetCore.SignalR.Hub
     {
         private readonly HashSet<string> connectionIds = new HashSet<string>();
         private object lockObject = new();
@@ -33,24 +33,14 @@ namespace ChatHub.HubR
             await base.OnDisconnectedAsync(exception);
         }
 
-        public static async Task UpdateDialogsTL(IHubContext<ChatHubR> chatHub, HubEntity? dialogs)
+        public static async Task UpdateDialogs(IHubContext<ChatHubR> chatHub, HubEntity? dialogs)
         {
-            await chatHub.Clients.All.SendAsync("updateDialogsTL", dialogs);
+            await chatHub.Clients.All.SendAsync("updateDialogs", dialogs);
         }
 
-        public static async Task UpdateDialogsVK(IHubContext<ChatHubR> chatHub, HubEntity? dialogs)
+        public static async Task UpdateMessages(IHubContext<ChatHubR> chatHub, HubEntity? messages)
         {
-            await chatHub.Clients.All.SendAsync("updateDialogsVk", dialogs);
-        }
-
-        public static async Task UpdateMessagesVK(IHubContext<ChatHubR> chatHub, HubEntity? messages)
-        {
-            await chatHub.Clients.All.SendAsync("updateMessagesVk", messages);
-        }
-
-        public static async Task UpdateMessagesTL(IHubContext<ChatHubR> chatHub, HubEntity? messages)
-        {
-            await chatHub.Clients.All.SendAsync("updateMessagesTL", messages);
+            await chatHub.Clients.All.SendAsync("updateMessages", messages);
         }
     }
 }
