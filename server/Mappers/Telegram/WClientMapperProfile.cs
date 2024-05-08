@@ -18,11 +18,11 @@ public class WClientMapperProfile : Profile
         CreateMap<User, DialogDTO>()
           .ForMember(dest => dest.Id, opt => opt.MapFrom(d => d.ID))
           .ForMember(dest => dest.Title, opt => opt.MapFrom(d => $"{d.first_name} {d.last_name}".Trim()))
-          .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(d => GetUserPhotoId(d)));
+          .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(d => GetUserPhotoId(d)));
 
         CreateMap<ChatBase, DialogDTO>()
           .ForMember(dest => dest.Id, opt => opt.MapFrom(d => d.ID))
-          .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(d => GetChatPhotoId(d)));
+          .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(d => GetChatPhotoId(d)));
     }
 
     private void CreateMapMessages()
@@ -43,7 +43,7 @@ public class WClientMapperProfile : Profile
         CreateMap<ChatBase, PeerDTO>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(chat => chat.ID))
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(chat => chat.MainUsername))
-                .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(chat => GetChatPhotoId(chat)));
+                .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(chat => GetChatPhotoId(chat)));
     }
 
     private void CreateMapUserPeerDTO()
@@ -54,7 +54,7 @@ public class WClientMapperProfile : Profile
                 dest => dest.Username,
                 opt => opt.MapFrom(user => $"{user.first_name} {user.last_name}".Trim())
             )
-            .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(user => GetUserPhotoId(user)))
+            .ForMember(dest => dest.PhotoUrl, opt => opt.MapFrom(user => GetUserPhotoId(user)))
             .ForMember(dest => dest.Tag, opt => opt.MapFrom(user => user.MainUsername));
     }
 
