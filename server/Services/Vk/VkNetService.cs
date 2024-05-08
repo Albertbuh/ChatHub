@@ -297,8 +297,9 @@ namespace ChatHub.Services.Vk
                 lastLogin = "";
                 lastPassword = "";
             }
-            catch
+            catch(ArgumentException ex)
             {
+                _logger.Log(LogLevel.Warning, ex.ToString());
                 lastLogin = login;
                 lastPassword = password;
                 response.StatusCode = 200;
