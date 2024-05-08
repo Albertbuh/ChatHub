@@ -1,179 +1,142 @@
-'use client'
+"use client";
 
-import Link from 'next/link';
-import { useState, useEffect, useContext } from 'react';
-import { usePathname } from 'next/navigation';
+import Link from "next/link";
+import { useContext, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
-import styles from './navbar.module.css';
-import { AiOutlineMenu, AiOutlineHome } from "react-icons/ai";
+import styles from "./navbar.module.css";
+import { AiOutlineHome, AiOutlineMenu } from "react-icons/ai";
 import { SlSocialVkontakte } from "react-icons/sl";
 import { LiaTelegram } from "react-icons/lia";
 import { BsChatSquareHeart } from "react-icons/bs";
 import { CiLogout } from "react-icons/ci";
-import { AuthStageContext } from '@/app/telegram/contexts/AuthContext';
-import { auth } from '@/app/realTimeChat/lib/firebase';
-import { useUserStore } from '@/app/realTimeChat/lib/userStore';
-import RealTimeChat from '@/app/realTimeChat/page';
-import { ExpandContext } from './expandContxt';
+import { AuthStageContext } from "@/app/telegram/contexts/AuthContext";
+import { auth } from "@/app/realTimeChat/lib/firebase";
+import { useUserStore } from "@/app/realTimeChat/lib/userStore";
+import RealTimeChat from "@/app/realTimeChat/page";
+import { ExpandContext } from "./expandContxt";
 
 // TODO: Time dependent drop-down
 export default function SideNav() {
     const { isExpanded, setIsExpanded } = useContext(ExpandContext);
 
-    const avatarPath = '/avatars/Hayasaka.jpg';
+    const avatarPath = "/avatars/Hayasaka.jpg";
     const { currentUser } = useUserStore();
 
-    let container:HTMLElement|null = null;
-    if (typeof window !== 'undefined') {
-        container = document.getElementById('container');
+    let container: HTMLElement | null = null;
+    if (typeof window !== "undefined") {
+        container = document.getElementById("container");
     }
     let telegramIsLogged = false;
     const { authStage } = useContext(AuthStageContext);
-
 
     const [sidebarActive, setSidebarActive] = useState(false);
     const pathname = usePathname();
 
     useEffect(() => {
-        const toggleBtn = document.querySelector('.toggleBtn');
+        const toggleBtn = document.querySelector(".toggleBtn");
 
         const handleClick = () => {
             setSidebarActive(!sidebarActive);
             if (sidebarActive === false && container) {
-                container.style.marginLeft = '10%';
+                container.style.marginLeft = "10%";
             } else if (container) {
-                container.style.marginLeft = '0';
+                container.style.marginLeft = "0";
             }
-            
+
             setIsExpanded(!isExpanded);
-            console.log("navbar expanded", isExpanded)
+            console.log("navbar expanded", isExpanded);
         };
 
         if (toggleBtn) {
-            toggleBtn.addEventListener('click', handleClick);
+            toggleBtn.addEventListener("click", handleClick);
         }
 
         return () => {
             if (toggleBtn) {
-                toggleBtn.removeEventListener('click', handleClick);
+                toggleBtn.removeEventListener("click", handleClick);
             }
         };
     }, [sidebarActive]);
 
     const getActiveClass = (path: string) => {
-        authStage === 'telegramLogged' ? telegramIsLogged : true;
-        return pathname === path ? styles.listItemActive : '';
+        authStage === "telegramLogged" ? telegramIsLogged : true;
+        return pathname === path ? styles.listItemActive : "";
     };
 
-    const [localTgAuthStage] = useState(localStorage.getItem('storedTgAuthStage') || "login");
-    const [localVkAuthStage] = useState(localStorage.getItem('storedVkAuthStage') || "login");
+    const [localTgAuthStage] = useState(
+        localStorage.getItem("storedTgAuthStage") || "login",
+    );
+    const [localVkAuthStage] = useState(
+        localStorage.getItem("storedVkAuthStage") || "login",
+    );
 
     return (
-        <nav className={`${styles.sidebar} ${sidebarActive ? styles.active : ''}`}>
+        <nav className={`${styles.sidebar} ${sidebarActive ? styles.active : ""}`}>
             <div className={styles.logoMenu}>
-                <h2 className={styles.logo}> ChatHUB</h2>
+                <h2 className={styles.logo}>ChatHUB</h2>
                 <AiOutlineMenu className={`${styles.menuToggleBtn} toggleBtn`} />
             </div>
             <ul className={styles.list}>
-
-                <li className={`${styles.listItem} ${getActiveClass('/')}`}>
+                <li className={`${styles.listItem} ${getActiveClass("/")}`}>
                     <Link href="/personalPage">
                         <AiOutlineHome className={styles.listItemIcon} />
-                        <span className={styles.linkName}> Home</span>
+                        <span className={styles.linkName}>Home</span>
                     </Link>
                 </li>
 
-                <li className={`${styles.listItem} ${getActiveClass(`/telegram/authorization/${authStage}`)} ${getActiveClass(`/telegram`)}`}>
-                    {/* {authStage === 'login' && ( */}
-                    {localTgAuthStage === 'login' && (
-
-                        <Link href='/telegram/authorization/login'>
+                <li
+                    className={`${styles.listItem} ${getActiveClass(`/telegram/authorization/${authStage}`)
+                        } ${getActiveClass(`/telegram`)}`}
+                >
+                    {
+                        <Link href="/telegram">
                             <LiaTelegram className={styles.listItemIcon} />
                             <span className={styles.linkName}>Telegram Login</span>
                         </Link>
-                    )}
-                    {/* {authStage === 'verification' && ( */}
-                    {localTgAuthStage === 'verification' && (
-                        <Link href="/telegram/authorization/verification">
-                            <LiaTelegram className={styles.listItemIcon} />
-                            <span className={styles.linkName}>Telegram Verification</span>
-                        </Link>
-                    )}
-                    {/* {authStage === 'password' && ( */}
-                    {localTgAuthStage === 'password' && (
-
-                        <Link href="/telegram/authorization/password">
-                            <LiaTelegram className={styles.listItemIcon} />
-                            <span className={styles.linkName}>Telegram Password</span>
-                        </Link>
-                    )}
-                    {/* {authStage === 'telegramLogged' && ( */}
-                    {localTgAuthStage === 'telegramLogged' && (
-
-                        <Link href="/telegram">
-                            <LiaTelegram className={styles.listItemIcon} />
-                            <span className={styles.linkName}>Telegram Dialogs</span>
-                        </Link>
-                    )}
+                    }
                 </li>
 
-                <li className={`${styles.listItem}  ${getActiveClass(`/vkontakte/authorization/${authStage}`)} ${getActiveClass(`/vkontakte`)}`}>
-                    {/* <Link href="/vkontakte">
-                        <SlSocialVkontakte className={styles.listItemIcon} />
-                        <span className={styles.linkName}>VK</span>
-                    </Link> */}
-                    {localVkAuthStage === 'login' && (
-                        <Link href='/vkontakte/authorization/login'>
+                <li
+                    className={`${styles.listItem}  ${getActiveClass(`/vkontakte/authorization/${authStage}`)
+                        } ${getActiveClass(`/vkontakte`)}`}
+                >
+                    {
+                        <Link href="/vkontakte">
                             <SlSocialVkontakte className={styles.listItemIcon} />
                             <span className={styles.linkName}>VK Login</span>
                         </Link>
-                    )}
-                    {localVkAuthStage === 'verification' && (
-                        <Link href="/vkontakte/authorization/verification">
-                            <SlSocialVkontakte className={styles.listItemIcon} />
-                            <span className={styles.linkName}>VK Verification</span>
-                        </Link>
-                    )}
-                    {localVkAuthStage === 'password' && (
-                        <Link href="/vkontakte/authorization/password">
-                            <SlSocialVkontakte className={styles.listItemIcon} />
-                            <span className={styles.linkName}>VK Password</span>
-                        </Link>
-                    )}
-                    {localVkAuthStage === 'vkLogged' && (
-                        <Link href="/vkontakte">
-                            <SlSocialVkontakte className={styles.listItemIcon} />
-                            <span className={styles.linkName}>VK Dialogs</span>
-                        </Link>
-                    )}
+                    }
                 </li>
 
-                <li className={`${styles.listItem} ${getActiveClass('/realTimeChat')}`}>
+                <li className={`${styles.listItem} ${getActiveClass("/realTimeChat")}`}>
                     <Link href="/realTimeChat">
                         <BsChatSquareHeart className={styles.listItemIcon} />
-                        <span className={styles.linkName}> Real Time Chat</span>
+                        <span className={styles.linkName}>Real Time Chat</span>
                     </Link>
                 </li>
-
-
             </ul>
             <ul className={`${styles.list} ${styles.flexColumn}`}>
-
-                <li className={styles.listItem} onClick={() => auth.signOut()}>
+                <li
+                    className={styles.listItem}
+                    onClick={() => auth.signOut()}
+                >
                     <Link href="/realTimeChat">
                         <CiLogout className={styles.listItemIcon} />
-                        <span className={styles.linkName}> Logout</span>
+                        <span className={styles.linkName}>Logout</span>
                     </Link>
                 </li>
-                <li className={`${styles.listItem} ${getActiveClass('/account')}`}>
+                <li className={`${styles.listItem} ${getActiveClass("/account")}`}>
                     <Link href="/personalPage">
-                        <img className={styles.avatarImg} src={currentUser?.avatar || avatarPath} alt='' />
-                        <span className={styles.linkName}> Your Name</span>
+                        <img
+                            className={styles.avatarImg}
+                            src={currentUser?.avatar || avatarPath}
+                            alt=""
+                        />
+                        <span className={styles.linkName}>Your Name</span>
                     </Link>
                 </li>
             </ul>
         </nav>
-
     );
-
-};
+}
