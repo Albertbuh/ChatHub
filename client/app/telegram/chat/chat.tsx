@@ -19,9 +19,8 @@ import {
 } from "@/app/utils/filePaths";
 import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
 import Timestamp from "@/app/components/timestamp/timestamp";
-import Image from "next/image";
-import { setPriority } from "os";
 import { SendRequest } from "@/app/models/sendRequest";
+import DialogHeader from "@/app/components/dialogHeader/dialogHeader";
 
 interface ChatProps {
     messages: IMessageInfo[];
@@ -32,7 +31,15 @@ interface ChatProps {
 const Chat = ({ messages, currentDialog, onSendSubmit }: ChatProps) => {
     return (
         <div className={styles.chat}>
-            <Top dialog={currentDialog} />
+            {currentDialog && (
+                <DialogHeader
+                    title={currentDialog.title}
+                    pathToPhoto={GetPathToProfilePhotoById(
+                        currentDialog.id,
+                        "telegram_tag",
+                    )}
+                />
+            )}
             <MessagesContainer messages={messages} currentDialog={currentDialog} />
             <MessageSender onSubmit={onSendSubmit} />
         </div>
@@ -82,7 +89,7 @@ function MessageSender({ onSubmit }: MessageSenderProps) {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        onSubmit({ message, mediaFilepath: media});
+        onSubmit({ message, mediaFilepath: media });
         setMessage("");
         setMedia("");
     };
@@ -162,7 +169,7 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
         "",
     ).replace("TL.MessageMediaWebPage", "");
     const [profilePath, setProfilePath] = useState(
-        GetPathToProfilePhotoById(messageInfo.sender.id, 'telegram_tag'),
+        GetPathToProfilePhotoById(messageInfo.sender.id, "telegram_tag"),
     );
 
     useEffect(() => {
@@ -170,7 +177,7 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
             let newPath = await GetPathToMediaFileWithoutExtension(
                 dialogId,
                 messageInfo.id,
-                'telegram_tag'
+                "telegram_tag",
             );
             if (newPath) {
                 setMediaPath(newPath);
@@ -262,48 +269,6 @@ function MessageMedia({ mediaPath }: MediaProps) {
     }
 
     return <h1>Undefined media</h1>;
-}
-
-interface TopProps {
-    dialog: IDialogInfo | undefined;
-}
-function Top({ dialog }: TopProps) {
-    if (!dialog) {
-        return null;
-    }
-
-    const [profilePath, setProfilePath] = useState(
-        GetPathToProfilePhotoById(dialog.id, 'telegram_tag'),
-    );
-    useEffect(() => {
-        setProfilePath(GetPathToProfilePhotoById(dialog.id, 'telegram_tag'));
-    }, [dialog]);
-
-    return (
-        <div className={styles.top}>
-            <div className={styles.user}>
-                <Image
-                    src={profilePath}
-                    width={"60"}
-                    height={"60"}
-                    alt=""
-                    className={styles.avatarImg}
-                    onError={() => setProfilePath("/avatars/defaultProfile.jpeg")}
-                />
-                <div className={styles.texts}>
-                    <span className={styles.span}>{dialog.title}</span>
-                    <p className={styles.p}>
-                        Have a good day, you better than you think!
-                    </p>
-                </div>
-            </div>
-            <div className={styles.icons}>
-                <CiPhone className={styles.imgI} />
-                <CiVideoOn className={styles.imgI} />
-                <CiCircleInfo className={styles.imgI} />
-            </div>
-        </div>
-    );
 }
 
 export default Chat;

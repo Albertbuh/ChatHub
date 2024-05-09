@@ -1,0 +1,47 @@
+.top {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #dddddd35;
+}
+
+.top .user {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.top .user .avatarImg {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.top .user .texts {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.top .user .texts .span {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.top .user .texts .p {
+    font-size: 14px;
+    font-weight: 300;
+    color: #a5a5a5;
+}
+
+.top .icons {
+    display: flex;
+    gap: 20px;
+}
+
+.top .icons .imgI {
+    width: 20px;
+    height: 20px;
+}
