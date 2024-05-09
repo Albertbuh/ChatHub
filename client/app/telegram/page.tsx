@@ -6,23 +6,29 @@ import React, {
     useRef,
     useState,
 } from "react";
-import { GetDialogs, GetMessages } from "../utils/getRequests";
+import { GetDialogs, GetMessages, sendMessage } from "../utils/getRequests";
 import Connector from "../utils/singnalR-connector";
 import { IDialogInfo } from "../models/dto/IDialogInfo";
 import { ConnectorEntity } from "../models/connectorEntity";
-import List from "./list/list";
 
 import styles from "./telegram.module.css";
 import Chat from "./chat/chat";
 import { IMessageInfo } from "../models/dto/IMessageInfo";
-import TLResponse from "../models/dto/TLResponse";
+import MessengerResponse from "../models/dto/TLResponse";
 import { ExpandContext } from "../components/navbar/expandContxt";
+import { SendRequest } from "../models/sendRequest";
+import { GetPathToProfilePhotoById } from "../utils/filePaths";
+import UserInfo from "../components/userInfo/userInfo";
+import ChatList from "./chatList/chatList";
 
 export default function Home() {
     const [dialogsUpdate, setDialogsUpdate] = useState<IDialogInfo[]>([]);
     const [messages, setMessages] = useState<IMessageInfo[]>([]);
     const [currentDialogId, setCurrentDialogId] = useState(0);
     const { isExpanded } = useContext(ExpandContext);
+
+    const avatarPath = `/assets/telegram/userAssets/${localStorage.getItem("telegram_tag")
+        }/${localStorage.getItem("telegram_id")}/profile.jpeg`;
 
     const handleDialogsUpdate = (connectorEntity: ConnectorEntity) => {
         setDialogsUpdate(connectorEntity.data as IDialogInfo[]);
@@ -35,7 +41,7 @@ export default function Home() {
         }
     };
 
-    const [connector] = useState(new Connector('telegram'));
+    const [connector] = useState(new Connector("telegram"));
     connector.setOnDialogsUpdateCallback(handleDialogsUpdate);
     connector.setOnMessagesUpdateCallback(handleMessagesUpdate);
 
@@ -70,23 +76,10 @@ export default function Home() {
         setMessages([]);
     }
 
-    const handleSendSubmit = async (data: SendData) => {
-        var response = await fetch(
-            `http://localhost:5041/api/v1.0/telegram/peers/${currentDialogId}`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-            },
-        );
-        if (response.ok) {
-            let message: TLResponse = await response.json();
-            let sendedMessage = message.data as IMessageInfo;
-            if (data) {
-                setMessages([sendedMessage, ...messages]);
-            }
+    const handleSendSubmit = async (data: SendRequest) => {
+        var sendedMessage = await sendMessage("telegram", currentDialogId, data);
+        if (sendedMessage) {
+            setMessages([sendedMessage, ...messages]);
         }
     };
 
@@ -96,7 +89,17 @@ export default function Home() {
                 className={styles.container}
                 style={{ marginLeft: isExpanded ? "15%" : "4%" }}
             >
-                <List dialogs={dialogsUpdate} handleClick={handleListClick} />
+                <div className={styles.list}>
+                    <UserInfo
+                        avatarPath={avatarPath}
+                        username={localStorage.getItem("telegram_username")}
+                    />
+                    <ChatList
+                        dialogs={dialogsUpdate}
+                        handleClick={handleListClick}
+                        dialogPhotoHandler={(id: number|string) => GetPathToProfilePhotoById(id, "telegram_tag")}
+                    />
+                </div>
                 <Chat
                     messages={messages.toReversed()}
                     currentDialog={dialogsUpdate.find((d) => d.id == currentDialogId)}
@@ -104,10 +107,7 @@ export default function Home() {
                 />
             </div>
         );
+    } else {
+        return <h1>Loading...</h1>;
     }
-}
-
-export interface SendData {
-    message: string;
-    mediaFilepath: string;
 }

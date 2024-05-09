@@ -3,7 +3,6 @@ import bg2 from "../public/backgrounds/1.jpg";
 
 import SideNav from "./components/navbar/navbar";
 import "./globals.css";
-import { AuthStageProvider } from "./telegram/contexts/AuthContext";
 import { ExpandContextProvider } from "./components/navbar/expandContxt";
 import { useContext, useEffect, useState } from "react";
 import BackgroundContext, { BackgroundProvider } from "./BackGroundContext";
@@ -33,12 +32,10 @@ function RootLayoutInner({ children }: RootLayoutProps) {
     return (
         <html lang="en">
             <body style={{ backgroundImage: `url(${localBackground})` }}>
-                <AuthStageProvider>
-                    <ExpandContextProvider>
-                        <SideNav />
-                        {children}
-                    </ExpandContextProvider>
-                </AuthStageProvider>
+                <ExpandContextProvider>
+                    <SideNav />
+                    {children}
+                </ExpandContextProvider>
             </body>
         </html>
     );

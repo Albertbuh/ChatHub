@@ -1,0 +1,63 @@
+.item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    cursor: pointer;
+    border-bottom: 1px solid #dddddd35;
+    transition: opacity 0.15s;
+    width: 100%;
+}
+
+.item:hover {
+    background-color: rgba(17, 25, 40, 0.5);
+}
+
+.item .avatarImg {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.item .texts {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    width: 100%;
+}
+
+.item .texts .span {
+    font-weight: 500;
+}
+
+.item .texts .title {
+    font-weight: 700;
+    font-size: 1.1em;
+    max-width: 80%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.item .texts .p {
+    max-width: 100%;
+    font-size: 14px;
+    font-weight: 300;
+    max-width: 20vw;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.item .texts .sendername {
+    font-weight: bold;
+}
+
+.item .texts .time {
+    position: absolute;
+    opacity: 0.8;
+    top: 2%;
+    right: 3%;
+}

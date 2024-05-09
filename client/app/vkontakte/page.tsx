@@ -3,23 +3,28 @@ import React, { Suspense, useEffect, useState } from "react";
 import { GetDialogsVK, GetMessagesVK } from "../utils/getRequests";
 import Connector from "../utils/singnalR-connector";
 import { ConnectorEntity } from "../models/connectorEntity";
-import List from "./list/list";
 
 import styles from "./vk.module.css";
 import Chat from "./chat/chat";
 import { IDialogInfoVK } from "./dto/IDialogInfo";
 import { IMessageInfoVK } from "./dto/IMessageInfo";
 import VKResponse from "./dto/VKResponse";
+import MessengerResponse from "../models/dto/TLResponse";
+import { SendRequest } from "../models/sendRequest";
+import UserInfo from "../components/userInfo/userInfo";
+import { IDialogInfo } from "../models/dto/IDialogInfo";
+import ChatList from "./chatList/chatList";
 
 export default function Home() {
     const [dialogsUpdate, setDialogsUpdate] = useState<IDialogInfoVK[]>([]);
     const [messages, setMessages] = useState<IMessageInfoVK[]>([]);
     const [currentDialogId, setCurrentDialogId] = useState(0);
 
+    const avatarPath = localStorage.getItem("vk_photoUrl") ?? "";
+
     const handleDialogsUpdate = (connectorEntity: ConnectorEntity) => {
         setDialogsUpdate(connectorEntity.data as IDialogInfoVK[]);
         console.log("dialogs");
-
     };
 
     const handleMessagesUpdate = (connectorEntity: ConnectorEntity) => {
@@ -31,14 +36,14 @@ export default function Home() {
         }
     };
 
-    const [connector] = useState(new Connector('vkontakte'));
+    const [connector] = useState(new Connector("vkontakte"));
     connector.setOnDialogsUpdateCallback(handleDialogsUpdate);
     connector.setOnMessagesUpdateCallback(handleMessagesUpdate);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const updatedDialogs = await GetDialogsVK(0,100);
+                const updatedDialogs = await GetDialogsVK(0, 100);
                 setDialogsUpdate(updatedDialogs);
             } catch (error) {
                 console.error("Ошибка при получении диалогов:", error);
@@ -69,30 +74,36 @@ export default function Home() {
         setMessages([]);
     }
 
-    const handleSendSubmit = async (data: SendData) => {
-      var response = await fetch(
-          `http://localhost:5041/api/v1.0/vk/peers/${currentDialogId}`,
-          {
-              method: "POST",
-              headers: {
-                  "Content-Type": "application/json",
-              },
-              body: JSON.stringify(data),
-          },
-      );
-      if (response.ok) {
-          let message: VKResponse = await response.json();
-          let sendedMessage = message.data as IMessageInfoVK;
-          if (data) {
-              setMessages([sendedMessage, ...messages]);
-          }
-      }
-  };
+    const handleSendSubmit = async (data: SendRequest) => {
+        var response = await fetch(
+            `http://localhost:5041/api/v1.0/vk/peers/${currentDialogId}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            },
+        );
+        if (response.ok) {
+            let message: MessengerResponse = await response.json();
+            let sendedMessage = message.data as IMessageInfoVK;
+            if (data) {
+                setMessages([sendedMessage, ...messages]);
+            }
+        }
+    };
 
     if (dialogsUpdate && dialogsUpdate.length > 0) {
         return (
             <div className={styles.container}>
-                <List dialogs={dialogsUpdate} handleClick={handleListClick}  />
+                <div className={styles.list}>
+                    <UserInfo
+                        avatarPath={avatarPath}
+                        username={localStorage.getItem("vk_username")}
+                    />
+                    <ChatList dialogs={dialogsUpdate} handleClick={handleListClick} />
+                </div>
                 <Chat
                     messages={messages}
                     currentDialog={dialogsUpdate.find((d) => d.id == currentDialogId)}
@@ -102,9 +113,3 @@ export default function Home() {
         );
     }
 }
-
-export interface SendData {
-  message: string;
-  mediaFilepath: string;
-}
-

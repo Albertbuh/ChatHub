@@ -108,18 +108,18 @@ namespace ChatHub.Services.Vk
                     {
                         name = $"{participant.FirstName} {participant.LastName}";
                     }
-                    dialogDto.PhotoUri = participant?.Photo100?.AbsoluteUri ?? "";
+                    dialogDto.PhotoUrl = participant?.Photo100?.AbsoluteUri ?? "";
                     break;
                 case ConversationPeerType.Chat:
                     name = conversation.Conversation.ChatSettings.Title;
                     senderU = Users.FirstOrDefault(u => u.Id == conversation.LastMessage.FromId);
                     user = _mapper.Map<UserDTO>(senderU);
-                    dialogDto.PhotoUri = conversation.Conversation.ChatSettings.Photo?.Photo100.ToString() ?? "";
+                    dialogDto.PhotoUrl = conversation.Conversation.ChatSettings.Photo?.Photo100.ToString() ?? "";
 
                     break;
                 case ConversationPeerType.Group:
                     var group = Groups.FirstOrDefault(f => f.Id == Math.Abs(id));
-                    dialogDto.PhotoUri = group?.Photo100.AbsoluteUri.ToString() ?? " ";
+                    dialogDto.PhotoUrl = group?.Photo100.AbsoluteUri.ToString() ?? " ";
                     dialogDto.MainUsername = group?.ScreenName ?? " ";
                     var senderG = Groups.FirstOrDefault(u => u.Id == conversation.LastMessage.FromId);
                     user = _mapper.Map<UserDTO>(senderG);
@@ -237,13 +237,13 @@ namespace ChatHub.Services.Vk
                     var groupVk = chatGroups?.FirstOrDefault(x => x.Id == Math.Abs(message.FromId!.Value)) ?? new Group();
 
                     user.Id = groupVk.Id;
-                    user.PhotoUri = groupVk?.Photo100?.AbsoluteUri.ToString() ?? " ";
+                    user.PhotoUrl = groupVk?.Photo100?.AbsoluteUri.ToString() ?? " ";
                     user.ScreenName = groupVk?.Name;
                 }
                 else
                 {
                     user.Id = userVk.Id;
-                    user.PhotoUri = userVk.Photo100?.AbsoluteUri?.ToString() ?? " ";
+                    user.PhotoUrl = userVk.Photo100?.AbsoluteUri?.ToString() ?? " ";
                     user.ScreenName = userVk.FirstName ?? " ";
                 }
 

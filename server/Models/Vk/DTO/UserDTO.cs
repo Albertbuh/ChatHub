@@ -2,7 +2,7 @@
 {
     public class UserDTO
     {
-        public string? PhotoUri { get; set; }
+        public string? PhotoUrl { get; set; }
         public long? Id { get; set; }
         public string? ScreenName { get; set; }
 
