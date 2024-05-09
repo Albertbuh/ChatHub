@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "./chat.module.css";
-import { BsFileEarmarkFill } from 'react-icons/bs';
+import { BsFileEarmarkFill } from "react-icons/bs";
 import {
     CiCamera,
     CiCircleInfo,
@@ -13,11 +13,12 @@ import {
 import { BsEmojiNeutral } from "react-icons/bs";
 import { useEffect, useRef, useState } from "react";
 import Timestamp from "@/app/components/timestamp/timestamp";
-import { IMediaInfoVK } from "../dto/IMediaInfo"
+import { IMediaInfoVK } from "../dto/IMediaInfo";
 import { IMessageInfoVK } from "../dto/IMessageInfo";
 import { IDialogInfoVK } from "../dto/IDialogInfo";
 import Image from "next/image";
 import { SendRequest } from "@/app/models/sendRequest";
+import DialogHeader from "@/app/components/dialogHeader/dialogHeader";
 
 interface ChatProps {
     messages: IMessageInfoVK[];
@@ -28,7 +29,12 @@ interface ChatProps {
 const Chat = ({ messages, currentDialog, onSendSubmit }: ChatProps) => {
     return (
         <div className={styles.chat}>
-            <Top dialog={currentDialog} />
+            {currentDialog && (
+                <DialogHeader
+                    title={currentDialog.title}
+                    pathToPhoto={currentDialog.photoUrl}
+                />
+            )}
             <MessagesContainer messages={messages} currentDialog={currentDialog} />
             <MessageSender onSubmit={onSendSubmit} />
         </div>
@@ -42,10 +48,6 @@ interface MessagesContainerProps {
 function MessagesContainer(
     { messages, currentDialog }: MessagesContainerProps,
 ) {
-    if (!currentDialog) {
-        return null;
-    }
-
     const messagesView = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -63,7 +65,6 @@ function MessagesContainer(
                         message={message}
                         dialogId={currentDialog!.id}
                     />
-
                 ))
                 : <h1 className={styles.suspense}>Loading...</h1>}
         </div>
@@ -79,7 +80,7 @@ function MessageSender({ onSubmit }: MessageSenderProps) {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        onSubmit({ message, mediaFilepath: media});
+        onSubmit({ message, mediaFilepath: media });
         setMessage("");
         setMedia("");
     };
@@ -150,11 +151,12 @@ interface MessageProps {
     dialogId: number;
 }
 function Message({ message: messageInfo, dialogId }: MessageProps) {
-    const hasMedia: boolean = (messageInfo.media ? true : false) && (messageInfo.media.type != "Undefined");
+    const hasMedia: boolean = (messageInfo.media ? true : false) &&
+        (messageInfo.media.type != "Undefined");
     console.log(hasMedia);
     const isOwn: boolean =
         messageInfo.sender.id.toString() === localStorage.getItem("id");
-   
+
     return (
         <div className={`${styles.message} ${isOwn ? styles.messageOwn : ""}`}>
             {!isOwn
@@ -162,14 +164,16 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
                     <img
                         className={styles.avatarImg}
                         src={messageInfo.sender.photoUrl}
-                        alt={''}
+                        alt={""}
                     />
                 )
                 : null}
             <div className={styles.texts}>
                 <span className={styles.sendername}>{messageInfo.sender.username}</span>
                 {hasMedia ? <MessageMedia mediaPath={messageInfo.media} /> : null}
-                {messageInfo.message.trim() !== "" ? <p className={styles.p}>{messageInfo.message}</p> : null}
+                {messageInfo.message.trim() !== ""
+                    ? <p className={styles.p}>{messageInfo.message}</p>
+                    : null}
                 <Timestamp time={messageInfo.date} className={styles.timestamp} />
             </div>
         </div>
@@ -199,48 +203,60 @@ function MessageMedia({ mediaPath }: MediaProps) {
 
     if (mediaPath.type == "Video") {
         return (
-        <iframe src={mediaPath.mediaUrl} height={300} width={200} allow="autoplay; encrypted-media; fullscreen; picture-in-picture;"allowFullScreen></iframe>
+            <iframe
+                src={mediaPath.mediaUrl}
+                height={300}
+                width={200}
+                allow="autoplay; encrypted-media; fullscreen; picture-in-picture;"
+                allowFullScreen
+            >
+            </iframe>
         );
     }
 
-    if (mediaPath.type == "Doc"){
+    if (mediaPath.type == "Doc") {
         const handleDownload = () => {
             const link = document.createElement("a");
             link.href = mediaPath.mediaUrl;
             link.download = "File";
             link.click();
-          };
-          let fileName = "File"; // Изначальное имя файла
-          let filePath = ""
-          const spaceIndex = mediaPath.mediaUrl.lastIndexOf(' ');
-          console.log(mediaPath.mediaUrl);
-          if (spaceIndex !== -1) {
+        };
+        let fileName = "File"; // Изначальное имя файла
+        let filePath = "";
+        const spaceIndex = mediaPath.mediaUrl.lastIndexOf(" ");
+        console.log(mediaPath.mediaUrl);
+        if (spaceIndex !== -1) {
             fileName = mediaPath.mediaUrl.substring(spaceIndex);
-            filePath = mediaPath.mediaUrl.substring(0,spaceIndex);
-          }
-          return (
+            filePath = mediaPath.mediaUrl.substring(0, spaceIndex);
+        }
+        return (
             <a href={filePath} download={"File"} onClick={handleDownload}>
-  <BsFileEarmarkFill style={{ fontSize: 46, color: '#FFFFFF', marginRight: '10px' }} />
-  <span style={{ color: '#FFFFFF', verticalAlign: 'middle' }}>{fileName}</span>
+                <BsFileEarmarkFill
+                    style={{ fontSize: 46, color: "#FFFFFF", marginRight: "10px" }}
+                />
+                <span style={{ color: "#FFFFFF", verticalAlign: "middle" }}>
+                    {fileName}
+                </span>
             </a>
-          );
+        );
     }
 
-    if(mediaPath.type == "VM"){
+    if (mediaPath.type == "VM") {
         return <audio controls src={mediaPath.mediaUrl}></audio>;
     }
 
-    if(mediaPath.type == "Sticker"){
-        return  <Image
-        className={styles.img}
-        src={mediaPath.mediaUrl}
-        alt="undefined media"
-        width={0}
-        height={0}
-        sizes="100vw"
-    />;
+    if (mediaPath.type == "Sticker") {
+        return (
+            <Image
+                className={styles.img}
+                src={mediaPath.mediaUrl}
+                alt="undefined media"
+                width={0}
+                height={0}
+                sizes="100vw"
+            />
+        );
     }
-    
 
     return <h1>Undefined media</h1>;
 }

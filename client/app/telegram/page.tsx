@@ -1,9 +1,7 @@
 "use client";
 import React, {
-    Suspense,
     useContext,
     useEffect,
-    useRef,
     useState,
 } from "react";
 import { GetDialogs, GetMessages, sendMessage } from "../utils/getRequests";
@@ -14,7 +12,6 @@ import { ConnectorEntity } from "../models/connectorEntity";
 import styles from "./telegram.module.css";
 import Chat from "./chat/chat";
 import { IMessageInfo } from "../models/dto/IMessageInfo";
-import MessengerResponse from "../models/dto/TLResponse";
 import { ExpandContext } from "../components/navbar/expandContxt";
 import { SendRequest } from "../models/sendRequest";
 import { GetPathToProfilePhotoById } from "../utils/filePaths";
