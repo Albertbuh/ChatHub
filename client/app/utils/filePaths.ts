@@ -1,4 +1,4 @@
-export function GetPathToProfilePhotoById(id: number, tag: string): string {
+export function GetPathToProfilePhotoById(id: number|string, tag: string): string {
     return `/assets/telegram/userAssets/${localStorage.getItem(tag)
         }/${id}/profile.jpeg`;
 }

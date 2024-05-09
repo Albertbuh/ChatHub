@@ -4,6 +4,6 @@ export interface IDialogInfo {
     id: number;
     title: string;
     mainUsername: string;
-    photoId: number;
+    photoUrl: string;
     topMessage: IMessageInfo;
 }

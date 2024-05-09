@@ -12,24 +12,17 @@ import {
 } from "react-icons/ci";
 import { BsEmojiNeutral } from "react-icons/bs";
 import { useEffect, useRef, useState } from "react";
-import { IMessageInfo } from "@/app/models/dto/IMessageInfo";
-import {
-    GetPathToMediaFile,
-    GetPathToMediaFileWithoutExtension,
-    GetPathToProfilePhotoById,
-} from "@/app/utils/filePaths";
-import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
 import Timestamp from "@/app/components/timestamp/timestamp";
-import { SendData } from "../page";
 import { IMediaInfoVK } from "../dto/IMediaInfo"
 import { IMessageInfoVK } from "../dto/IMessageInfo";
 import { IDialogInfoVK } from "../dto/IDialogInfo";
 import Image from "next/image";
+import { SendRequest } from "@/app/models/sendRequest";
 
 interface ChatProps {
     messages: IMessageInfoVK[];
     currentDialog: IDialogInfoVK | undefined;
-    onSendSubmit: (data: SendData) => void;
+    onSendSubmit: (data: SendRequest) => void;
 }
 
 const Chat = ({ messages, currentDialog, onSendSubmit }: ChatProps) => {
@@ -77,7 +70,7 @@ function MessagesContainer(
     );
 }
 interface MessageSenderProps {
-    onSubmit: (data: SendData) => void;
+    onSubmit: (data: SendRequest) => void;
 }
 function MessageSender({ onSubmit }: MessageSenderProps) {
     const [message, setMessage] = useState("");
@@ -264,7 +257,7 @@ function Top({ dialog }: TopProps) {
         <div className={styles.top}>
             <div className={styles.user}>
                 <Image
-                    src={dialog.photoUri}
+                    src={dialog.photoUrl}
                     width={"60"}
                     height={"60"}
                     alt=""

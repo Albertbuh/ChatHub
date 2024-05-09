@@ -6,12 +6,17 @@ import { IDialogInfoVK } from "../vkontakte/dto/IDialogInfo";
 import ResponseDTO from "../models/responseDTO";
 import UserInfo from "../models/userInfo";
 import { navigate, setCookie } from "./redirect";
+import { SendRequest } from "../models/sendRequest";
+import MessengerResponse from "../models/dto/TLResponse";
 
 export async function logoutRequest(messenger: string) {
     await fetch(`http://localhost:5041/api/v1.0/${messenger}/logout`);
 }
 
-export async function loginRequest(messenger: string, url: string):Promise<boolean> {
+export async function loginRequest(
+    messenger: string,
+    url: string,
+): Promise<boolean> {
     const response = await fetch(
         url,
         {
@@ -128,4 +133,26 @@ export async function GetDialogsVK(
     } finally {
         return dialogs.data;
     }
+}
+
+export async function sendMessage(
+    messenger: string,
+    chatId: number,
+    sendData: SendRequest,
+): Promise<IMessageInfo|undefined> {
+    var response = await fetch(
+        `http://localhost:5041/api/v1.0/${messenger}/peers/${chatId}`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(sendData),
+        },
+    );
+    if (response.ok) {
+        let message: MessengerResponse = await response.json();
+        return message.data as IMessageInfo;
+    }
+    return undefined;
 }

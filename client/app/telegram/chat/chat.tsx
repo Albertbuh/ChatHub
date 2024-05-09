@@ -19,14 +19,14 @@ import {
 } from "@/app/utils/filePaths";
 import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
 import Timestamp from "@/app/components/timestamp/timestamp";
-import { SendData } from "../page";
 import Image from "next/image";
 import { setPriority } from "os";
+import { SendRequest } from "@/app/models/sendRequest";
 
 interface ChatProps {
     messages: IMessageInfo[];
     currentDialog: IDialogInfo | undefined;
-    onSendSubmit: (data: SendData) => void;
+    onSendSubmit: (data: SendRequest) => void;
 }
 
 const Chat = ({ messages, currentDialog, onSendSubmit }: ChatProps) => {
@@ -73,7 +73,7 @@ function MessagesContainer(
     );
 }
 interface MessageSenderProps {
-    onSubmit: (data: SendData) => void;
+    onSubmit: (data: SendRequest) => void;
 }
 function MessageSender({ onSubmit }: MessageSenderProps) {
     const [message, setMessage] = useState("");

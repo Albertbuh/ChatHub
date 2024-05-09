@@ -10,10 +10,8 @@ import { SlSocialVkontakte } from "react-icons/sl";
 import { LiaTelegram } from "react-icons/lia";
 import { BsChatSquareHeart } from "react-icons/bs";
 import { CiLogout } from "react-icons/ci";
-import { AuthStageContext } from "@/app/telegram/contexts/AuthContext";
 import { auth } from "@/app/realTimeChat/lib/firebase";
 import { useUserStore } from "@/app/realTimeChat/lib/userStore";
-import RealTimeChat from "@/app/realTimeChat/page";
 import { ExpandContext } from "./expandContxt";
 
 // TODO: Time dependent drop-down
@@ -27,11 +25,7 @@ export default function SideNav() {
     if (typeof window !== "undefined") {
         container = document.getElementById("container");
     }
-    let telegramIsLogged = false;
-    const { authStage } = useContext(AuthStageContext);
-
     const [sidebarActive, setSidebarActive] = useState(false);
-    const pathname = usePathname();
 
     useEffect(() => {
         const toggleBtn = document.querySelector(".toggleBtn");
@@ -59,18 +53,6 @@ export default function SideNav() {
         };
     }, [sidebarActive]);
 
-    const getActiveClass = (path: string) => {
-        authStage === "telegramLogged" ? telegramIsLogged : true;
-        return pathname === path ? styles.listItemActive : "";
-    };
-
-    const [localTgAuthStage] = useState(
-        localStorage.getItem("storedTgAuthStage") || "login",
-    );
-    const [localVkAuthStage] = useState(
-        localStorage.getItem("storedVkAuthStage") || "login",
-    );
-
     return (
         <nav className={`${styles.sidebar} ${sidebarActive ? styles.active : ""}`}>
             <div className={styles.logoMenu}>
@@ -78,38 +60,28 @@ export default function SideNav() {
                 <AiOutlineMenu className={`${styles.menuToggleBtn} toggleBtn`} />
             </div>
             <ul className={styles.list}>
-                <li className={`${styles.listItem} ${getActiveClass("/")}`}>
+                <li className={styles.listItem}>
                     <Link href="/personalPage">
                         <AiOutlineHome className={styles.listItemIcon} />
                         <span className={styles.linkName}>Home</span>
                     </Link>
                 </li>
 
-                <li
-                    className={`${styles.listItem} ${getActiveClass(`/telegram/authorization/${authStage}`)
-                        } ${getActiveClass(`/telegram`)}`}
-                >
-                    {
-                        <Link href="/telegram">
-                            <LiaTelegram className={styles.listItemIcon} />
-                            <span className={styles.linkName}>Telegram Login</span>
-                        </Link>
-                    }
+                <li className={styles.listItem}>
+                    <Link href="/telegram">
+                        <LiaTelegram className={styles.listItemIcon} />
+                        <span className={styles.linkName}>Telegram</span>
+                    </Link>
                 </li>
 
-                <li
-                    className={`${styles.listItem}  ${getActiveClass(`/vkontakte/authorization/${authStage}`)
-                        } ${getActiveClass(`/vkontakte`)}`}
-                >
-                    {
+                <li className={styles.listItem}>
                         <Link href="/vkontakte">
                             <SlSocialVkontakte className={styles.listItemIcon} />
-                            <span className={styles.linkName}>VK Login</span>
+                            <span className={styles.linkName}>VK</span>
                         </Link>
-                    }
                 </li>
 
-                <li className={`${styles.listItem} ${getActiveClass("/realTimeChat")}`}>
+                <li className={styles.listItem}>
                     <Link href="/realTimeChat">
                         <BsChatSquareHeart className={styles.listItemIcon} />
                         <span className={styles.linkName}>Real Time Chat</span>
@@ -119,14 +91,15 @@ export default function SideNav() {
             <ul className={`${styles.list} ${styles.flexColumn}`}>
                 <li
                     className={styles.listItem}
-                    onClick={() => auth.signOut()}
+                    onClick={() =>
+                        auth.signOut()}
                 >
                     <Link href="/realTimeChat">
                         <CiLogout className={styles.listItemIcon} />
                         <span className={styles.linkName}>Logout</span>
                     </Link>
                 </li>
-                <li className={`${styles.listItem} ${getActiveClass("/account")}`}>
+                <li className={`${styles.listItem} `}>
                     <Link href="/personalPage">
                         <img
                             className={styles.avatarImg}
