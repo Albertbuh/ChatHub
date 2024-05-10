@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import styles from "./chatField.module.css";
 import Timestamp from "../timestamp/timestamp";
-import Image from "next/image";
+import ProfilePhoto from "../profilePhoto/profilePhoto";
 
 interface ChatFieldProps {
     title: string;
@@ -15,7 +15,7 @@ export default function ChatField(props: ChatFieldProps) {
     return (
         <div className={styles.item}>
             <Suspense fallback={<p>loading...</p>}>
-                <Image
+                <ProfilePhoto
                     className={styles.avatarImg}
                     src={props.pathToPhoto}
                     width={"50"}

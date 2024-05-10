@@ -18,7 +18,6 @@ const ChatList = ({ dialogs, handleClick, dialogPhotoHandler }: IChatProps) => {
 
     function handleSearchBarUpdate(filter: string) {
         setSearchFilter(filter.toLowerCase());
-        console.log(searchFilter);
     }
     return (
         <div className={styles.chatList}>
