@@ -2,15 +2,6 @@
 
 import styles from "./chat.module.css";
 import { BsFileEarmarkFill } from "react-icons/bs";
-import {
-    CiCamera,
-    CiCircleInfo,
-    CiImageOn,
-    CiMicrophoneOn,
-    CiPhone,
-    CiVideoOn,
-} from "react-icons/ci";
-import { BsEmojiNeutral } from "react-icons/bs";
 import { useEffect, useRef, useState } from "react";
 import Timestamp from "@/app/components/timestamp/timestamp";
 import { IMediaInfoVK } from "../dto/IMediaInfo";
@@ -19,6 +10,8 @@ import { IDialogInfoVK } from "../dto/IDialogInfo";
 import Image from "next/image";
 import { SendRequest } from "@/app/models/sendRequest";
 import DialogHeader from "@/app/components/dialogHeader/dialogHeader";
+import MessageSender from "@/app/components/messageSender/messageSender";
+import ProfilePhoto from "@/app/components/profilePhoto/profilePhoto";
 
 interface ChatProps {
     messages: IMessageInfoVK[];
@@ -70,87 +63,12 @@ function MessagesContainer(
         </div>
     );
 }
-interface MessageSenderProps {
-    onSubmit: (data: SendRequest) => void;
-}
-function MessageSender({ onSubmit }: MessageSenderProps) {
-    const [message, setMessage] = useState("");
-    const [media, setMedia] = useState("");
-    const [isMediaFieldVisible, setIsMediaFieldVisible] = useState(false);
-
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        onSubmit({ message, mediaFilepath: media });
-        setMessage("");
-        setMedia("");
-    };
-
-    function handleImageClick() {
-        setIsMediaFieldVisible(!isMediaFieldVisible);
-    }
-
-    return (
-        <>
-            <form action="" className={styles.bottom} onSubmit={handleSubmit}>
-                <div className={styles.icons}>
-                    <CiImageOn className={styles.imgI} onClick={handleImageClick} />
-                    <CiCamera className={styles.imgI} />
-                    <CiMicrophoneOn className={styles.imgI} />
-                </div>
-                <input
-                    className={styles.input}
-                    value={message}
-                    type="text"
-                    placeholder="Type a message..."
-                    onChange={(e) => setMessage(e.target.value)}
-                />
-                <div className={styles.emoji}>
-                    <BsEmojiNeutral className={styles.imgI} />
-                </div>
-                <button
-                    type="submit"
-                    className={styles.sendButton}
-                >
-                    Send
-                </button>
-            </form>
-            <div
-                className={styles.mediaField}
-                style={{ opacity: isMediaFieldVisible ? "100" : "0" }}
-            >
-                <input
-                    className={styles.input}
-                    name="media"
-                    value={media}
-                    type="text"
-                    placeholder="path to media..."
-                    onChange={(e) => setMedia(e.target.value)}
-                />
-                <button
-                    onClick={() => {
-                        setIsMediaFieldVisible(false);
-                    }}
-                >
-                    Ok
-                </button>
-                <button
-                    onClick={() => {
-                        setIsMediaFieldVisible(false);
-                        setMedia("");
-                    }}
-                >
-                    Cancel
-                </button>
-            </div>
-        </>
-    );
-}
 
 interface MessageProps {
     message: IMessageInfoVK;
     dialogId: number;
 }
-function Message({ message: messageInfo, dialogId }: MessageProps) {
+function Message({ message: messageInfo }: MessageProps) {
     const hasMedia: boolean = (messageInfo.media ? true : false) &&
         (messageInfo.media.type != "Undefined");
     console.log(hasMedia);
@@ -161,11 +79,13 @@ function Message({ message: messageInfo, dialogId }: MessageProps) {
         <div className={`${styles.message} ${isOwn ? styles.messageOwn : ""}`}>
             {!isOwn
                 ? (
-                    <img
+                    <ProfilePhoto
                         className={styles.avatarImg}
                         src={messageInfo.sender.photoUrl}
                         alt={""}
-                    />
+                        width={"30"}
+                        height={"30"}
+                        />
                 )
                 : null}
             <div className={styles.texts}>
@@ -184,10 +104,6 @@ interface MediaProps {
     mediaPath: IMediaInfoVK;
 }
 function MessageMedia({ mediaPath }: MediaProps) {
-    console.log("---");
-    console.log(mediaPath.type);
-    console.log("---");
-
     if (mediaPath.type == "Photo") {
         return (
             <Image
@@ -261,38 +177,5 @@ function MessageMedia({ mediaPath }: MediaProps) {
     return <h1>Undefined media</h1>;
 }
 
-interface TopProps {
-    dialog: IDialogInfoVK | undefined;
-}
-function Top({ dialog }: TopProps) {
-    if (!dialog) {
-        return null;
-    }
-
-    return (
-        <div className={styles.top}>
-            <div className={styles.user}>
-                <Image
-                    src={dialog.photoUrl}
-                    width={"60"}
-                    height={"60"}
-                    alt=""
-                    className={styles.avatarImg}
-                />
-                <div className={styles.texts}>
-                    <span className={styles.span}>{dialog.title}</span>
-                    <p className={styles.p}>
-                        Have a good day, you better than you think!
-                    </p>
-                </div>
-            </div>
-            <div className={styles.icons}>
-                <CiPhone className={styles.imgI} />
-                <CiVideoOn className={styles.imgI} />
-                <CiCircleInfo className={styles.imgI} />
-            </div>
-        </div>
-    );
-}
 
 export default Chat;
