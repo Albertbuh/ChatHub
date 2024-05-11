@@ -11,3 +11,8 @@ export async function navigate(url: string) {
 export async function setCookie(key: string, value: string, cookie?: Partial<ResponseCookie> | undefined) {
     cookies().set(key, value, cookie);
 }
+
+export async function deleteCookie(key: string) {
+    cookies().delete(key);
+}
+

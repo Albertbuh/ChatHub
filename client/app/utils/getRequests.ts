@@ -33,7 +33,9 @@ export async function loginRequest(
     const result: ResponseDTO = await response.json();
     if (result.data == null) {
         return false;
-    } else if (result.statusCode == 200) {
+    } 
+
+    if (result.statusCode == 200) {
         let data = result.data as UserInfo;
         localStorage.setItem(`${messenger}_username`, data.username.toString());
         localStorage.setItem(`${messenger}_tag`, data.tag);
@@ -69,10 +71,10 @@ export async function GetMessages(
     }
 }
 
-export async function GetDialogs(): Promise<IDialogInfo[]> {
-    let dialogs = [];
+export async function GetDialogs(messenger: string): Promise<IDialogInfo[]|null> {
+    let dialogs:ResponseDTO|null = null;
     try {
-        const res = await fetch("http://localhost:5041/api/v1.0/telegram/dialogs", {
+        const res = await fetch(`http://localhost:5041/api/v1.0/${messenger}/dialogs`, {
             headers: {
                 "Cache-Control": "no-cache",
             },
@@ -81,10 +83,13 @@ export async function GetDialogs(): Promise<IDialogInfo[]> {
             throw new Error("Unable to get telegram dialogs data");
         }
         dialogs = await res.json();
+        
+        if(!dialogs || dialogs.statusCode == 401)
+            navigate(`/${messenger}/authorization`);
     } catch (error) {
         console.error(error);
     } finally {
-        return dialogs.data;
+        return dialogs ? dialogs.data as IDialogInfo[] : null;
     }
 }
 

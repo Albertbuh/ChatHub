@@ -74,8 +74,6 @@ export default function Page() {
         } catch (error) {
             console.log(error);
         }
-        //useRef not trigger rerender so we need to change some useState
-        //need to fix in future
         setThirdLoginField("");
     }
 

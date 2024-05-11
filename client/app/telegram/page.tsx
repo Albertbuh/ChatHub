@@ -46,8 +46,9 @@ export default function Home() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const updatedDialogs = await GetDialogs();
-                setDialogsUpdate(updatedDialogs);
+                const updatedDialogs = await GetDialogs("telegram");
+                if(updatedDialogs)
+                    setDialogsUpdate(updatedDialogs);
             } catch (error) {
                 console.error("Ошибка при получении диалогов:", error);
             }
