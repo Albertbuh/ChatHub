@@ -2,12 +2,12 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import UserInfo from "../models/userInfo";
+import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 
 export async function navigate(url: string) {
     redirect(url);
 }
 
-export async function setCookie(key: string, value: string) {
-    cookies().set(key, value);
+export async function setCookie(key: string, value: string, cookie?: Partial<ResponseCookie> | undefined) {
+    cookies().set(key, value, cookie);
 }

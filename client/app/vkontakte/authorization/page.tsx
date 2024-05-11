@@ -76,8 +76,7 @@ export default function Page() {
         }
         //useRef not trigger rerender so we need to change some useState
         //need to fix in future
-        setFirstLoginField("");
-        setSecondLoginField("");
+        setThirdLoginField("");
     }
 
     let statesOfLogin: Record<LoginState, FormProps> = {

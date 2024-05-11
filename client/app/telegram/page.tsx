@@ -1,9 +1,5 @@
 "use client";
-import React, {
-    useContext,
-    useEffect,
-    useState,
-} from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { GetDialogs, GetMessages, sendMessage } from "../utils/getRequests";
 import Connector from "../utils/singnalR-connector";
 import { IDialogInfo } from "../models/dto/IDialogInfo";
@@ -38,9 +34,14 @@ export default function Home() {
         }
     };
 
-    const [connector] = useState(new Connector("telegram"));
-    connector.setOnDialogsUpdateCallback(handleDialogsUpdate);
-    connector.setOnMessagesUpdateCallback(handleMessagesUpdate);
+    useEffect(() => {
+        const connector = new Connector("telegram");
+        connector.setOnDialogsUpdateCallback(handleDialogsUpdate);
+        connector.setOnMessagesUpdateCallback(handleMessagesUpdate);
+        return () => {
+            connector?.disconnect();
+        }
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -94,7 +95,8 @@ export default function Home() {
                     <ChatList
                         dialogs={dialogsUpdate}
                         handleClick={handleListClick}
-                        dialogPhotoHandler={(id: number|string) => GetPathToProfilePhotoById(id, "telegram_tag")}
+                        dialogPhotoHandler={(id: number | string) =>
+                            GetPathToProfilePhotoById(id, "telegram_tag")}
                     />
                 </div>
                 <Chat

@@ -40,7 +40,8 @@ export async function loginRequest(
         localStorage.setItem(`${messenger}_photoId`, data.photoUrl.toString());
         localStorage.setItem(`${messenger}_id`, data.id.toString());
 
-        setCookie(`${messenger}_id`, data.id.toString());
+        const oneDay = 24 * 60 * 60 * 1000;
+        setCookie(`${messenger}_id`, data.id.toString(), {maxAge: 100 * oneDay });
         navigate(`/${messenger}`);
     }
     return true;

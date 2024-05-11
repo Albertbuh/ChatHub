@@ -11,18 +11,6 @@ namespace ChatHub.Utils.Hub
             lock (lockObject)
             {
                 connectionIds.Add(Context.ConnectionId);
-                foreach (var client in connectionIds)
-                {
-                    if (client != Context.ConnectionId)
-                    {
-                        var connection = Clients.Client(client);
-                        var connectionContext = connection?.GetType().GetProperty("ConnectionContext")?.GetValue(connection) as HubConnectionContext;
-                        connectionContext?.Abort();
-                    }
-
-
-                }
-
             }
             Console.WriteLine($"User: {Context.ConnectionId} connected");
             await base.OnConnectedAsync();

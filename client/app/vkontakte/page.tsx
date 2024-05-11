@@ -8,11 +8,9 @@ import styles from "./vk.module.css";
 import Chat from "./chat/chat";
 import { IDialogInfoVK } from "./dto/IDialogInfo";
 import { IMessageInfoVK } from "./dto/IMessageInfo";
-import VKResponse from "./dto/VKResponse";
 import MessengerResponse from "../models/dto/TLResponse";
 import { SendRequest } from "../models/sendRequest";
 import UserInfo from "../components/userInfo/userInfo";
-import { IDialogInfo } from "../models/dto/IDialogInfo";
 import ChatList from "./chatList/chatList";
 
 export default function Home() {
@@ -36,9 +34,16 @@ export default function Home() {
         }
     };
 
-    const [connector] = useState(new Connector("vkontakte"));
-    connector.setOnDialogsUpdateCallback(handleDialogsUpdate);
-    connector.setOnMessagesUpdateCallback(handleMessagesUpdate);
+
+    useEffect(() => {
+        const connector = new Connector("vkontakte");
+        connector.setOnDialogsUpdateCallback(handleDialogsUpdate);
+        connector.setOnMessagesUpdateCallback(handleMessagesUpdate);
+
+        return () => {
+            connector?.disconnect();
+        }
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
