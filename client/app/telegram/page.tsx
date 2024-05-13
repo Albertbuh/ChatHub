@@ -20,9 +20,6 @@ export default function Home() {
     const [currentDialogId, setCurrentDialogId] = useState(0);
     const { isExpanded } = useContext(ExpandContext);
 
-    const avatarPath = `/assets/telegram/userAssets/${localStorage.getItem("telegram_tag")
-        }/${localStorage.getItem("telegram_id")}/profile.jpeg`;
-
     const handleDialogsUpdate = (connectorEntity: ConnectorEntity) => {
         setDialogsUpdate(connectorEntity.data as IDialogInfo[]);
     };
@@ -40,15 +37,16 @@ export default function Home() {
         connector.setOnMessagesUpdateCallback(handleMessagesUpdate);
         return () => {
             connector?.disconnect();
-        }
+        };
     }, []);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const updatedDialogs = await GetDialogs("telegram");
-                if(updatedDialogs)
+                if (updatedDialogs) {
                     setDialogsUpdate(updatedDialogs);
+                }
             } catch (error) {
                 console.error("Ошибка при получении диалогов:", error);
             }
@@ -90,7 +88,7 @@ export default function Home() {
             >
                 <div className={styles.list}>
                     <UserInfo
-                        avatarPath={avatarPath}
+                        avatarPath={localStorage.getItem("telegram_photoUrl") ?? ""}
                         username={localStorage.getItem("telegram_username")}
                     />
                     <ChatList

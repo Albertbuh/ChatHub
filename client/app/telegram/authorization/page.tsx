@@ -3,6 +3,7 @@ import { Bs123, BsFillKeyFill, BsFillTelephoneFill } from "react-icons/bs";
 import { ChangeEvent, useRef, useState } from "react";
 import Form, { FormProps } from "@/app/components/loginForm/loginForm";
 import { loginRequest } from "@/app/utils/getRequests";
+import { navigate } from "@/app/utils/redirect";
 
 enum LoginState {
     Phone = 0,
@@ -67,27 +68,34 @@ export default function Page() {
             var isLoggedIn = await loginRequest(
                 "telegram",
                 `http://localhost:5041/api/v1.0/telegram/login?info=${firstLoginField}`,
+                false
             );
             if (!isLoggedIn) {
                 currentLoginState.current = currentLoginState.current + 1;
-            }
-        } catch (error) {
-            console.log(error);
+            } else {
+                localStorage.setItem(
+                    "telegram_photoUrl",
+                    `/assets/telegram/userAssets/${localStorage.getItem("telegram_tag")}/${localStorage.getItem("telegram_id")}/profile.jpeg`,
+                );
+            navigate(`/telegram`);
         }
-        setFirstLoginField("");
+        } catch (error) {
+        console.log(error);
     }
+    setFirstLoginField("");
+}
 
-    let statesOfLogin: Record<LoginState, FormProps> = {
-        [LoginState.Phone]: formPhoneProps,
-        [LoginState.Verification]: formVerificationProps,
-        [LoginState.Password]: formPasswordProps,
-    };
+let statesOfLogin: Record<LoginState, FormProps> = {
+    [LoginState.Phone]: formPhoneProps,
+    [LoginState.Verification]: formVerificationProps,
+    [LoginState.Password]: formPasswordProps,
+};
 
-    return (
-        <Form
-            header={statesOfLogin[currentLoginState.current].header}
-            inputs={statesOfLogin[currentLoginState.current].inputs}
-            onSubmitHandler={handleSubmit}
-        />
-    );
+return (
+    <Form
+        header={statesOfLogin[currentLoginState.current].header}
+        inputs={statesOfLogin[currentLoginState.current].inputs}
+        onSubmitHandler={handleSubmit}
+    />
+);
 }

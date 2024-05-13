@@ -2,15 +2,6 @@
 
 import styles from "./chat.module.css";
 
-import {
-    CiCamera,
-    CiCircleInfo,
-    CiImageOn,
-    CiMicrophoneOn,
-    CiPhone,
-    CiVideoOn,
-} from "react-icons/ci";
-import { BsEmojiNeutral } from "react-icons/bs";
 import { useEffect, useRef, useState } from "react";
 import { IMessageInfo } from "@/app/models/dto/IMessageInfo";
 import {

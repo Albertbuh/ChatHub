@@ -1,5 +1,5 @@
 "use client";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useContext, useEffect, useState } from "react";
 import { GetDialogsVK, GetMessagesVK } from "../utils/getRequests";
 import Connector from "../utils/singnalR-connector";
 import { ConnectorEntity } from "../models/connectorEntity";
@@ -12,13 +12,15 @@ import MessengerResponse from "../models/dto/TLResponse";
 import { SendRequest } from "../models/sendRequest";
 import UserInfo from "../components/userInfo/userInfo";
 import ChatList from "./chatList/chatList";
+import { ExpandContext } from "../components/navbar/expandContxt";
 
 export default function Home() {
     const [dialogsUpdate, setDialogsUpdate] = useState<IDialogInfoVK[]>([]);
     const [messages, setMessages] = useState<IMessageInfoVK[]>([]);
     const [currentDialogId, setCurrentDialogId] = useState(0);
 
-    const avatarPath = localStorage.getItem("vk_photoUrl") ?? "";
+    const { isExpanded } = useContext(ExpandContext);
+    const avatarPath = localStorage.getItem("vkontakte_photoUrl") ?? "";
 
     const handleDialogsUpdate = (connectorEntity: ConnectorEntity) => {
         setDialogsUpdate(connectorEntity.data as IDialogInfoVK[]);
@@ -34,7 +36,6 @@ export default function Home() {
         }
     };
 
-
     useEffect(() => {
         const connector = new Connector("vkontakte");
         connector.setOnDialogsUpdateCallback(handleDialogsUpdate);
@@ -42,7 +43,7 @@ export default function Home() {
 
         return () => {
             connector?.disconnect();
-        }
+        };
     }, []);
 
     useEffect(() => {
@@ -101,11 +102,14 @@ export default function Home() {
 
     if (dialogsUpdate && dialogsUpdate.length > 0) {
         return (
-            <div className={styles.container}>
+            <div
+                className={styles.container}
+                style={{ marginLeft: isExpanded ? "15%" : "4%" }}
+            >
                 <div className={styles.list}>
                     <UserInfo
                         avatarPath={avatarPath}
-                        username={localStorage.getItem("vk_username")}
+                        username={localStorage.getItem("vkontakte_username")}
                     />
                     <ChatList dialogs={dialogsUpdate} handleClick={handleListClick} />
                 </div>

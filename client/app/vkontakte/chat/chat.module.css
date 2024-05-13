@@ -1,104 +1,106 @@
 .chat {
-  flex: 2;
-  border-left: 1px solid #dddddd35;
-  border-right: 1px solid #dddddd35;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+    flex: 2;
+    border-left: 1px solid #dddddd35;
+    border-right: 1px solid #dddddd35;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
+
 .chat .center {
-  padding: 20px;
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  position: relative;
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: relative;
 }
 
 .chat .center::-webkit-scrollbar {
-  width: 8px;
+    width: 8px;
 }
 
 .chat .center::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 .chat .center::-webkit-scrollbar-thumb {
-  background: rgba(17, 25, 40, 0.75);
-  border-radius: 10px;
+    background: rgba(17, 25, 40, 0.75);
+    border-radius: 10px;
 }
 
 .chat .center .suspense {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .chat .center .message {
-  max-width: 70%;
-  display: flex;
-  gap: 20px;
+    max-width: 70%;
+    display: flex;
+    gap: 20px;
 }
 
 .chat .center .messageOwn {
-  align-self: flex-end;
+    align-self: flex-end;
 }
 
 .chat .center .messageOwn .sendername {
-  text-align: right;
+    text-align: right;
 }
 
 .chat .center .messageOwn .texts .p {
-  background-color: #5555553a;
+    background-color: #5555553a;
 }
 
 .chat .center .message .avatarImg {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  object-fit: cover;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .chat .center .message .texts .img {
-  width: 100%;
-  height: auto;
-  border-radius: 10px;
-  object-fit: contain;
-  margin-bottom: -12px;
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    object-fit: contain;
+    margin-bottom: -12px;
 }
 
 .chat .center .message .texts {
-  position: relative;
+    position: relative;
 }
 
 .chat .center .message .texts p {
-  padding: 20px;
-  background-color: rgba(17, 25, 40, 0.3);
-  border-radius: 10px;
+    padding: 20px;
+    background-color: rgba(17, 25, 40, 0.3);
+    border-radius: 10px;
 }
 
 .chat .center .message .texts .span {
-  font-size: 13px;
+    font-size: 13px;
 }
 
 .chat .center .message .texts .timestamp {
-  position: absolute;
-  bottom: -2%;
-  right: 2%;
+    position: absolute;
+    bottom: -2%;
+    right: 2%;
 }
 
 .chat .center .message .texts {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
 .chat .center .message .texts .sendername {
-  font-weight: bold;
-  font-size: 1.05rem;
+    font-weight: bold;
+    font-size: 1.05rem;
 }
+
 

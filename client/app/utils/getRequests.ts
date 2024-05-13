@@ -5,17 +5,26 @@ import { IMessageInfoVK } from "../vkontakte/dto/IMessageInfo";
 import { IDialogInfoVK } from "../vkontakte/dto/IDialogInfo";
 import ResponseDTO from "../models/responseDTO";
 import UserInfo from "../models/userInfo";
-import { navigate, setCookie } from "./redirect";
+import { deleteCookie, navigate, setCookie } from "./redirect";
 import { SendRequest } from "../models/sendRequest";
 import MessengerResponse from "../models/dto/TLResponse";
 
 export async function logoutRequest(messenger: string) {
+    let keys = Object.keys(localStorage);
+    keys.forEach((key) => {
+        if (key.includes(messenger)) {
+            localStorage.removeItem(key);
+        }
+    });
+    deleteCookie(`${messenger}_id`);
     await fetch(`http://localhost:5041/api/v1.0/${messenger}/logout`);
 }
 
 export async function loginRequest(
     messenger: string,
     url: string,
+    //if user want to do smthing before redirect set this flag to false
+    withNavigate: boolean = true    
 ): Promise<boolean> {
     const response = await fetch(
         url,
@@ -33,21 +42,24 @@ export async function loginRequest(
     const result: ResponseDTO = await response.json();
     if (result.data == null) {
         return false;
-    } 
+    }
 
     if (result.statusCode == 200) {
         let data = result.data as UserInfo;
         localStorage.setItem(`${messenger}_username`, data.username.toString());
         localStorage.setItem(`${messenger}_tag`, data.tag);
-        localStorage.setItem(`${messenger}_photoId`, data.photoUrl.toString());
+        localStorage.setItem(`${messenger}_photoUrl`, data.photoUrl.toString());
         localStorage.setItem(`${messenger}_id`, data.id.toString());
 
         const oneDay = 24 * 60 * 60 * 1000;
-        setCookie(`${messenger}_id`, data.id.toString(), {maxAge: 100 * oneDay });
-        navigate(`/${messenger}`);
+        setCookie(`${messenger}_id`, data.id.toString(), { maxAge: 100 * oneDay });
+        if(withNavigate) {
+            navigate(`/${messenger}`);
+        }
     }
     return true;
 }
+
 export async function GetMessages(
     dialogId: number,
     offset: number,
@@ -71,21 +83,27 @@ export async function GetMessages(
     }
 }
 
-export async function GetDialogs(messenger: string): Promise<IDialogInfo[]|null> {
-    let dialogs:ResponseDTO|null = null;
+export async function GetDialogs(
+    messenger: string,
+): Promise<IDialogInfo[] | null> {
+    let dialogs: ResponseDTO | null = null;
     try {
-        const res = await fetch(`http://localhost:5041/api/v1.0/${messenger}/dialogs`, {
-            headers: {
-                "Cache-Control": "no-cache",
+        const res = await fetch(
+            `http://localhost:5041/api/v1.0/${messenger}/dialogs`,
+            {
+                headers: {
+                    "Cache-Control": "no-cache",
+                },
             },
-        });
+        );
         if (!res.ok) {
             throw new Error("Unable to get telegram dialogs data");
         }
         dialogs = await res.json();
-        
-        if(!dialogs || dialogs.statusCode == 401)
+
+        if (!dialogs || dialogs.statusCode == 401) {
             navigate(`/${messenger}/authorization`);
+        }
     } catch (error) {
         console.error(error);
     } finally {
@@ -145,7 +163,7 @@ export async function sendMessage(
     messenger: string,
     chatId: number,
     sendData: SendRequest,
-): Promise<IMessageInfo|undefined> {
+): Promise<IMessageInfo | undefined> {
     var response = await fetch(
         `http://localhost:5041/api/v1.0/${messenger}/peers/${chatId}`,
         {

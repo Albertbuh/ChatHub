@@ -14,6 +14,8 @@ export default function Page() {
     const [secondLoginField, setSecondLoginField] = useState("");
     const [thirdLoginField, setThirdLoginField] = useState("");
     const currentLoginState = useRef(LoginState.Phone);
+    //stub for rerender after button click
+    const [updateForm, setUpdateForm] = useState(false);
 
     function onChangeFirstHandler(e: ChangeEvent<HTMLInputElement>) {
         setFirstLoginField(e.target.value);
@@ -69,12 +71,12 @@ export default function Page() {
                 `http://localhost:5041/api/v1.0/vk/login?login=${firstLoginField}&password=${secondLoginField}&code=${thirdLoginField}`,
             );
             if (!isLoggedIn) {
-                currentLoginState.current = currentLoginState.current + 1;
+                currentLoginState.current = (currentLoginState.current + 1) % 2;
             }
+            setUpdateForm(!updateForm);
         } catch (error) {
             console.log(error);
         }
-        setThirdLoginField("");
     }
 
     let statesOfLogin: Record<LoginState, FormProps> = {

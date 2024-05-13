@@ -23,12 +23,18 @@ const Chat = ({ messages, currentDialog, onSendSubmit }: ChatProps) => {
     return (
         <div className={styles.chat}>
             {currentDialog && (
-                <DialogHeader
-                    title={currentDialog.title}
-                    pathToPhoto={currentDialog.photoUrl}
-                />
+                <>
+                    <DialogHeader
+                        title={currentDialog.title}
+                        pathToPhoto={currentDialog.photoUrl}
+                    />
+                    <MessagesContainer
+                        messages={messages}
+                        currentDialog={currentDialog}
+                    />
+                </>
             )}
-            <MessagesContainer messages={messages} currentDialog={currentDialog} />
+
             <MessageSender onSubmit={onSendSubmit} />
         </div>
     );
@@ -71,9 +77,8 @@ interface MessageProps {
 function Message({ message: messageInfo }: MessageProps) {
     const hasMedia: boolean = (messageInfo.media ? true : false) &&
         (messageInfo.media.type != "Undefined");
-    console.log(hasMedia);
     const isOwn: boolean =
-        messageInfo.sender.id.toString() === localStorage.getItem("id");
+        messageInfo.sender.id.toString() === localStorage.getItem("vkontakte_id");
 
     return (
         <div className={`${styles.message} ${isOwn ? styles.messageOwn : ""}`}>
@@ -85,7 +90,7 @@ function Message({ message: messageInfo }: MessageProps) {
                         alt={""}
                         width={"30"}
                         height={"30"}
-                        />
+                    />
                 )
                 : null}
             <div className={styles.texts}>
@@ -140,7 +145,6 @@ function MessageMedia({ mediaPath }: MediaProps) {
         let fileName = "File"; // Изначальное имя файла
         let filePath = "";
         const spaceIndex = mediaPath.mediaUrl.lastIndexOf(" ");
-        console.log(mediaPath.mediaUrl);
         if (spaceIndex !== -1) {
             fileName = mediaPath.mediaUrl.substring(spaceIndex);
             filePath = mediaPath.mediaUrl.substring(0, spaceIndex);
@@ -176,6 +180,5 @@ function MessageMedia({ mediaPath }: MediaProps) {
 
     return <h1>Undefined media</h1>;
 }
-
 
 export default Chat;

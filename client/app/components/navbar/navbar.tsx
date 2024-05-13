@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useContext, useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { useContext, useEffect, useRef, useState } from "react";
 
 import styles from "./navbar.module.css";
 import { AiOutlineHome, AiOutlineMenu } from "react-icons/ai";
@@ -10,15 +9,15 @@ import { SlSocialVkontakte } from "react-icons/sl";
 import { LiaTelegram } from "react-icons/lia";
 import { BsChatSquareHeart } from "react-icons/bs";
 import { CiLogout } from "react-icons/ci";
-import { auth } from "@/app/realTimeChat/lib/firebase";
 import { useUserStore } from "@/app/realTimeChat/lib/userStore";
 import { ExpandContext } from "./expandContxt";
+import ProfilePhoto from "../profilePhoto/profilePhoto";
+import { logoutRequest } from "@/app/utils/getRequests";
 
-// TODO: Time dependent drop-down
 export default function SideNav() {
     const { isExpanded, setIsExpanded } = useContext(ExpandContext);
 
-    const avatarPath = "/avatars/Hayasaka.jpg";
+    const defaultAvatarPath = useRef("/avatars/Hayasaka.jpg");
     const { currentUser } = useUserStore();
 
     let container: HTMLElement | null = null;
@@ -26,6 +25,13 @@ export default function SideNav() {
         container = document.getElementById("container");
     }
     const [sidebarActive, setSidebarActive] = useState(false);
+    const [currentChat, setCurrentChat] = useState(
+        localStorage.getItem("current_chat") ?? "",
+    );
+
+    useEffect(() => {
+        localStorage.setItem("current_chat", currentChat ?? "");
+    }, [currentChat]);
 
     useEffect(() => {
         const toggleBtn = document.querySelector(".toggleBtn");
@@ -53,6 +59,14 @@ export default function SideNav() {
         };
     }, [sidebarActive]);
 
+    function GetProfilePicture(): string {
+        return localStorage.getItem(
+            `${currentChat}_photoUrl`,
+        ) ??
+            currentUser?.profilePhoto ??
+            defaultAvatarPath.current;
+    }
+
     return (
         <nav className={`${styles.sidebar} ${sidebarActive ? styles.active : ""}`}>
             <div className={styles.logoMenu}>
@@ -60,7 +74,10 @@ export default function SideNav() {
                 <AiOutlineMenu className={`${styles.menuToggleBtn} toggleBtn`} />
             </div>
             <ul className={styles.list}>
-                <li className={styles.listItem}>
+                <li
+                    className={styles.listItem}
+                    onClick={() => setCurrentChat("")}
+                >
                     <Link href="/personalPage">
                         <AiOutlineHome className={styles.listItemIcon} />
                         <span className={styles.linkName}>Home</span>
@@ -68,45 +85,59 @@ export default function SideNav() {
                 </li>
 
                 <li className={styles.listItem}>
-                    <Link href="/telegram">
+                    <Link
+                        href="/telegram"
+                        onClick={() => setCurrentChat("telegram")}
+                    >
                         <LiaTelegram className={styles.listItemIcon} />
                         <span className={styles.linkName}>Telegram</span>
                     </Link>
                 </li>
 
                 <li className={styles.listItem}>
-                        <Link href="/vkontakte">
-                            <SlSocialVkontakte className={styles.listItemIcon} />
-                            <span className={styles.linkName}>VK</span>
-                        </Link>
+                    <Link
+                        href="/vkontakte"
+                        onClick={() => setCurrentChat("vkontakte")}
+                    >
+                        <SlSocialVkontakte className={styles.listItemIcon} />
+                        <span className={styles.linkName}>VK</span>
+                    </Link>
                 </li>
 
-                <li className={styles.listItem}>
+                <li className={styles.listItem} onClick={() => setCurrentChat("")}>
                     <Link href="/realTimeChat">
-                        <BsChatSquareHeart className={styles.listItemIcon} />
+                        <BsChatSquareHeart
+                            className={styles.listItemIcon}
+                            onClick={() => setCurrentChat("realTimeChat")}
+                        />
                         <span className={styles.linkName}>Real Time Chat</span>
                     </Link>
                 </li>
             </ul>
             <ul className={`${styles.list} ${styles.flexColumn}`}>
-                <li
-                    className={styles.listItem}
-                    onClick={() =>
-                        auth.signOut()}
-                >
-                    <Link href="/realTimeChat">
+                <li className={styles.listItem}>
+                    <Link
+                        href="/"
+                        onClick={async () => await logoutRequest(currentChat)}
+                    >
                         <CiLogout className={styles.listItemIcon} />
                         <span className={styles.linkName}>Logout</span>
                     </Link>
                 </li>
                 <li className={`${styles.listItem} `}>
                     <Link href="/personalPage">
-                        <img
+                        <ProfilePhoto
+                            width={30}
+                            height={30}
                             className={styles.avatarImg}
-                            src={currentUser?.avatar || avatarPath}
+                            src={GetProfilePicture()}
                             alt=""
                         />
-                        <span className={styles.linkName}>Your Name</span>
+                        <span className={styles.linkName}>
+                            {localStorage.getItem(
+                                `${currentChat}_username`,
+                            )}
+                        </span>
                     </Link>
                 </li>
             </ul>
