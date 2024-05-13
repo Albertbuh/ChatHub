@@ -5,8 +5,8 @@ import { IMessageInfoVK } from "../vkontakte/dto/IMessageInfo";
 import { IDialogInfoVK } from "../vkontakte/dto/IDialogInfo";
 import ResponseDTO from "../models/responseDTO";
 import UserInfo from "../models/userInfo";
-import { deleteCookie, navigate, setCookie } from "./redirect";
-import { SendRequest } from "../models/sendRequest";
+import { deleteCookie, navigate, setCookie } from "./browserUtils";
+import { SendRequestData } from "../models/sendRequest";
 import MessengerResponse from "../models/dto/TLResponse";
 
 export async function logoutRequest(messenger: string) {
@@ -162,7 +162,7 @@ export async function GetDialogsVK(
 export async function sendMessage(
     messenger: string,
     chatId: number,
-    sendData: SendRequest,
+    sendData: SendRequestData,
 ): Promise<IMessageInfo | undefined> {
     var response = await fetch(
         `http://localhost:5041/api/v1.0/${messenger}/peers/${chatId}`,

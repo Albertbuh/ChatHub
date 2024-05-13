@@ -1,6 +1,6 @@
 "use client";
 import React, { useContext, useEffect, useState } from "react";
-import { GetDialogs, GetMessages, sendMessage } from "../utils/getRequests";
+import { GetDialogs, GetMessages, sendMessage } from "../utils/serverRequests";
 import Connector from "../utils/singnalR-connector";
 import { IDialogInfo } from "../models/dto/IDialogInfo";
 import { ConnectorEntity } from "../models/connectorEntity";
@@ -9,8 +9,8 @@ import styles from "./telegram.module.css";
 import Chat from "./chat/chat";
 import { IMessageInfo } from "../models/dto/IMessageInfo";
 import { ExpandContext } from "../components/navbar/expandContxt";
-import { SendRequest } from "../models/sendRequest";
-import { GetPathToProfilePhotoById } from "../utils/filePaths";
+import { SendRequestData } from "../models/sendRequestData";
+import { GetPathToProfilePhotoById } from "../utils/telegramFilePaths";
 import UserInfo from "../components/userInfo/userInfo";
 import ChatList from "./chatList/chatList";
 
@@ -73,7 +73,7 @@ export default function Home() {
         setMessages([]);
     }
 
-    const handleSendSubmit = async (data: SendRequest) => {
+    const handleSendSubmit = async (data: SendRequestData) => {
         var sendedMessage = await sendMessage("telegram", currentDialogId, data);
         if (sendedMessage) {
             setMessages([sendedMessage, ...messages]);

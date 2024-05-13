@@ -7,10 +7,10 @@ import { IMessageInfo } from "@/app/models/dto/IMessageInfo";
 import {
     GetPathToMediaFileWithoutExtension,
     GetPathToProfilePhotoById,
-} from "@/app/utils/filePaths";
+} from "@/app/utils/telegramFilePaths";
 import { IDialogInfo } from "@/app/models/dto/IDialogInfo";
 import Timestamp from "@/app/components/timestamp/timestamp";
-import { SendRequest } from "@/app/models/sendRequest";
+import { SendRequestData } from "@/app/models/sendRequestData";
 import DialogHeader from "@/app/components/dialogHeader/dialogHeader";
 import MessageSender from "@/app/components/messageSender/messageSender";
 import ProfilePhoto from "@/app/components/profilePhoto/profilePhoto";
@@ -18,7 +18,7 @@ import ProfilePhoto from "@/app/components/profilePhoto/profilePhoto";
 interface ChatProps {
     messages: IMessageInfo[];
     currentDialog: IDialogInfo | undefined;
-    onSendSubmit: (data: SendRequest) => void;
+    onSendSubmit: (data: SendRequestData) => void;
 }
 
 const Chat = ({ messages, currentDialog, onSendSubmit }: ChatProps) => {

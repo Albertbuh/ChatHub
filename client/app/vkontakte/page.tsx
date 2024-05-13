@@ -1,6 +1,6 @@
 "use client";
 import React, { Suspense, useContext, useEffect, useState } from "react";
-import { GetDialogsVK, GetMessagesVK } from "../utils/getRequests";
+import { GetDialogsVK, GetMessagesVK } from "../utils/serverRequests";
 import Connector from "../utils/singnalR-connector";
 import { ConnectorEntity } from "../models/connectorEntity";
 
@@ -9,7 +9,7 @@ import Chat from "./chat/chat";
 import { IDialogInfoVK } from "./dto/IDialogInfo";
 import { IMessageInfoVK } from "./dto/IMessageInfo";
 import MessengerResponse from "../models/dto/TLResponse";
-import { SendRequest } from "../models/sendRequest";
+import { SendRequestData } from "../models/sendRequestData";
 import UserInfo from "../components/userInfo/userInfo";
 import ChatList from "./chatList/chatList";
 import { ExpandContext } from "../components/navbar/expandContxt";
@@ -80,7 +80,7 @@ export default function Home() {
         setMessages([]);
     }
 
-    const handleSendSubmit = async (data: SendRequest) => {
+    const handleSendSubmit = async (data: SendRequestData) => {
         var response = await fetch(
             `http://localhost:5041/api/v1.0/vk/peers/${currentDialogId}`,
             {

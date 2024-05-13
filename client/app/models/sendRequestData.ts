@@ -1,4 +1,4 @@
-export interface SendRequest {
+export interface SendRequestData {
     message: string;
     mediaFilepath: string;
 }

@@ -12,7 +12,7 @@ import { CiLogout } from "react-icons/ci";
 import { useUserStore } from "@/app/realTimeChat/lib/userStore";
 import { ExpandContext } from "./expandContxt";
 import ProfilePhoto from "../profilePhoto/profilePhoto";
-import { logoutRequest } from "@/app/utils/getRequests";
+import { logoutRequest } from "@/app/utils/serverRequests";
 
 export default function SideNav() {
     const { isExpanded, setIsExpanded } = useContext(ExpandContext);

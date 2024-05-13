@@ -8,7 +8,7 @@ import { IMediaInfoVK } from "../dto/IMediaInfo";
 import { IMessageInfoVK } from "../dto/IMessageInfo";
 import { IDialogInfoVK } from "../dto/IDialogInfo";
 import Image from "next/image";
-import { SendRequest } from "@/app/models/sendRequest";
+import { SendRequestData } from "@/app/models/sendRequestData";
 import DialogHeader from "@/app/components/dialogHeader/dialogHeader";
 import MessageSender from "@/app/components/messageSender/messageSender";
 import ProfilePhoto from "@/app/components/profilePhoto/profilePhoto";
@@ -16,7 +16,7 @@ import ProfilePhoto from "@/app/components/profilePhoto/profilePhoto";
 interface ChatProps {
     messages: IMessageInfoVK[];
     currentDialog: IDialogInfoVK | undefined;
-    onSendSubmit: (data: SendRequest) => void;
+    onSendSubmit: (data: SendRequestData) => void;
 }
 
 const Chat = ({ messages, currentDialog, onSendSubmit }: ChatProps) => {

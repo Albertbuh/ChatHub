@@ -2,8 +2,8 @@
 import { Bs123, BsFillKeyFill, BsFillTelephoneFill } from "react-icons/bs";
 import { ChangeEvent, useRef, useState } from "react";
 import Form, { FormProps } from "@/app/components/loginForm/loginForm";
-import { loginRequest } from "@/app/utils/getRequests";
-import { navigate } from "@/app/utils/redirect";
+import { loginRequest } from "@/app/utils/serverRequests";
+import { navigate } from "@/app/utils/browserUtils";
 
 enum LoginState {
     Phone = 0,

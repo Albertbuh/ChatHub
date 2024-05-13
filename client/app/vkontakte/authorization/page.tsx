@@ -2,7 +2,7 @@
 import { Bs123, BsFillKeyFill, BsFillTelephoneFill } from "react-icons/bs";
 import { ChangeEvent, useRef, useState } from "react";
 import Form, { FormProps } from "@/app/components/loginForm/loginForm";
-import { loginRequest } from "@/app/utils/getRequests";
+import { loginRequest } from "@/app/utils/serverRequests";
 
 enum LoginState {
     Phone = 0,

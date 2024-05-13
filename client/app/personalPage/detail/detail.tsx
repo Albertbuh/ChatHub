@@ -5,7 +5,7 @@ import { GoDownload } from "react-icons/go";
 import { useUserStore } from '@/app/realTimeChat/lib/userStore';
 import { useContext, useState } from 'react';
 import BackgroundContext from '@/app/BackGroundContext';
-import { logoutRequest } from '@/app/utils/getRequests';
+import { logoutRequest } from '@/app/utils/serverRequests';
 
 
 const imagePaths = ['/backgrounds/1.jpg', '/backgrounds/2.jpg',

@@ -1,4 +1,4 @@
-import { SendRequest } from "@/app/models/sendRequest";
+import { SendRequestData } from "@/app/models/sendRequest";
 import { useState } from "react";
 import { CiCamera, CiImageOn, CiMicrophoneOn } from "react-icons/ci";
 
@@ -6,7 +6,7 @@ import styles from "./messageSender.module.css";
 import { BsEmojiNeutral } from "react-icons/bs";
 
 interface MessageSenderProps {
-    onSubmit: (data: SendRequest) => void;
+    onSubmit: (data: SendRequestData) => void;
 }
 
 export default function MessageSender({ onSubmit }: MessageSenderProps) {
