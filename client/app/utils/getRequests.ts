@@ -20,10 +20,10 @@ export async function logoutRequest(messenger: string) {
     await fetch(`http://localhost:5041/api/v1.0/${messenger}/logout`);
 }
 
+//if user want to do smthing before redirect set this flag to false
 export async function loginRequest(
     messenger: string,
     url: string,
-    //if user want to do smthing before redirect set this flag to false
     withNavigate: boolean = true    
 ): Promise<boolean> {
     const response = await fetch(

@@ -8,10 +8,6 @@ interface LoginPageProps {
 }
 
 export default function LoginPage() {
-  
-  const handleLoginSuccess = () => {
-  };
-
   return (
     <div >
       <LoginForm />

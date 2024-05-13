@@ -6,8 +6,6 @@ import { useUserStore } from '@/app/realTimeChat/lib/userStore';
 import { useContext, useState } from 'react';
 import BackgroundContext from '@/app/BackGroundContext';
 import { logoutRequest } from '@/app/utils/getRequests';
-import { navigate } from '@/app/realTimeChat/authorization/login/actions';
-import { redirect } from 'next/dist/server/api-utils';
 
 
 const imagePaths = ['/backgrounds/1.jpg', '/backgrounds/2.jpg',
@@ -27,9 +25,8 @@ const Detail = () => {
     const { updateBackground } = useContext(BackgroundContext);
 
     const handleLogout = async () => {
-        localStorage.clear();
         await logoutRequest("telegram");
-        await logoutRequest("vk");
+        await logoutRequest("vkontakte");
     };
 
     const handleDownloadClick = (imageNumber: number) => {

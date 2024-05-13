@@ -1,5 +1,4 @@
 import styles from './LoginForm.module.css'
-import { CgRename } from "react-icons/cg";
 import { MdOutlineAlternateEmail, MdOutlinePassword, MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 import { useRef, useState } from 'react';
 import { toast } from 'react-toastify';
@@ -13,15 +12,6 @@ import Link from 'next/link';
 const LoginForm = () => {
     const passwordInputRef = useRef<HTMLInputElement>(null);
     const [passwordVisible, setPasswordVisible] = useState(false);
-
-    const [avatar, setAvatar] = useState<{
-        file: File | null;
-        url: string;
-    }>({
-        file: null,
-        url: "",
-    });
-
 
     const [loading, setLoading] = useState(false);
 
@@ -67,12 +57,6 @@ const LoginForm = () => {
                     <input type={passwordVisible ? "text" : "password" } name='password' placeholder='Password' required ref={passwordInputRef}/>
                     <MdOutlinePassword className={styles.icon} onClick={togglePasswordVisibility} />
                 </div>
-                {/* <div className={styles.inputBox}>
-                    <input type="text" name='password' placeholder='Password' required ref={passwordInputRef}/>
-                    <MdOutlinePassword className={styles.icon}  onClick={togglePasswordVisibility}>
-                        </MdOutlinePassword>
-                    
-                </div> */}
 
                 <div className={styles.rememberForgot}>
                     <label><input type="checkbox" />Remember me</label>

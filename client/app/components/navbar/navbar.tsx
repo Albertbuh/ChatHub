@@ -63,7 +63,7 @@ export default function SideNav() {
         return localStorage.getItem(
             `${currentChat}_photoUrl`,
         ) ??
-            currentUser?.profilePhoto ??
+            currentUser?.avatar ??
             defaultAvatarPath.current;
     }
 
