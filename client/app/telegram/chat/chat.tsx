@@ -54,7 +54,7 @@ function MessagesContainer(
 
     useEffect(() => {
         if (messagesView.current != null) {
-            messagesView.current.scrollTo({ top: 10000 });
+            messagesView.current.scrollTo({ top: 100000 });
         }
     }, [messages]);
 
