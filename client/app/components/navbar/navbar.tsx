@@ -74,8 +74,8 @@ export default function SideNav() {
                 <AiOutlineMenu className={`${styles.menuToggleBtn} toggleBtn`} />
             </div>
             <ul className={styles.list}>
-                <li
-                    className={styles.listItem}
+                <li className={`${styles.listItem} ${currentChat === "" ? styles.listItemActive : ""
+                    }`}
                     onClick={() => setCurrentChat("")}
                 >
                     <Link href="/personalPage">
@@ -84,7 +84,8 @@ export default function SideNav() {
                     </Link>
                 </li>
 
-                <li className={styles.listItem}>
+                <li className={`${styles.listItem} ${currentChat === "telegram" ? styles.listItemActive : ""
+                    }`}>
                     <Link
                         href="/telegram"
                         onClick={() => setCurrentChat("telegram")}
@@ -94,7 +95,8 @@ export default function SideNav() {
                     </Link>
                 </li>
 
-                <li className={styles.listItem}>
+                <li className={`${styles.listItem} ${currentChat === "vkontakte" ? styles.listItemActive : ""
+                    }`}>
                     <Link
                         href="/vkontakte"
                         onClick={() => setCurrentChat("vkontakte")}
@@ -104,11 +106,14 @@ export default function SideNav() {
                     </Link>
                 </li>
 
-                <li className={styles.listItem} onClick={() => setCurrentChat("")}>
+                <li className={`${styles.listItem} 
+                ${currentChat === "realTimeChat" ? styles.listItemActive : ""
+                    }`}
+                    onClick={() => setCurrentChat("realTimeChat")}>
                     <Link href="/realTimeChat">
                         <BsChatSquareHeart
                             className={styles.listItemIcon}
-                            onClick={() => setCurrentChat("realTimeChat")}
+                        // onClick={() => setCurrentChat("realTimeChat")}
                         />
                         <span className={styles.linkName}>Real Time Chat</span>
                     </Link>
@@ -126,17 +131,24 @@ export default function SideNav() {
                 </li>
                 <li className={`${styles.listItem} `}>
                     <Link href="/personalPage">
-                        <ProfilePhoto
+                        {/* <ProfilePhoto
                             width={30}
                             height={30}
                             className={styles.avatarImg}
                             src={GetProfilePicture()}
                             alt=""
-                        />
-                        <span className={styles.linkName}>
+                        /> */}
+                        {/* <span className={styles.linkName}>
                             {localStorage.getItem(
                                 `${currentChat}_username`,
-                            )}
+                            )} */}
+                        <img
+                            src={currentUser?.avatar ?? defaultAvatarPath.current}
+                            alt="User Avatar"
+                            className={styles.avatarImg}
+                        />
+                        <span className={styles.linkName}>
+                            {currentUser?.username ?? "username"}
                         </span>
                     </Link>
                 </li>

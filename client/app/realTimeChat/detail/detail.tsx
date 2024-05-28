@@ -61,35 +61,21 @@ const Detail = () => {
                         <div className={styles.photoItem}>
                             <div className={styles.photoDetail}>
                                 <img className={styles.img} src='https://a.storyblok.com/f/178900/1920x1080/37ae90580e/4ca025356f824c76c2c3132631be82d81640322663_main.jpg/m/filters:quality(95)format(webp)'></img>
-                                <span className={styles.span}> photo_MC_2023.png</span>
+                                <span className={styles.span}> photo_2023.png</span>
                             </div>
                             <GoDownload className={styles.icon} />
                         </div>
                         <div className={styles.photoItem}>
                             <div className={styles.photoDetail}>
                                 <img className={styles.img} src='https://a.storyblok.com/f/178900/1920x1080/37ae90580e/4ca025356f824c76c2c3132631be82d81640322663_main.jpg/m/filters:quality(95)format(webp)'></img>
-                                <span className={styles.span}> photo_MC_2023.png</span>
+                                <span className={styles.span}> photo_2023.png</span>
                             </div>
                             <GoDownload className={styles.icon} />
                         </div>
                         <div className={styles.photoItem}>
                             <div className={styles.photoDetail}>
                                 <img className={styles.img} src='https://a.storyblok.com/f/178900/1920x1080/37ae90580e/4ca025356f824c76c2c3132631be82d81640322663_main.jpg/m/filters:quality(95)format(webp)'></img>
-                                <span className={styles.span}> photo_MC_2023.png</span>
-                            </div>
-                            <GoDownload className={styles.icon} />
-                        </div>
-                        <div className={styles.photoItem}>
-                            <div className={styles.photoDetail}>
-                                <img className={styles.img} src='https://a.storyblok.com/f/178900/1920x1080/37ae90580e/4ca025356f824c76c2c3132631be82d81640322663_main.jpg/m/filters:quality(95)format(webp)'></img>
-                                <span className={styles.span}> photo_MC_2023.png</span>
-                            </div>
-                            <GoDownload className={styles.icon} />
-                        </div>
-                        <div className={styles.photoItem}>
-                            <div className={styles.photoDetail}>
-                                <img className={styles.img} src='https://a.storyblok.com/f/178900/1920x1080/37ae90580e/4ca025356f824c76c2c3132631be82d81640322663_main.jpg/m/filters:quality(95)format(webp)'></img>
-                                <span className={styles.span}> photo_MC_2023.png</span>
+                                <span className={styles.span}> photo_2023.png</span>
                             </div>
                             <GoDownload className={styles.icon} />
                         </div>
