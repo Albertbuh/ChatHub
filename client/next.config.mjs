@@ -17,12 +17,20 @@ const nextConfig = {
             hostname: "pp.userapi.com",
             port: "",
             pathname: "/**",
-        }, {
+        }, 
+        {
+            protocol: 'https',
+            hostname: 'firebasestorage.googleapis.com',
+            port: '',
+            pathname: '/**',
+          },
+        {
             protocol: "https",
             hostname: "sun9-21.userapi.com",
             port: "",
             pathname: "/**",
         }],
+        
     },
 };
 
