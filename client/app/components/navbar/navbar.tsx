@@ -113,7 +113,6 @@ export default function SideNav() {
                     <Link href="/realTimeChat">
                         <BsChatSquareHeart
                             className={styles.listItemIcon}
-                        // onClick={() => setCurrentChat("realTimeChat")}
                         />
                         <span className={styles.linkName}>Real Time Chat</span>
                     </Link>
