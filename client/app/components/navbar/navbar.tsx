@@ -129,8 +129,10 @@ export default function SideNav() {
                         <span className={styles.linkName}>Logout</span>
                     </Link>
                 </li>
-                <li className={`${styles.listItem} `}>
+                <li className={`${styles.listItem} `}
+                onClick={() => setCurrentChat("")}>
                     <Link href="/personalPage">
+                        
                         {/* <ProfilePhoto
                             width={30}
                             height={30}
