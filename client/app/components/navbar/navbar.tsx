@@ -132,22 +132,22 @@ export default function SideNav() {
                 onClick={() => setCurrentChat("")}>
                     <Link href="/personalPage">
                         
-                        {/* <ProfilePhoto
+                        <ProfilePhoto
                             width={30}
                             height={30}
                             className={styles.avatarImg}
                             src={GetProfilePicture()}
                             alt=""
-                        /> */}
+                        />
                         {/* <span className={styles.linkName}>
                             {localStorage.getItem(
                                 `${currentChat}_username`,
                             )} */}
-                        <img
+                        {/* <img
                             src={currentUser?.avatar ?? defaultAvatarPath.current}
                             alt="User Avatar"
                             className={styles.avatarImg}
-                        />
+                        /> */}
                         <span className={styles.linkName}>
                             {currentUser?.username ?? "username"}
                         </span>
