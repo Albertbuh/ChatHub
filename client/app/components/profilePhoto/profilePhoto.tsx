@@ -21,13 +21,12 @@ export default function ProfilePhoto(props: Props) {
     
     return (
         <img
-            // src={profilePath}
-            src={currentUser?.avatar ?? "/avatars/defaultProfile.jpeg"}
+            src={profilePath}
             width={props.width}
             height={props.height}
             alt={props.alt}
             className={props.className}
-            onError={() => setProfilePath("/avatars/defaultProfile.jpeg")}
+            onError={() => setProfilePath(currentUser?.avatar ?? "/avatars/defaultProfile.jpeg")}
         />
     );
 }
